@@ -1,18 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               minimum-scale=1.0,
-               user-scalable=no,
-               viewport-fit=cover">
 
-<title>Mirror Control</title>
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<meta name="apple-mobile-web-app-capable"
+content="yes">
+
+<title>كرة القدم ⚽️</title>
 
 <style>
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -20,7 +24,6 @@
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -28,105 +31,313 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #333333;
-    touch-action: none;
-    overscroll-behavior: none;
-    position: fixed;
+    background: #16803c;
+    font-family: -apple-system,
+                 BlinkMacSystemFont,
+                 "Segoe UI",
+                 sans-serif;
 }
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* الملعب */
 
 #game {
-    position: fixed;
-    inset: 0;
-    background: #333333;
+    position: relative;
+
+    width: 100vw;
+    height: 100vh;
+
+    max-width: 700px;
+
     overflow: hidden;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            rgba(255,255,255,0.035) 0px,
+            rgba(255,255,255,0.035) 50px,
+            rgba(0,0,0,0.035) 50px,
+            rgba(0,0,0,0.035) 100px
+        ),
+        #16803c;
+
     touch-action: none;
 }
 
-/* الدائرة M */
-#circle {
+/* خطوط الملعب */
+
+.field-line {
     position: absolute;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: white;
-    border: 3px solid black;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 28px;
-    font-weight: 900;
-    color: black;
-
-    z-index: 2;
-    transform: translate3d(0, 0, 0);
-    will-change: transform;
+    border: 2px solid rgba(255,255,255,0.75);
     pointer-events: none;
 }
 
-/* منطقة التحكم */
-#controlArea {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 250px;
+/* دائرة المنتصف */
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 5;
-    touch-action: none;
+.center-circle {
+    position: absolute;
+
+    width: 170px;
+    height: 170px;
+
+    border: 2px solid rgba(255,255,255,0.55);
+    border-radius: 50%;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
 }
 
-/* لوحة MIRROR */
-#pad {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    background: rgba(51, 51, 51, 0.9);
+/* خط المنتصف */
+
+.center-line {
+    position: absolute;
+
+    width: 100%;
+    height: 2px;
+
+    background: rgba(255,255,255,0.55);
+
+    left: 0;
+    top: 50%;
+}
+
+/* اللاعب */
+
+#player {
+
+    position: absolute;
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    background: #1769ff;
+
+    border: 4px solid white;
+
+    box-shadow:
+        0 4px 10px rgba(0,0,0,0.35);
+
+    transform:
+        translate(-50%, -50%);
+
+    z-index: 10;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 25px;
+}
+
+/* الكرة */
+
+#ball {
+
+    position: absolute;
+
+    width: 28px;
+    height: 28px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    border: 2px solid #222;
+
+    box-shadow:
+        0 3px 7px rgba(0,0,0,0.35);
+
+    transform:
+        translate(-50%, -50%);
+
+    z-index: 9;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 17px;
+
+    transition: transform 0.05s linear;
+}
+
+/* سهم اتجاه الركلة */
+
+#aim {
+
+    position: absolute;
+
+    width: 75px;
+    height: 4px;
+
+    background: #ffd400;
+
+    transform-origin: left center;
+
+    z-index: 7;
+
+    border-radius: 5px;
+
+    box-shadow:
+        0 0 5px rgba(255,215,0,0.8);
+
+    pointer-events: none;
+}
+
+/* رأس السهم */
+
+#aim::after {
+
+    content: "";
+
+    position: absolute;
+
+    right: -2px;
+    top: 50%;
+
+    width: 0;
+    height: 0;
+
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 14px solid #ffd400;
+
+    transform:
+        translateY(-50%);
+}
+
+/* عداد القوة */
+
+#powerBox {
+
+    position: absolute;
+
+    top: 18px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 190px;
+    height: 18px;
+
+    border: 2px solid white;
     border-radius: 20px;
 
-    /* منع التكبير والنقر المزدوج */
-    touch-action: none;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
+    background: rgba(0,0,0,0.35);
+
+    overflow: hidden;
+
+    z-index: 30;
 }
 
-/* النص MIRROR */
-#mirror {
+#power {
+
+    width: 0%;
+    height: 100%;
+
+    background: #ffd400;
+
+    border-radius: 20px;
+}
+
+/* النص */
+
+#powerText {
+
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 150px;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+
+    top: 42px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
     color: white;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    pointer-events: none;
+
+    font-size: 14px;
+
+    text-shadow:
+        0 2px 4px black;
+
+    z-index: 30;
+
+    white-space: nowrap;
 }
 
-/* الأسهم */
-.arrow {
+/* زر الركل */
+
+#kickButton {
+
     position: absolute;
-    width: 20px;
-    height: 20px;
-    fill: white;
-    pointer-events: none;
+
+    right: 22px;
+    bottom: 28px;
+
+    width: 78px;
+    height: 78px;
+
+    border-radius: 50%;
+
+    border: 4px solid white;
+
+    background: #e53935;
+
+    color: white;
+
+    font-size: 34px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,0.35);
+
+    z-index: 40;
+
+    touch-action: none;
 }
 
-.up { top: 10px; left: 65px; }
-.down { bottom: 10px; left: 65px; }
-.left { left: 8px; top: 65px; }
-.right { right: 8px; top: 65px; }
+#kickButton:active {
+
+    transform: scale(0.93);
+
+}
+
+/* تعليمات */
+
+#info {
+
+    position: absolute;
+
+    bottom: 20px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    color: white;
+
+    font-size: 13px;
+
+    background: rgba(0,0,0,0.35);
+
+    padding: 7px 14px;
+
+    border-radius: 20px;
+
+    z-index: 30;
+
+    white-space: nowrap;
+}
+
 </style>
 </head>
 
@@ -134,158 +345,836 @@ body {
 
 <div id="game">
 
-    <div id="circle">M</div>
+    <!-- خطوط الملعب -->
 
-    <div id="controlArea">
-        <div id="pad">
+    <div class="center-line"></div>
 
-            <div id="mirror">MIRROR</div>
+    <div class="center-circle"></div>
 
-            <svg class="arrow up" viewBox="0 0 24 24"><path d="M12 4l-8 8h16z"/></svg>
-            <svg class="arrow down" viewBox="0 0 24 24"><path d="M12 20l8-8H4z"/></svg>
-            <svg class="arrow left" viewBox="0 0 24 24"><path d="M4 12l8-8v16z"/></svg>
-            <svg class="arrow right" viewBox="0 0 24 24"><path d="M20 12l-8 8V4z"/></svg>
+    <!-- اللاعب -->
 
-        </div>
+    <div id="player">
+        🧍
+    </div>
+
+    <!-- الكرة -->
+
+    <div id="ball">
+        ⚽
+    </div>
+
+    <!-- اتجاه الركلة -->
+
+    <div id="aim"></div>
+
+    <!-- القوة -->
+
+    <div id="powerBox">
+        <div id="power"></div>
+    </div>
+
+    <div id="powerText">
+        قوة الركلة
+    </div>
+
+    <!-- زر الركل -->
+
+    <div id="kickButton">
+        👟
+    </div>
+
+    <div id="info">
+        حرّك اللاعب واسحب لتحديد اتجاه الركلة
     </div>
 
 </div>
 
 <script>
 
-// منع التكبير بإصبعين (Pinch Zoom) على مستوى الصفحة بالكامل
-document.addEventListener('touchmove', function(e) {
-    if (e.touches.length > 1) {
-        e.preventDefault();
+/* =========================
+   العناصر
+========================= */
+
+const game =
+    document.getElementById("game");
+
+const player =
+    document.getElementById("player");
+
+const ball =
+    document.getElementById("ball");
+
+const aim =
+    document.getElementById("aim");
+
+const kickButton =
+    document.getElementById("kickButton");
+
+const powerBar =
+    document.getElementById("power");
+
+
+
+/* =========================
+   حجم الملعب
+========================= */
+
+let gameWidth =
+    game.clientWidth;
+
+let gameHeight =
+    game.clientHeight;
+
+
+
+/* =========================
+   اللاعب
+========================= */
+
+let playerX =
+    gameWidth / 2;
+
+let playerY =
+    gameHeight / 2;
+
+
+
+/* =========================
+   الكرة
+========================= */
+
+let ballX =
+    playerX;
+
+let ballY =
+    playerY - 40;
+
+
+
+/* =========================
+   اتجاه اللاعب
+========================= */
+
+let aimAngle =
+    -Math.PI / 2;
+
+
+
+/* =========================
+   حركة اللاعب
+========================= */
+
+let keys = {
+
+    up: false,
+    down: false,
+    left: false,
+    right: false
+
+};
+
+
+
+let playerSpeed = 4.5;
+
+
+
+/* =========================
+   حركة الكرة
+========================= */
+
+let ballVX = 0;
+
+let ballVY = 0;
+
+let ballMoving = false;
+
+let friction = 0.985;
+
+
+
+/* =========================
+   الركلة
+========================= */
+
+let charging = false;
+
+let power = 0;
+
+let maxPower = 100;
+
+let powerSpeed = 1.4;
+
+
+
+/* =========================
+   لمس الشاشة
+========================= */
+
+let touchStartX = 0;
+
+let touchStartY = 0;
+
+let movingTouch = false;
+
+
+
+/* =========================
+   عرض العناصر
+========================= */
+
+function draw() {
+
+    player.style.left =
+        playerX + "px";
+
+    player.style.top =
+        playerY + "px";
+
+
+    ball.style.left =
+        ballX + "px";
+
+    ball.style.top =
+        ballY + "px";
+
+
+    /*
+       السهم يبدأ من الكرة
+    */
+
+    aim.style.left =
+        ballX + "px";
+
+    aim.style.top =
+        ballY + "px";
+
+
+    aim.style.transform =
+        `rotate(${aimAngle}rad)`;
+
+
+    /*
+       عندما الكرة تتحرك
+       نخفي السهم قليلاً
+    */
+
+    if (ballMoving) {
+
+        aim.style.opacity = "0.25";
+
+    } else {
+
+        aim.style.opacity = "1";
+
     }
-}, { passive: false });
 
-// منع التكبير بالنقر المزدوج (Double Tap Zoom)
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(e) {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
-
-// منع التكبير بالإيماءات (Gesture Events) الخاصة بـ Safari
-document.addEventListener('gesturestart', function(e) {
-    e.preventDefault();
-});
-document.addEventListener('gesturechange', function(e) {
-    e.preventDefault();
-});
-document.addEventListener('gestureend', function(e) {
-    e.preventDefault();
-});
-
-
-const game = document.getElementById("game");
-const circle = document.getElementById("circle");
-const pad = document.getElementById("pad");
-
-const CIRCLE_SIZE = 60;
-const SPEED = 1.5;
-
-let dx = 0;
-let dy = 0;
-let touching = false;
-let activePointerId = null;
-
-let x = 0;
-let y = 0;
-
-function centerCircle() {
-    const width = game.clientWidth;
-    const height = game.clientHeight;
-    x = (width - CIRCLE_SIZE) / 2;
-    y = (height - CIRCLE_SIZE) / 2;
-    drawCircle();
 }
 
-function drawCircle() {
-    circle.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-}
 
-function keepInsideScreen() {
-    const maxX = game.clientWidth - CIRCLE_SIZE;
-    const maxY = game.clientHeight - CIRCLE_SIZE;
-    if (x < 0) x = 0;
-    if (x > maxX) x = maxX;
-    if (y < 0) y = 0;
-    if (y > maxY) y = maxY;
-}
 
-function updateDirection(clientX, clientY) {
-    const rect = pad.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const offsetX = clientX - centerX;
-    const offsetY = clientY - centerY;
-    const deadZone = 12;
-    const distance = Math.hypot(offsetX, offsetY);
+/* =========================
+   وضع الكرة أمام اللاعب
+========================= */
 
-    if (distance < deadZone) {
-        dx = 0;
-        dy = 0;
+function placeBallWithPlayer() {
+
+    if (ballMoving)
         return;
+
+
+    const distance = 42;
+
+
+    ballX =
+        playerX +
+        Math.cos(aimAngle) *
+        distance;
+
+
+    ballY =
+        playerY +
+        Math.sin(aimAngle) *
+        distance;
+
+}
+
+
+
+/* =========================
+   تحديث اللعبة
+========================= */
+
+function update() {
+
+
+    /*
+       حركة اللاعب
+    */
+
+    let dx = 0;
+    let dy = 0;
+
+
+    if (keys.left)
+        dx -= 1;
+
+    if (keys.right)
+        dx += 1;
+
+    if (keys.up)
+        dy -= 1;
+
+    if (keys.down)
+        dy += 1;
+
+
+    /*
+       منع السرعة القطرية
+    */
+
+    if (dx !== 0 || dy !== 0) {
+
+        const length =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+
+        dx /= length;
+        dy /= length;
+
+
+        playerX +=
+            dx * playerSpeed;
+
+        playerY +=
+            dy * playerSpeed;
+
     }
 
-    dx = (offsetX / distance) * SPEED;
-    dy = (offsetY / distance) * SPEED;
-}
 
-pad.addEventListener("pointerdown", function(event) {
-    event.preventDefault();
-    touching = true;
-    activePointerId = event.pointerId;
-    if (pad.setPointerCapture) pad.setPointerCapture(event.pointerId);
-    updateDirection(event.clientX, event.clientY);
-}, { passive: false });
+    /*
+       حدود اللاعب
+    */
 
-pad.addEventListener("pointermove", function(event) {
-    if (!touching || event.pointerId !== activePointerId) return;
-    event.preventDefault();
-    updateDirection(event.clientX, event.clientY);
-}, { passive: false });
+    const radius = 25;
 
-function stopMovement(event) {
-    if (activePointerId !== null && event.pointerId !== activePointerId) return;
-    touching = false;
-    activePointerId = null;
-    dx = 0;
-    dy = 0;
-}
 
-pad.addEventListener("pointerup", stopMovement);
-pad.addEventListener("pointercancel", stopMovement);
+    playerX =
+        Math.max(
+            radius,
+            Math.min(
+                gameWidth - radius,
+                playerX
+            )
+        );
 
-pad.addEventListener("lostpointercapture", function() {
-    touching = false;
-    activePointerId = null;
-    dx = 0;
-    dy = 0;
-});
 
-function gameLoop() {
-    if (touching) {
-        x += dx;
-        y += dy;
-        keepInsideScreen();
-        drawCircle();
+    playerY =
+        Math.max(
+            radius,
+            Math.min(
+                gameHeight - radius,
+                playerY
+            )
+        );
+
+
+    /*
+       إذا الكرة ليست في حركة
+       تبقى أمام اللاعب
+    */
+
+    if (!ballMoving) {
+
+        placeBallWithPlayer();
+
     }
-    requestAnimationFrame(gameLoop);
+
+
+    /*
+       حركة الكرة
+    */
+
+    if (ballMoving) {
+
+        ballX += ballVX;
+
+        ballY += ballVY;
+
+
+        /*
+           احتكاك
+        */
+
+        ballVX *= friction;
+        ballVY *= friction;
+
+
+        /*
+           اصطدام الجوانب
+        */
+
+        const ballRadius = 14;
+
+
+        if (
+            ballX <
+            ballRadius
+        ) {
+
+            ballX =
+                ballRadius;
+
+            ballVX =
+                Math.abs(ballVX);
+
+        }
+
+
+        if (
+            ballX >
+            gameWidth -
+            ballRadius
+        ) {
+
+            ballX =
+                gameWidth -
+                ballRadius;
+
+            ballVX =
+                -Math.abs(ballVX);
+
+        }
+
+
+        /*
+           اصطدام أعلى وأسفل
+        */
+
+        if (
+            ballY <
+            ballRadius
+        ) {
+
+            ballY =
+                ballRadius;
+
+            ballVY =
+                Math.abs(ballVY);
+
+        }
+
+
+        if (
+            ballY >
+            gameHeight -
+            ballRadius
+        ) {
+
+            ballY =
+                gameHeight -
+                ballRadius;
+
+            ballVY =
+                -Math.abs(ballVY);
+
+        }
+
+
+        /*
+           إيقاف الكرة
+        */
+
+        const speed =
+            Math.sqrt(
+                ballVX * ballVX +
+                ballVY * ballVY
+            );
+
+
+        if (speed < 0.15) {
+
+            ballVX = 0;
+            ballVY = 0;
+
+            ballMoving = false;
+
+            /*
+               إعادة الكرة قرب اللاعب
+            */
+
+            placeBallWithPlayer();
+
+        }
+
+    }
+
+
+    draw();
+
+    requestAnimationFrame(update);
+
 }
 
-window.addEventListener("resize", function() {
-    keepInsideScreen();
-    drawCircle();
-});
 
-centerCircle();
-requestAnimationFrame(gameLoop);
+
+/* =========================
+   بدء شحن الركلة
+========================= */
+
+function startCharging(e) {
+
+    e.preventDefault();
+
+
+    if (ballMoving)
+        return;
+
+
+    charging = true;
+
+    power = 0;
+
+}
+
+
+
+/* =========================
+   شحن القوة
+========================= */
+
+function chargePower() {
+
+    if (!charging)
+        return;
+
+
+    power += powerSpeed;
+
+
+    /*
+       حد أقصى
+    */
+
+    if (power > maxPower)
+        power = maxPower;
+
+
+    powerBar.style.width =
+        power + "%";
+
+
+    requestAnimationFrame(
+        chargePower
+    );
+
+}
+
+
+
+/* =========================
+   تنفيذ الركلة
+========================= */
+
+function kick() {
+
+    if (!charging)
+        return;
+
+
+    charging = false;
+
+
+    /*
+       إذا لم يشحن
+       نعطيه قوة بسيطة
+    */
+
+    if (power < 5)
+        power = 5;
+
+
+    /*
+       قوة الركلة
+    */
+
+    const minSpeed = 5;
+
+    const maxSpeed = 18;
+
+
+    const speed =
+        minSpeed +
+        (power / 100) *
+        (maxSpeed - minSpeed);
+
+
+    /*
+       اتجاه الكرة
+    */
+
+    ballVX =
+        Math.cos(aimAngle) *
+        speed;
+
+
+    ballVY =
+        Math.sin(aimAngle) *
+        speed;
+
+
+    ballMoving = true;
+
+
+    /*
+       تصفير العداد
+    */
+
+    power = 0;
+
+    powerBar.style.width =
+        "0%";
+
+}
+
+
+
+/* =========================
+   زر الركل
+========================= */
+
+kickButton.addEventListener(
+    "pointerdown",
+    startCharging
+);
+
+
+kickButton.addEventListener(
+    "pointerup",
+    kick
+);
+
+
+kickButton.addEventListener(
+    "pointercancel",
+    kick
+);
+
+
+kickButton.addEventListener(
+    "pointerleave",
+    function() {
+
+        if (charging)
+            kick();
+
+    }
+);
+
+
+
+/* =========================
+   تحديد اتجاه الركلة
+========================= */
+
+game.addEventListener(
+    "pointerdown",
+    function(e) {
+
+        /*
+           لا نغير الاتجاه
+           إذا ضغط على زر الركل
+        */
+
+        if (
+            e.target === kickButton
+        )
+            return;
+
+
+        touchStartX =
+            e.clientX;
+
+        touchStartY =
+            e.clientY;
+
+        movingTouch = true;
+
+    }
+);
+
+
+
+game.addEventListener(
+    "pointermove",
+    function(e) {
+
+        if (!movingTouch)
+            return;
+
+
+        /*
+           حساب اتجاه السحب
+        */
+
+        const dx =
+            e.clientX -
+            touchStartX;
+
+
+        const dy =
+            e.clientY -
+            touchStartY;
+
+
+        /*
+           إذا كانت الحركة صغيرة
+           لا نغير الاتجاه
+        */
+
+        if (
+            Math.abs(dx) < 8 &&
+            Math.abs(dy) < 8
+        )
+            return;
+
+
+        aimAngle =
+            Math.atan2(
+                dy,
+                dx
+            );
+
+
+        /*
+           منع اتجاه غريب
+           إذا أردنا لاحقًا
+           يمكن تغييره
+        */
+
+        if (!ballMoving) {
+
+            placeBallWithPlayer();
+
+        }
+
+    }
+);
+
+
+
+game.addEventListener(
+    "pointerup",
+    function() {
+
+        movingTouch = false;
+
+    }
+);
+
+
+
+game.addEventListener(
+    "pointercancel",
+    function() {
+
+        movingTouch = false;
+
+    }
+);
+
+
+
+/* =========================
+   لوحة المفاتيح
+   للاختبار على الكمبيوتر
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(e) {
+
+        if (e.key === "ArrowUp")
+            keys.up = true;
+
+        if (e.key === "ArrowDown")
+            keys.down = true;
+
+        if (e.key === "ArrowLeft")
+            keys.left = true;
+
+        if (e.key === "ArrowRight")
+            keys.right = true;
+
+    }
+);
+
+
+
+document.addEventListener(
+    "keyup",
+    function(e) {
+
+        if (e.key === "ArrowUp")
+            keys.up = false;
+
+        if (e.key === "ArrowDown")
+            keys.down = false;
+
+        if (e.key === "ArrowLeft")
+            keys.left = false;
+
+        if (e.key === "ArrowRight")
+            keys.right = false;
+
+    }
+);
+
+
+
+/* =========================
+   تغيير حجم الشاشة
+========================= */
+
+window.addEventListener(
+    "resize",
+    function() {
+
+        gameWidth =
+            game.clientWidth;
+
+        gameHeight =
+            game.clientHeight;
+
+
+        playerX =
+            Math.min(
+                playerX,
+                gameWidth - 25
+            );
+
+
+        playerY =
+            Math.min(
+                playerY,
+                gameHeight - 25
+            );
+
+    }
+);
+
+
+
+/* =========================
+   البداية
+========================= */
+
+draw();
+
+update();
 
 </script>
 
