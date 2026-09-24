@@ -37,14 +37,14 @@ body {
     overflow: hidden;
 }
 
-/* الدائرة Ⓜ️ */
+/* الدائرة M */
 #circle {
     position: absolute;
     width: 60px;
     height: 60px;
     border-radius: 50%;
     background: white;
-    border: 2px solid black;
+    border: 3px solid black;
 
     display: flex;
     align-items: center;
@@ -55,16 +55,23 @@ body {
                  "Segoe UI",
                  sans-serif;
 
-    font-size: 30px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 900;
+    color: black;
 
     z-index: 2;
 
     transform: translate3d(0, 0, 0);
     will-change: transform;
+    
+    /* منع تحديد النص أو التكبير عند اللمس */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    pointer-events: none;
 }
 
-/* منطقة التحكم (تغطي الجزء السفلي) */
+/* منطقة التحكم */
 #controlArea {
     position: absolute;
     left: 0;
@@ -76,7 +83,6 @@ body {
     align-items: center;
     justify-content: center;
 
-    touch-action: none;
     z-index: 5;
 }
 
@@ -89,7 +95,13 @@ body {
     background: rgba(51, 51, 51, 0.9);
     border-radius: 20px;
 
-    touch-action: none;
+    /* هذه الخاصية تمنع تكبير الشاشة عند اللمس السريع */
+    touch-action: manipulation;
+    
+    /* منع تحديد النص */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 /* النص MIRROR */
@@ -155,7 +167,7 @@ body {
 
 <div id="game">
 
-    <div id="circle">Ⓜ️</div>
+    <div id="circle">M</div>
 
     <div id="controlArea">
         <div id="pad">
@@ -176,42 +188,21 @@ body {
 
 const game = document.getElementById("game");
 const circle = document.getElementById("circle");
-const controlArea = document.getElementById("controlArea");
 const pad = document.getElementById("pad");
 
-/*
-    إعدادات الحركة
-*/
 const CIRCLE_SIZE = 60;
-
-/*
-    السرعة
-    1.0 = بطيء
-    1.5 = متوسط
-    2.5 = سريع
-*/
 const SPEED = 1.5;
 
-/*
-    الاتجاه الحالي (متجه)
-*/
 let dx = 0;
 let dy = 0;
-
-/*
-    حالة اللمس
-*/
 let touching = false;
 let activePointerId = null;
 
-/*
-    موقع الدائرة
-*/
 let x = 0;
 let y = 0;
 
 /*
-    تحديد موقع الدائرة في منتصف الشاشة
+    تحديد موقع الدائرة في المنتصف
 */
 function centerCircle() {
     const width = game.clientWidth;
@@ -223,17 +214,11 @@ function centerCircle() {
     drawCircle();
 }
 
-/*
-    رسم الدائرة
-*/
 function drawCircle() {
     circle.style.transform =
         `translate3d(${x}px, ${y}px, 0)`;
 }
 
-/*
-    منع الخروج عن الشاشة
-*/
 function keepInsideScreen() {
     const maxX = game.clientWidth - CIRCLE_SIZE;
     const maxY = game.clientHeight - CIRCLE_SIZE;
@@ -245,8 +230,7 @@ function keepInsideScreen() {
 }
 
 /*
-    تحديث الاتجاه بناءً على موقع الإصبع
-    (يدعم الآن 8 اتجاهات بما فيها المائلة)
+    تحديث الاتجاه (يدعم 8 اتجاهات)
 */
 function updateDirection(clientX, clientY) {
 
@@ -259,19 +243,14 @@ function updateDirection(clientX, clientY) {
     const offsetY = clientY - centerY;
 
     const deadZone = 12;
-
-    // حساب المسافة الكلية من المركز
     const distance = Math.hypot(offsetX, offsetY);
 
     if (distance < deadZone) {
-        // منطقة ميتة في المنتصف - توقف
         dx = 0;
         dy = 0;
         return;
     }
 
-    // تطبيع المتجه (Normalization)
-    // هذا يسمح بالحركة المائلة بسلاسة تامة
     dx = (offsetX / distance) * SPEED;
     dy = (offsetY / distance) * SPEED;
 }
@@ -279,67 +258,35 @@ function updateDirection(clientX, clientY) {
 /*
     بداية اللمس
 */
-pad.addEventListener(
-    "pointerdown",
-    function(event) {
+pad.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    touching = true;
+    activePointerId = event.pointerId;
 
-        event.preventDefault();
+    if (pad.setPointerCapture) {
+        pad.setPointerCapture(event.pointerId);
+    }
 
-        touching = true;
-        activePointerId = event.pointerId;
-
-        // تثبيت اللمسة على الزر (للسماح بالسحب المستمر)
-        if (pad.setPointerCapture) {
-            pad.setPointerCapture(event.pointerId);
-        }
-
-        updateDirection(
-            event.clientX,
-            event.clientY
-        );
-    },
-    { passive: false }
-);
+    updateDirection(event.clientX, event.clientY);
+}, { passive: false });
 
 /*
     تحريك الإصبع
 */
-pad.addEventListener(
-    "pointermove",
-    function(event) {
-
-        if (
-            !touching ||
-            event.pointerId !== activePointerId
-        ) {
-            return;
-        }
-
-        event.preventDefault();
-
-        updateDirection(
-            event.clientX,
-            event.clientY
-        );
-    },
-    { passive: false }
-);
+pad.addEventListener("pointermove", function(event) {
+    if (!touching || event.pointerId !== activePointerId) return;
+    event.preventDefault();
+    updateDirection(event.clientX, event.clientY);
+}, { passive: false });
 
 /*
-    رفع الإصبع أو إلغاء اللمس
+    رفع الإصبع
 */
 function stopMovement(event) {
-
-    if (
-        activePointerId !== null &&
-        event.pointerId !== activePointerId
-    ) {
-        return;
-    }
+    if (activePointerId !== null && event.pointerId !== activePointerId) return;
 
     touching = false;
     activePointerId = null;
-
     dx = 0;
     dy = 0;
 }
@@ -347,46 +294,31 @@ function stopMovement(event) {
 pad.addEventListener("pointerup", stopMovement);
 pad.addEventListener("pointercancel", stopMovement);
 
-pad.addEventListener(
-    "lostpointercapture",
-    function() {
-        touching = false;
-        activePointerId = null;
-        dx = 0;
-        dy = 0;
-    }
-);
+pad.addEventListener("lostpointercapture", function() {
+    touching = false;
+    activePointerId = null;
+    dx = 0;
+    dy = 0;
+});
 
 /*
     حلقة الحركة
 */
 function gameLoop() {
-
     if (touching) {
         x += dx;
         y += dy;
-
         keepInsideScreen();
         drawCircle();
     }
-
     requestAnimationFrame(gameLoop);
 }
 
-/*
-    عند تغيير حجم الشاشة أو اتجاهها
-*/
-window.addEventListener(
-    "resize",
-    function() {
-        keepInsideScreen();
-        drawCircle();
-    }
-);
+window.addEventListener("resize", function() {
+    keepInsideScreen();
+    drawCircle();
+});
 
-/*
-    البداية
-*/
 centerCircle();
 requestAnimationFrame(gameLoop);
 
