@@ -9,10 +9,14 @@
 content="width=device-width,
 initial-scale=1.0,
 maximum-scale=1.0,
-user-scalable=no">
+user-scalable=no,
+viewport-fit=cover">
 
 <meta name="apple-mobile-web-app-capable"
 content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style"
+content="black-translucent">
 
 <title>كرة القدم ⚽️</title>
 
@@ -27,6 +31,8 @@ content="yes">
     user-select: none;
 
     -webkit-touch-callout: none;
+
+    -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -44,13 +50,20 @@ body {
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
+
+    touch-action: none;
+
+    overscroll-behavior: none;
 }
 
 body {
 
     display: flex;
+
     justify-content: center;
     align-items: center;
+
+    touch-action: none;
 }
 
 
@@ -90,6 +103,8 @@ body {
         #16803c;
 
     touch-action: none;
+
+    overscroll-behavior: none;
 }
 
 
@@ -345,7 +360,7 @@ body {
 
 
 /* =========================================
-   وحدة تحكم الحركة
+   JOYSTICK الحركة
 ========================================= */
 
 #movePad {
@@ -358,97 +373,136 @@ body {
     width: 150px;
     height: 150px;
 
+    border-radius: 50%;
+
+    background:
+        rgba(0,0,0,0.12);
+
+    border:
+        3px solid
+        rgba(255,255,255,0.35);
+
+    box-shadow:
+        0 5px 12px
+        rgba(0,0,0,0.25);
+
     z-index: 40;
 
     touch-action: none;
+
+    /*
+       مهم:
+       الإصبع يستطيع التحرك
+       داخل وخارج الدائرة
+       بدون فقدان التحكم
+    */
 }
 
 
 /* =========================================
-   أزرار الحركة
+   دائرة وسط Joystick
 ========================================= */
 
-.moveBtn {
+#joystickCenter {
 
     position: absolute;
 
-    width: 50px;
-    height: 50px;
+    left: 50%;
+    top: 50%;
 
-    border-radius: 14px;
+    width: 54px;
+    height: 54px;
+
+    transform:
+        translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background:
+        rgba(0,0,0,0.30);
 
     border:
         3px solid white;
 
-    background:
+    box-shadow:
+        0 4px 8px
         rgba(0,0,0,0.35);
+
+    pointer-events: none;
+
+    transition:
+        transform 0.04s linear;
+}
+
+
+/* =========================================
+   أسهم الاتجاه
+========================================= */
+
+.moveArrow {
+
+    position: absolute;
 
     color: white;
 
-    font-size: 23px;
+    font-size: 24px;
 
-    display: flex;
+    font-weight: bold;
 
-    justify-content: center;
-    align-items: center;
+    opacity: 0.85;
 
-    box-shadow:
-        0 4px 8px
-        rgba(0,0,0,0.3);
+    pointer-events: none;
 
-    touch-action: none;
-
-    transition:
-        transform 0.05s ease,
-        background 0.05s ease;
+    text-shadow:
+        0 2px 4px black;
 }
 
 
 /* أعلى */
 
-#moveUp {
+#arrowUp {
 
-    left: 50px;
-    top: 0;
+    left: 50%;
+    top: 10px;
+
+    transform:
+        translateX(-50%);
 }
 
 
 /* أسفل */
 
-#moveDown {
+#arrowDown {
 
-    left: 50px;
-    bottom: 0;
+    left: 50%;
+    bottom: 10px;
+
+    transform:
+        translateX(-50%);
 }
 
 
 /* يسار */
 
-#moveLeft {
+#arrowLeft {
 
-    left: 0;
-    top: 50px;
+    left: 10px;
+    top: 50%;
+
+    transform:
+        translateY(-50%);
 }
 
 
 /* يمين */
 
-#moveRight {
+#arrowRight {
 
-    right: 0;
-    top: 50px;
-}
-
-
-/* ضغط الزر */
-
-.moveBtn.active {
+    right: 10px;
+    top: 50%;
 
     transform:
-        scale(0.90);
-
-    background:
-        rgba(0,0,0,0.60);
+        translateY(-50%);
 }
 
 
@@ -490,7 +544,7 @@ body {
 
 
 /* =========================================
-   الجزء الأحمر الداخلي
+   الزر الأحمر
 ========================================= */
 
 #kickButton {
@@ -523,7 +577,7 @@ body {
 
 
 /* =========================================
-   مؤشر مكان الإصبع
+   مؤشر الإصبع للركلة
 ========================================= */
 
 #kickDot {
@@ -561,7 +615,7 @@ body {
 
     position: absolute;
 
-    bottom: 8px;
+    top: 72px;
     left: 50%;
 
     transform:
@@ -626,40 +680,42 @@ body {
 
 
     <!-- =====================================
-         لوحة حركة اللاعب
+         JOYSTICK الحركة
     ====================================== -->
 
     <div id="movePad">
 
         <div
-            class="moveBtn"
-            id="moveUp">
+            class="moveArrow"
+            id="arrowUp">
             ▲
         </div>
 
         <div
-            class="moveBtn"
-            id="moveDown">
+            class="moveArrow"
+            id="arrowDown">
             ▼
         </div>
 
         <div
-            class="moveBtn"
-            id="moveLeft">
+            class="moveArrow"
+            id="arrowLeft">
             ◀
         </div>
 
         <div
-            class="moveBtn"
-            id="moveRight">
+            class="moveArrow"
+            id="arrowRight">
             ▶
         </div>
+
+        <div id="joystickCenter"></div>
 
     </div>
 
 
     <!-- =====================================
-         وحدة تحكم الركلة
+         الركلة
     ====================================== -->
 
     <div id="kickControl">
@@ -674,7 +730,7 @@ body {
 
 
     <div id="info">
-        الحركة 8 اتجاهات • يمكنك التحرك والركل معًا
+        حرّك إصبعك للتحكم • الحركة والركل معًا
     </div>
 
 </div>
@@ -711,21 +767,13 @@ const powerBar =
     document.getElementById("power");
 
 
-/* =================================================
-   أزرار الحركة
-================================================= */
+const movePad =
+    document.getElementById("movePad");
 
-const moveUp =
-    document.getElementById("moveUp");
-
-const moveDown =
-    document.getElementById("moveDown");
-
-const moveLeft =
-    document.getElementById("moveLeft");
-
-const moveRight =
-    document.getElementById("moveRight");
+const joystickCenter =
+    document.getElementById(
+        "joystickCenter"
+    );
 
 
 /* =================================================
@@ -773,7 +821,17 @@ let aimAngle =
    سرعة اللاعب
 ================================================= */
 
-const playerSpeed = 4.5;
+/*
+   تم تخفيض السرعة بشكل واضح.
+
+   سابقًا:
+   4.5
+
+   الآن:
+   2.0
+*/
+
+const playerSpeed = 2.0;
 
 
 /* =================================================
@@ -808,20 +866,27 @@ const powerSpeed = 1.4;
 
 
 /* =================================================
-   لمس اللاعب
+   Joystick الحركة
 ================================================= */
 
-let playerTouching = false;
+let movePointerId = null;
 
-let playerPointerId = null;
+let moveTouching = false;
 
-let lastPlayerTouchX = 0;
 
-let lastPlayerTouchY = 0;
+/*
+   اتجاه الحركة الحالي
+
+   القيم من -1 إلى +1
+*/
+
+let moveX = 0;
+
+let moveY = 0;
 
 
 /* =================================================
-   وحدة تحكم الركلة
+   وحدة الركلة
 ================================================= */
 
 let kickPointerId = null;
@@ -830,21 +895,7 @@ let kickTouching = false;
 
 
 /* =================================================
-   مفاتيح الحركة
-================================================= */
-
-let keys = {
-
-    up: false,
-    down: false,
-    left: false,
-    right: false
-
-};
-
-
-/* =================================================
-   وضع الكرة أمام اللاعب
+   الكرة أمام اللاعب
 ================================================= */
 
 function placeBallWithPlayer() {
@@ -928,13 +979,21 @@ function movePlayer(dx, dy) {
         );
 
 
-    if (length === 0)
+    if (length < 0.001)
         return;
 
 
     /*
-       التطبيع مهم جدًا:
-       الحركة القطرية لا تصبح أسرع
+       توحيد السرعة.
+
+       هذا يجعل:
+       ↑
+
+       و
+
+       ↗️
+
+       بنفس السرعة.
     */
 
     dx /= length;
@@ -986,35 +1045,20 @@ function movePlayer(dx, dy) {
 
 function update() {
 
-    let dx = 0;
-
-    let dy = 0;
-
-
-    if (keys.left)
-        dx -= 1;
-
-    if (keys.right)
-        dx += 1;
-
-    if (keys.up)
-        dy -= 1;
-
-    if (keys.down)
-        dy += 1;
-
-
     /*
-       هنا بالضبط يتم السماح
-       بالحركة القطرية
+       الحركة تأتي مباشرة
+       من مكان الإصبع على Joystick
     */
 
-    movePlayer(dx, dy);
+    movePlayer(
+        moveX,
+        moveY
+    );
 
 
-    /* ---------------------------------------------
+    /* =============================================
        حركة الكرة
-    --------------------------------------------- */
+    ============================================= */
 
     if (ballMoving) {
 
@@ -1031,6 +1075,8 @@ function update() {
         const ballRadius = 15;
 
 
+        /* يمين */
+
         if (
             ballX >
             gameWidth - ballRadius
@@ -1046,6 +1092,8 @@ function update() {
         }
 
 
+        /* يسار */
+
         if (
             ballX <
             ballRadius
@@ -1060,6 +1108,8 @@ function update() {
         }
 
 
+        /* أعلى */
+
         if (
             ballY <
             ballRadius
@@ -1073,6 +1123,8 @@ function update() {
 
         }
 
+
+        /* أسفل */
 
         if (
             ballY >
@@ -1120,111 +1172,110 @@ function update() {
 
 
 /* =================================================
-   أزرار الحركة
-   Multi-touch
+   حساب اتجاه Joystick
 ================================================= */
 
-function bindMoveButton(button, direction) {
+function updateMoveJoystick(
+    clientX,
+    clientY
+) {
 
-    button.addEventListener(
-        "pointerdown",
-        function(e) {
-
-            e.preventDefault();
-            e.stopPropagation();
-
-
-            keys[direction] = true;
-
-            button.classList.add("active");
+    const rect =
+        movePad.getBoundingClientRect();
 
 
-            /*
-               يمسك الإصبع بالزر
-               حتى لو تحرك قليلًا خارجه
-            */
-
-            try {
-
-                button.setPointerCapture(
-                    e.pointerId
-                );
-
-            } catch (error) {}
-
-        }
-    );
+    const centerX =
+        rect.left +
+        rect.width / 2;
 
 
-    function stop(e) {
+    const centerY =
+        rect.top +
+        rect.height / 2;
 
-        e.preventDefault();
-        e.stopPropagation();
+
+    let dx =
+        clientX - centerX;
 
 
-        keys[direction] = false;
+    let dy =
+        clientY - centerY;
 
-        button.classList.remove("active");
+
+    const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+
+    /*
+       نصف قطر الحركة
+    */
+
+    const maxDistance = 48;
+
+
+    /*
+       إذا خرج الإصبع من الدائرة
+       نثبت الاتجاه عند الحافة
+    */
+
+    if (
+        distance > maxDistance
+    ) {
+
+        dx =
+            (dx / distance) *
+            maxDistance;
+
+        dy =
+            (dy / distance) *
+            maxDistance;
 
     }
 
 
-    button.addEventListener(
-        "pointerup",
-        stop
-    );
+    /*
+       الاتجاه الحقيقي.
+
+       هنا توجد الحركة القطرية.
+    */
+
+    if (distance > 6) {
+
+        moveX =
+            dx / maxDistance;
+
+        moveY =
+            dy / maxDistance;
+
+    } else {
+
+        moveX = 0;
+
+        moveY = 0;
+
+    }
 
 
-    button.addEventListener(
-        "pointercancel",
-        stop
-    );
+    /*
+       تحريك الدائرة الوسطى
+       مع الإصبع
+    */
 
-
-    button.addEventListener(
-        "lostpointercapture",
-        function() {
-
-            keys[direction] = false;
-
-            button.classList.remove("active");
-
-        }
-    );
+    joystickCenter.style.transform =
+        `translate(calc(-50% + ${dx}px),
+                   calc(-50% + ${dy}px))`;
 
 }
 
 
 /* =================================================
-   ربط أزرار الحركة
+   بداية Joystick
 ================================================= */
 
-bindMoveButton(
-    moveUp,
-    "up"
-);
-
-bindMoveButton(
-    moveDown,
-    "down"
-);
-
-bindMoveButton(
-    moveLeft,
-    "left"
-);
-
-bindMoveButton(
-    moveRight,
-    "right"
-);
-
-
-/* =================================================
-   سحب اللاعب مباشرة
-================================================= */
-
-player.addEventListener(
+movePad.addEventListener(
     "pointerdown",
     function(e) {
 
@@ -1233,128 +1284,125 @@ player.addEventListener(
         e.stopPropagation();
 
 
-        if (ballMoving)
-            return;
+        moveTouching = true;
 
-
-        playerTouching = true;
-
-        playerPointerId =
+        movePointerId =
             e.pointerId;
 
 
-        lastPlayerTouchX =
-            e.clientX;
+        try {
 
-        lastPlayerTouchY =
-            e.clientY;
+            movePad.setPointerCapture(
+                e.pointerId
+            );
+
+        } catch (error) {}
 
 
-        player.setPointerCapture(
-            e.pointerId
+        updateMoveJoystick(
+            e.clientX,
+            e.clientY
         );
 
     }
 );
 
 
-player.addEventListener(
+/* =================================================
+   حركة الإصبع على Joystick
+================================================= */
+
+movePad.addEventListener(
     "pointermove",
     function(e) {
 
-        if (!playerTouching)
+        if (!moveTouching)
             return;
 
 
         if (
             e.pointerId !==
-            playerPointerId
+            movePointerId
         )
             return;
 
 
-        const dx =
-            e.clientX -
-            lastPlayerTouchX;
+        e.preventDefault();
 
 
-        const dy =
-            e.clientY -
-            lastPlayerTouchY;
+        /*
+           أهم تغيير:
 
+           لا نحتاج رفع الإصبع
+           لتغيير الاتجاه.
+        */
 
-        playerX += dx;
-
-        playerY += dy;
-
-
-        const radius = 24;
-
-
-        playerX =
-            Math.max(
-                radius,
-                Math.min(
-                    gameWidth - radius,
-                    playerX
-                )
-            );
-
-
-        playerY =
-            Math.max(
-                radius,
-                Math.min(
-                    gameHeight - radius,
-                    playerY
-                )
-            );
-
-
-        lastPlayerTouchX =
-            e.clientX;
-
-        lastPlayerTouchY =
-            e.clientY;
-
-
-        if (!ballMoving) {
-
-            placeBallWithPlayer();
-
-        }
-
-
-        draw();
+        updateMoveJoystick(
+            e.clientX,
+            e.clientY
+        );
 
     }
 );
 
 
-function stopPlayerTouch(e) {
+/* =================================================
+   إيقاف Joystick
+================================================= */
+
+function stopMoveJoystick(e) {
 
     if (
         e.pointerId !==
-        playerPointerId
+        movePointerId
     )
         return;
 
 
-    playerTouching = false;
+    moveTouching = false;
 
-    playerPointerId = null;
+    movePointerId = null;
+
+
+    moveX = 0;
+
+    moveY = 0;
+
+
+    joystickCenter.style.transform =
+        "translate(-50%, -50%)";
 
 }
 
 
-player.addEventListener(
+movePad.addEventListener(
     "pointerup",
-    stopPlayerTouch
+    stopMoveJoystick
 );
 
-player.addEventListener(
+
+movePad.addEventListener(
     "pointercancel",
-    stopPlayerTouch
+    stopMoveJoystick
+);
+
+
+movePad.addEventListener(
+    "lostpointercapture",
+    function() {
+
+        moveTouching = false;
+
+        movePointerId = null;
+
+        moveX = 0;
+
+        moveY = 0;
+
+        joystickCenter.style.transform =
+            "translate(-50%, -50%)";
+
+    }
 );
 
 
@@ -1434,6 +1482,7 @@ function updateKickDirection(
     kickDot.style.left =
         `calc(50% + ${dotX}px)`;
 
+
     kickDot.style.top =
         `calc(50% + ${dotY}px)`;
 
@@ -1465,7 +1514,7 @@ function updateKickDirection(
 
 
 /* =================================================
-   الضغط على وحدة الركلة
+   بداية الركلة
 ================================================= */
 
 kickControl.addEventListener(
@@ -1487,9 +1536,13 @@ kickControl.addEventListener(
             e.pointerId;
 
 
-        kickControl.setPointerCapture(
-            e.pointerId
-        );
+        try {
+
+            kickControl.setPointerCapture(
+                e.pointerId
+            );
+
+        } catch (error) {}
 
 
         updateKickDirection(
@@ -1502,7 +1555,7 @@ kickControl.addEventListener(
 
 
 /* =================================================
-   تحريك الإصبع داخل الركلة
+   حركة إصبع الركلة
 ================================================= */
 
 kickControl.addEventListener(
@@ -1518,6 +1571,9 @@ kickControl.addEventListener(
             kickPointerId
         )
             return;
+
+
+        e.preventDefault();
 
 
         updateKickDirection(
@@ -1557,6 +1613,10 @@ kickControl.addEventListener(
             );
 
 
+        /*
+           دخول المركز = بدء الشحن
+        */
+
         if (
             distance < 20 &&
             !charging
@@ -1566,6 +1626,11 @@ kickControl.addEventListener(
 
         }
 
+
+        /*
+           الخروج من المركز
+           يوقف الشحن
+        */
 
         if (
             distance >= 20 &&
@@ -1581,7 +1646,7 @@ kickControl.addEventListener(
 
 
 /* =================================================
-   بدء الشحن
+   بدء شحن الركلة
 ================================================= */
 
 function startCharging() {
@@ -1605,7 +1670,7 @@ function startCharging() {
 
 
 /* =================================================
-   شحن القوة
+   شحن الركلة
 ================================================= */
 
 function chargePower() {
@@ -1640,7 +1705,7 @@ function chargePower() {
 
 
 /* =================================================
-   رفع الإصبع
+   رفع إصبع الركلة
 ================================================= */
 
 kickControl.addEventListener(
@@ -1719,6 +1784,10 @@ kickControl.addEventListener(
     }
 );
 
+
+/* =================================================
+   إلغاء الركلة
+================================================= */
 
 kickControl.addEventListener(
     "pointercancel",
@@ -1803,67 +1872,44 @@ function kick() {
 
 
 /* =================================================
-   لوحة المفاتيح
+   منع التكبير والإيماءات
 ================================================= */
 
 document.addEventListener(
-    "keydown",
+    "gesturestart",
     function(e) {
 
-        if (
-            e.key === "ArrowUp"
-        )
-            keys.up = true;
+        e.preventDefault();
 
-
-        if (
-            e.key === "ArrowDown"
-        )
-            keys.down = true;
-
-
-        if (
-            e.key === "ArrowLeft"
-        )
-            keys.left = true;
-
-
-        if (
-            e.key === "ArrowRight"
-        )
-            keys.right = true;
-
+    },
+    {
+        passive: false
     }
 );
 
 
 document.addEventListener(
-    "keyup",
+    "gesturechange",
     function(e) {
 
-        if (
-            e.key === "ArrowUp"
-        )
-            keys.up = false;
+        e.preventDefault();
+
+    },
+    {
+        passive: false
+    }
+);
 
 
-        if (
-            e.key === "ArrowDown"
-        )
-            keys.down = false;
+document.addEventListener(
+    "gestureend",
+    function(e) {
 
+        e.preventDefault();
 
-        if (
-            e.key === "ArrowLeft"
-        )
-            keys.left = false;
-
-
-        if (
-            e.key === "ArrowRight"
-        )
-            keys.right = false;
-
+    },
+    {
+        passive: false
     }
 );
 
