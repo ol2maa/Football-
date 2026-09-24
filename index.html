@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 
 <head>
+
 <meta charset="UTF-8">
 
 <meta name="viewport"
@@ -21,32 +22,45 @@ content="yes">
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+
     -webkit-user-select: none;
     user-select: none;
+
     -webkit-touch-callout: none;
 }
 
 html,
 body {
+
     width: 100%;
     height: 100%;
+
     overflow: hidden;
+
     background: #16803c;
-    font-family: -apple-system,
-                 BlinkMacSystemFont,
-                 "Segoe UI",
-                 sans-serif;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 }
 
 body {
+
     display: flex;
+
     justify-content: center;
     align-items: center;
 }
 
-/* الملعب */
+
+/* =========================
+   الملعب
+========================= */
 
 #game {
+
     position: relative;
 
     width: 100vw;
@@ -57,58 +71,80 @@ body {
     overflow: hidden;
 
     background:
+
         repeating-linear-gradient(
             90deg,
-            rgba(255,255,255,0.035) 0px,
-            rgba(255,255,255,0.035) 50px,
-            rgba(0,0,0,0.035) 50px,
-            rgba(0,0,0,0.035) 100px
+
+            rgba(255,255,255,0.035)
+            0px,
+
+            rgba(255,255,255,0.035)
+            50px,
+
+            rgba(0,0,0,0.035)
+            50px,
+
+            rgba(0,0,0,0.035)
+            100px
         ),
+
         #16803c;
 
     touch-action: none;
 }
 
-/* خطوط الملعب */
 
-.field-line {
-    position: absolute;
-    border: 2px solid rgba(255,255,255,0.75);
-    pointer-events: none;
-}
-
-/* دائرة المنتصف */
-
-.center-circle {
-    position: absolute;
-
-    width: 170px;
-    height: 170px;
-
-    border: 2px solid rgba(255,255,255,0.55);
-    border-radius: 50%;
-
-    left: 50%;
-    top: 50%;
-
-    transform: translate(-50%, -50%);
-}
-
-/* خط المنتصف */
+/* =========================
+   خط المنتصف
+========================= */
 
 .center-line {
+
     position: absolute;
 
     width: 100%;
     height: 2px;
 
-    background: rgba(255,255,255,0.55);
-
     left: 0;
     top: 50%;
+
+    background:
+        rgba(255,255,255,0.55);
+
+    pointer-events: none;
 }
 
-/* اللاعب */
+
+/* =========================
+   دائرة المنتصف
+========================= */
+
+.center-circle {
+
+    position: absolute;
+
+    width: 170px;
+    height: 170px;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    border:
+        2px solid
+        rgba(255,255,255,0.55);
+
+    border-radius: 50%;
+
+    pointer-events: none;
+}
+
+
+/* =========================
+   اللاعب
+========================= */
 
 #player {
 
@@ -117,44 +153,57 @@ body {
     width: 48px;
     height: 48px;
 
-    border-radius: 50%;
-
-    background: #1769ff;
-
-    border: 4px solid white;
-
-    box-shadow:
-        0 4px 10px rgba(0,0,0,0.35);
+    left: 50%;
+    top: 50%;
 
     transform:
         translate(-50%, -50%);
 
+    border-radius: 50%;
+
+    background: #1769ff;
+
+    border:
+        4px solid white;
+
+    box-shadow:
+        0 4px 10px
+        rgba(0,0,0,0.35);
+
     z-index: 10;
 
     display: flex;
+
     justify-content: center;
     align-items: center;
 
     font-size: 25px;
+
+    touch-action: none;
 }
 
-/* الكرة */
+
+/* =========================
+   الكرة
+========================= */
 
 #ball {
 
     position: absolute;
 
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
 
     border-radius: 50%;
 
     background: white;
 
-    border: 2px solid #222;
+    border:
+        2px solid #222;
 
     box-shadow:
-        0 3px 7px rgba(0,0,0,0.35);
+        0 3px 7px
+        rgba(0,0,0,0.35);
 
     transform:
         translate(-50%, -50%);
@@ -162,38 +211,43 @@ body {
     z-index: 9;
 
     display: flex;
+
     justify-content: center;
     align-items: center;
 
-    font-size: 17px;
+    font-size: 18px;
 
-    transition: transform 0.05s linear;
+    pointer-events: none;
 }
 
-/* سهم اتجاه الركلة */
+
+/* =========================
+   سهم الاتجاه
+========================= */
 
 #aim {
 
     position: absolute;
 
-    width: 75px;
+    width: 78px;
     height: 4px;
 
     background: #ffd400;
 
-    transform-origin: left center;
-
-    z-index: 7;
-
     border-radius: 5px;
 
-    box-shadow:
-        0 0 5px rgba(255,215,0,0.8);
+    transform-origin:
+        left center;
+
+    z-index: 8;
 
     pointer-events: none;
+
+    box-shadow:
+        0 0 6px
+        rgba(255,215,0,0.8);
 }
 
-/* رأس السهم */
 
 #aim::after {
 
@@ -207,15 +261,23 @@ body {
     width: 0;
     height: 0;
 
-    border-top: 8px solid transparent;
-    border-bottom: 8px solid transparent;
-    border-left: 14px solid #ffd400;
+    border-top:
+        8px solid transparent;
+
+    border-bottom:
+        8px solid transparent;
+
+    border-left:
+        14px solid #ffd400;
 
     transform:
         translateY(-50%);
 }
 
-/* عداد القوة */
+
+/* =========================
+   عداد القوة
+========================= */
 
 #powerBox {
 
@@ -224,24 +286,30 @@ body {
     top: 18px;
     left: 50%;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     width: 190px;
     height: 18px;
 
-    border: 2px solid white;
+    border:
+        2px solid white;
+
     border-radius: 20px;
 
-    background: rgba(0,0,0,0.35);
+    background:
+        rgba(0,0,0,0.35);
 
     overflow: hidden;
 
     z-index: 30;
 }
 
+
 #power {
 
     width: 0%;
+
     height: 100%;
 
     background: #ffd400;
@@ -249,7 +317,10 @@ body {
     border-radius: 20px;
 }
 
-/* النص */
+
+/* =========================
+   نص القوة
+========================= */
 
 #powerText {
 
@@ -258,7 +329,8 @@ body {
     top: 42px;
     left: 50%;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     color: white;
 
@@ -272,7 +344,10 @@ body {
     white-space: nowrap;
 }
 
-/* زر الركل */
+
+/* =========================
+   زر الركل
+========================= */
 
 #kickButton {
 
@@ -286,7 +361,8 @@ body {
 
     border-radius: 50%;
 
-    border: 4px solid white;
+    border:
+        4px solid white;
 
     background: #e53935;
 
@@ -295,24 +371,23 @@ body {
     font-size: 34px;
 
     display: flex;
+
     justify-content: center;
     align-items: center;
 
     box-shadow:
-        0 5px 12px rgba(0,0,0,0.35);
+        0 5px 12px
+        rgba(0,0,0,0.35);
 
     z-index: 40;
 
     touch-action: none;
 }
 
-#kickButton:active {
 
-    transform: scale(0.93);
-
-}
-
-/* تعليمات */
+/* =========================
+   التعليمات
+========================= */
 
 #info {
 
@@ -321,15 +396,18 @@ body {
     bottom: 20px;
     left: 50%;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     color: white;
 
     font-size: 13px;
 
-    background: rgba(0,0,0,0.35);
+    background:
+        rgba(0,0,0,0.35);
 
-    padding: 7px 14px;
+    padding:
+        7px 14px;
 
     border-radius: 20px;
 
@@ -339,61 +417,61 @@ body {
 }
 
 </style>
+
 </head>
+
 
 <body>
 
 <div id="game">
 
-    <!-- خطوط الملعب -->
-
     <div class="center-line"></div>
 
     <div class="center-circle"></div>
 
-    <!-- اللاعب -->
 
     <div id="player">
         🧍
     </div>
 
-    <!-- الكرة -->
 
     <div id="ball">
         ⚽
     </div>
 
-    <!-- اتجاه الركلة -->
 
     <div id="aim"></div>
 
-    <!-- القوة -->
 
     <div id="powerBox">
+
         <div id="power"></div>
+
     </div>
+
 
     <div id="powerText">
         قوة الركلة
     </div>
 
-    <!-- زر الركل -->
 
     <div id="kickButton">
         👟
     </div>
 
+
     <div id="info">
-        حرّك اللاعب واسحب لتحديد اتجاه الركلة
+        اسحب اللاعب للتحرك • اسحب الملعب لتحديد الركلة
     </div>
 
 </div>
 
+
 <script>
 
-/* =========================
+/* ==================================================
    العناصر
-========================= */
+================================================== */
 
 const game =
     document.getElementById("game");
@@ -414,10 +492,9 @@ const powerBar =
     document.getElementById("power");
 
 
-
-/* =========================
+/* ==================================================
    حجم الملعب
-========================= */
+================================================== */
 
 let gameWidth =
     game.clientWidth;
@@ -426,10 +503,9 @@ let gameHeight =
     game.clientHeight;
 
 
-
-/* =========================
+/* ==================================================
    اللاعب
-========================= */
+================================================== */
 
 let playerX =
     gameWidth / 2;
@@ -438,31 +514,87 @@ let playerY =
     gameHeight / 2;
 
 
-
-/* =========================
+/* ==================================================
    الكرة
-========================= */
+================================================== */
 
 let ballX =
     playerX;
 
 let ballY =
-    playerY - 40;
+    playerY - 42;
 
 
-
-/* =========================
-   اتجاه اللاعب
-========================= */
+/* ==================================================
+   اتجاه الركلة
+================================================== */
 
 let aimAngle =
     -Math.PI / 2;
 
 
+/* ==================================================
+   سرعة اللاعب
+================================================== */
 
-/* =========================
-   حركة اللاعب
-========================= */
+const playerSpeed = 4.5;
+
+
+/* ==================================================
+   الكرة بعد الركلة
+================================================== */
+
+let ballVX = 0;
+let ballVY = 0;
+
+let ballMoving = false;
+
+
+/* ==================================================
+   احتكاك الكرة
+================================================== */
+
+const friction = 0.985;
+
+
+/* ==================================================
+   شحن الركلة
+================================================== */
+
+let charging = false;
+
+let power = 0;
+
+const maxPower = 100;
+
+const powerSpeed = 1.4;
+
+
+/* ==================================================
+   لمس اللاعب
+================================================== */
+
+let playerTouching = false;
+
+let playerPointerId = null;
+
+let lastPlayerTouchX = 0;
+
+let lastPlayerTouchY = 0;
+
+
+/* ==================================================
+   لمس تحديد الاتجاه
+================================================== */
+
+let aiming = false;
+
+let aimPointerId = null;
+
+
+/* ==================================================
+   لوحة المفاتيح
+================================================== */
 
 let keys = {
 
@@ -474,108 +606,9 @@ let keys = {
 };
 
 
-
-let playerSpeed = 4.5;
-
-
-
-/* =========================
-   حركة الكرة
-========================= */
-
-let ballVX = 0;
-
-let ballVY = 0;
-
-let ballMoving = false;
-
-let friction = 0.985;
-
-
-
-/* =========================
-   الركلة
-========================= */
-
-let charging = false;
-
-let power = 0;
-
-let maxPower = 100;
-
-let powerSpeed = 1.4;
-
-
-
-/* =========================
-   لمس الشاشة
-========================= */
-
-let touchStartX = 0;
-
-let touchStartY = 0;
-
-let movingTouch = false;
-
-
-
-/* =========================
-   عرض العناصر
-========================= */
-
-function draw() {
-
-    player.style.left =
-        playerX + "px";
-
-    player.style.top =
-        playerY + "px";
-
-
-    ball.style.left =
-        ballX + "px";
-
-    ball.style.top =
-        ballY + "px";
-
-
-    /*
-       السهم يبدأ من الكرة
-    */
-
-    aim.style.left =
-        ballX + "px";
-
-    aim.style.top =
-        ballY + "px";
-
-
-    aim.style.transform =
-        `rotate(${aimAngle}rad)`;
-
-
-    /*
-       عندما الكرة تتحرك
-       نخفي السهم قليلاً
-    */
-
-    if (ballMoving) {
-
-        aim.style.opacity = "0.25";
-
-    } else {
-
-        aim.style.opacity = "1";
-
-    }
-
-}
-
-
-
-/* =========================
+/* ==================================================
    وضع الكرة أمام اللاعب
-========================= */
+================================================== */
 
 function placeBallWithPlayer() {
 
@@ -596,70 +629,82 @@ function placeBallWithPlayer() {
         playerY +
         Math.sin(aimAngle) *
         distance;
+}
+
+
+/* ==================================================
+   رسم العناصر
+================================================== */
+
+function draw() {
+
+    player.style.left =
+        playerX + "px";
+
+    player.style.top =
+        playerY + "px";
+
+
+    ball.style.left =
+        ballX + "px";
+
+    ball.style.top =
+        ballY + "px";
+
+
+    aim.style.left =
+        ballX + "px";
+
+    aim.style.top =
+        ballY + "px";
+
+
+    aim.style.transform =
+        `rotate(${aimAngle}rad)`;
+
+
+    if (ballMoving) {
+
+        aim.style.opacity = "0.25";
+
+    } else {
+
+        aim.style.opacity = "1";
+
+    }
 
 }
 
 
+/* ==================================================
+   تحريك اللاعب
+================================================== */
 
-/* =========================
-   تحديث اللعبة
-========================= */
+function movePlayer(dx, dy) {
 
-function update() {
-
-
-    /*
-       حركة اللاعب
-    */
-
-    let dx = 0;
-    let dy = 0;
+    const length =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
 
 
-    if (keys.left)
-        dx -= 1;
-
-    if (keys.right)
-        dx += 1;
-
-    if (keys.up)
-        dy -= 1;
-
-    if (keys.down)
-        dy += 1;
+    if (length === 0)
+        return;
 
 
-    /*
-       منع السرعة القطرية
-    */
-
-    if (dx !== 0 || dy !== 0) {
-
-        const length =
-            Math.sqrt(
-                dx * dx +
-                dy * dy
-            );
+    dx /= length;
+    dy /= length;
 
 
-        dx /= length;
-        dy /= length;
+    playerX +=
+        dx * playerSpeed;
+
+    playerY +=
+        dy * playerSpeed;
 
 
-        playerX +=
-            dx * playerSpeed;
-
-        playerY +=
-            dy * playerSpeed;
-
-    }
-
-
-    /*
-       حدود اللاعب
-    */
-
-    const radius = 25;
+    const radius = 24;
 
 
     playerX =
@@ -682,21 +727,49 @@ function update() {
         );
 
 
-    /*
-       إذا الكرة ليست في حركة
-       تبقى أمام اللاعب
-    */
-
     if (!ballMoving) {
 
         placeBallWithPlayer();
 
     }
 
+}
 
-    /*
+
+/* ==================================================
+   تحديث اللعبة
+================================================== */
+
+function update() {
+
+
+    /* ----------------------------
+       لوحة المفاتيح
+    ---------------------------- */
+
+    let dx = 0;
+    let dy = 0;
+
+
+    if (keys.left)
+        dx -= 1;
+
+    if (keys.right)
+        dx += 1;
+
+    if (keys.up)
+        dy -= 1;
+
+    if (keys.down)
+        dy += 1;
+
+
+    movePlayer(dx, dy);
+
+
+    /* ----------------------------
        حركة الكرة
-    */
+    ---------------------------- */
 
     if (ballMoving) {
 
@@ -705,20 +778,32 @@ function update() {
         ballY += ballVY;
 
 
-        /*
-           احتكاك
-        */
-
         ballVX *= friction;
+
         ballVY *= friction;
 
 
-        /*
-           اصطدام الجوانب
-        */
+        const ballRadius = 15;
 
-        const ballRadius = 14;
 
+        /* اليمين */
+
+        if (
+            ballX >
+            gameWidth - ballRadius
+        ) {
+
+            ballX =
+                gameWidth -
+                ballRadius;
+
+            ballVX =
+                -Math.abs(ballVX);
+
+        }
+
+
+        /* اليسار */
 
         if (
             ballX <
@@ -734,25 +819,7 @@ function update() {
         }
 
 
-        if (
-            ballX >
-            gameWidth -
-            ballRadius
-        ) {
-
-            ballX =
-                gameWidth -
-                ballRadius;
-
-            ballVX =
-                -Math.abs(ballVX);
-
-        }
-
-
-        /*
-           اصطدام أعلى وأسفل
-        */
+        /* الأعلى */
 
         if (
             ballY <
@@ -768,10 +835,11 @@ function update() {
         }
 
 
+        /* الأسفل */
+
         if (
             ballY >
-            gameHeight -
-            ballRadius
+            gameHeight - ballRadius
         ) {
 
             ballY =
@@ -784,9 +852,9 @@ function update() {
         }
 
 
-        /*
+        /* ------------------------
            إيقاف الكرة
-        */
+        ------------------------ */
 
         const speed =
             Math.sqrt(
@@ -802,10 +870,6 @@ function update() {
 
             ballMoving = false;
 
-            /*
-               إعادة الكرة قرب اللاعب
-            */
-
             placeBallWithPlayer();
 
         }
@@ -815,36 +879,373 @@ function update() {
 
     draw();
 
+
     requestAnimationFrame(update);
 
 }
 
 
+/* ==================================================
+   بداية سحب اللاعب
+================================================== */
 
-/* =========================
-   بدء شحن الركلة
-========================= */
+player.addEventListener(
+    "pointerdown",
+    function(e) {
 
-function startCharging(e) {
+        e.preventDefault();
 
-    e.preventDefault();
+        e.stopPropagation();
 
 
-    if (ballMoving)
+        if (ballMoving)
+            return;
+
+
+        playerTouching = true;
+
+        playerPointerId =
+            e.pointerId;
+
+
+        lastPlayerTouchX =
+            e.clientX;
+
+        lastPlayerTouchY =
+            e.clientY;
+
+
+        player.setPointerCapture(
+            e.pointerId
+        );
+
+    }
+);
+
+
+/* ==================================================
+   تحريك اللاعب بالإصبع
+================================================== */
+
+player.addEventListener(
+    "pointermove",
+    function(e) {
+
+        if (!playerTouching)
+            return;
+
+
+        if (
+            e.pointerId !==
+            playerPointerId
+        )
+            return;
+
+
+        const dx =
+            e.clientX -
+            lastPlayerTouchX;
+
+
+        const dy =
+            e.clientY -
+            lastPlayerTouchY;
+
+
+        /*
+           نحول حركة الإصبع
+           إلى حركة اللاعب
+        */
+
+        playerX += dx;
+
+        playerY += dy;
+
+
+        const radius = 24;
+
+
+        playerX =
+            Math.max(
+                radius,
+                Math.min(
+                    gameWidth - radius,
+                    playerX
+                )
+            );
+
+
+        playerY =
+            Math.max(
+                radius,
+                Math.min(
+                    gameHeight - radius,
+                    playerY
+                )
+            );
+
+
+        lastPlayerTouchX =
+            e.clientX;
+
+        lastPlayerTouchY =
+            e.clientY;
+
+
+        /*
+           الكرة تتحرك مع اللاعب
+        */
+
+        if (!ballMoving) {
+
+            placeBallWithPlayer();
+
+        }
+
+
+        draw();
+
+    }
+);
+
+
+/* ==================================================
+   انتهاء سحب اللاعب
+================================================== */
+
+function stopPlayerTouch(e) {
+
+    if (
+        e.pointerId !==
+        playerPointerId
+    )
         return;
 
 
-    charging = true;
+    playerTouching = false;
 
-    power = 0;
+    playerPointerId = null;
 
 }
 
 
+player.addEventListener(
+    "pointerup",
+    stopPlayerTouch
+);
 
-/* =========================
+player.addEventListener(
+    "pointercancel",
+    stopPlayerTouch
+);
+
+
+/* ==================================================
+   تحديد اتجاه الركلة
+   من أي مكان في الملعب
+================================================== */
+
+game.addEventListener(
+    "pointerdown",
+    function(e) {
+
+        /*
+           لا نأخذ لمس اللاعب
+        */
+
+        if (
+            e.target === player
+        )
+            return;
+
+
+        /*
+           لا نأخذ زر الركلة
+        */
+
+        if (
+            e.target === kickButton
+        )
+            return;
+
+
+        /*
+           لا نحدد الاتجاه
+           أثناء حركة الكرة
+        */
+
+        if (ballMoving)
+            return;
+
+
+        aiming = true;
+
+        aimPointerId =
+            e.pointerId;
+
+
+        updateAim(
+            e.clientX,
+            e.clientY
+        );
+
+    }
+);
+
+
+/* ==================================================
+   تحديث اتجاه السهم
+================================================== */
+
+game.addEventListener(
+    "pointermove",
+    function(e) {
+
+        if (!aiming)
+            return;
+
+
+        if (
+            e.pointerId !==
+            aimPointerId
+        )
+            return;
+
+
+        updateAim(
+            e.clientX,
+            e.clientY
+        );
+
+    }
+);
+
+
+/* ==================================================
+   حساب اتجاه الركلة
+================================================== */
+
+function updateAim(x, y) {
+
+    /*
+       مركز الكرة
+    */
+
+    const dx =
+        x - ballX;
+
+    const dy =
+        y - ballY;
+
+
+    /*
+       تجاهل لمس قريب جدًا
+    */
+
+    if (
+        Math.abs(dx) < 5 &&
+        Math.abs(dy) < 5
+    )
+        return;
+
+
+    aimAngle =
+        Math.atan2(
+            dy,
+            dx
+        );
+
+
+    if (!ballMoving) {
+
+        placeBallWithPlayer();
+
+    }
+
+
+    draw();
+
+}
+
+
+/* ==================================================
+   انتهاء تحديد الاتجاه
+================================================== */
+
+game.addEventListener(
+    "pointerup",
+    function(e) {
+
+        if (
+            e.pointerId ===
+            aimPointerId
+        ) {
+
+            aiming = false;
+
+            aimPointerId = null;
+
+        }
+
+    }
+);
+
+
+game.addEventListener(
+    "pointercancel",
+    function(e) {
+
+        if (
+            e.pointerId ===
+            aimPointerId
+        ) {
+
+            aiming = false;
+
+            aimPointerId = null;
+
+        }
+
+    }
+);
+
+
+/* ==================================================
+   بداية شحن الركلة
+================================================== */
+
+kickButton.addEventListener(
+    "pointerdown",
+    function(e) {
+
+        e.preventDefault();
+
+        e.stopPropagation();
+
+
+        if (ballMoving)
+            return;
+
+
+        charging = true;
+
+        power = 0;
+
+
+        kickButton.setPointerCapture(
+            e.pointerId
+        );
+
+
+        chargePower();
+
+    }
+);
+
+
+/* ==================================================
    شحن القوة
-========================= */
+================================================== */
 
 function chargePower() {
 
@@ -855,12 +1256,13 @@ function chargePower() {
     power += powerSpeed;
 
 
-    /*
-       حد أقصى
-    */
+    if (power >
+        maxPower) {
 
-    if (power > maxPower)
-        power = maxPower;
+        power =
+            maxPower;
+
+    }
 
 
     powerBar.style.width =
@@ -874,10 +1276,37 @@ function chargePower() {
 }
 
 
+/* ==================================================
+   انتهاء ضغط زر الركلة
+================================================== */
 
-/* =========================
+kickButton.addEventListener(
+    "pointerup",
+    function(e) {
+
+        e.preventDefault();
+
+        kick();
+
+    }
+);
+
+
+kickButton.addEventListener(
+    "pointercancel",
+    function(e) {
+
+        e.preventDefault();
+
+        kick();
+
+    }
+);
+
+
+/* ==================================================
    تنفيذ الركلة
-========================= */
+================================================== */
 
 function kick() {
 
@@ -889,8 +1318,7 @@ function kick() {
 
 
     /*
-       إذا لم يشحن
-       نعطيه قوة بسيطة
+       أقل قوة
     */
 
     if (power < 5)
@@ -898,7 +1326,7 @@ function kick() {
 
 
     /*
-       قوة الركلة
+       السرعة
     */
 
     const minSpeed = 5;
@@ -913,7 +1341,7 @@ function kick() {
 
 
     /*
-       اتجاه الكرة
+       اتجاه الركلة
     */
 
     ballVX =
@@ -929,11 +1357,8 @@ function kick() {
     ballMoving = true;
 
 
-    /*
-       تصفير العداد
-    */
-
     power = 0;
+
 
     powerBar.style.width =
         "0%";
@@ -941,203 +1366,75 @@ function kick() {
 }
 
 
-
-/* =========================
-   زر الركل
-========================= */
-
-kickButton.addEventListener(
-    "pointerdown",
-    startCharging
-);
-
-
-kickButton.addEventListener(
-    "pointerup",
-    kick
-);
-
-
-kickButton.addEventListener(
-    "pointercancel",
-    kick
-);
-
-
-kickButton.addEventListener(
-    "pointerleave",
-    function() {
-
-        if (charging)
-            kick();
-
-    }
-);
-
-
-
-/* =========================
-   تحديد اتجاه الركلة
-========================= */
-
-game.addEventListener(
-    "pointerdown",
-    function(e) {
-
-        /*
-           لا نغير الاتجاه
-           إذا ضغط على زر الركل
-        */
-
-        if (
-            e.target === kickButton
-        )
-            return;
-
-
-        touchStartX =
-            e.clientX;
-
-        touchStartY =
-            e.clientY;
-
-        movingTouch = true;
-
-    }
-);
-
-
-
-game.addEventListener(
-    "pointermove",
-    function(e) {
-
-        if (!movingTouch)
-            return;
-
-
-        /*
-           حساب اتجاه السحب
-        */
-
-        const dx =
-            e.clientX -
-            touchStartX;
-
-
-        const dy =
-            e.clientY -
-            touchStartY;
-
-
-        /*
-           إذا كانت الحركة صغيرة
-           لا نغير الاتجاه
-        */
-
-        if (
-            Math.abs(dx) < 8 &&
-            Math.abs(dy) < 8
-        )
-            return;
-
-
-        aimAngle =
-            Math.atan2(
-                dy,
-                dx
-            );
-
-
-        /*
-           منع اتجاه غريب
-           إذا أردنا لاحقًا
-           يمكن تغييره
-        */
-
-        if (!ballMoving) {
-
-            placeBallWithPlayer();
-
-        }
-
-    }
-);
-
-
-
-game.addEventListener(
-    "pointerup",
-    function() {
-
-        movingTouch = false;
-
-    }
-);
-
-
-
-game.addEventListener(
-    "pointercancel",
-    function() {
-
-        movingTouch = false;
-
-    }
-);
-
-
-
-/* =========================
+/* ==================================================
    لوحة المفاتيح
-   للاختبار على الكمبيوتر
-========================= */
+================================================== */
 
 document.addEventListener(
     "keydown",
     function(e) {
 
-        if (e.key === "ArrowUp")
+        if (
+            e.key === "ArrowUp"
+        )
             keys.up = true;
 
-        if (e.key === "ArrowDown")
+
+        if (
+            e.key === "ArrowDown"
+        )
             keys.down = true;
 
-        if (e.key === "ArrowLeft")
+
+        if (
+            e.key === "ArrowLeft"
+        )
             keys.left = true;
 
-        if (e.key === "ArrowRight")
+
+        if (
+            e.key === "ArrowRight"
+        )
             keys.right = true;
 
     }
 );
 
 
-
 document.addEventListener(
     "keyup",
     function(e) {
 
-        if (e.key === "ArrowUp")
+        if (
+            e.key === "ArrowUp"
+        )
             keys.up = false;
 
-        if (e.key === "ArrowDown")
+
+        if (
+            e.key === "ArrowDown"
+        )
             keys.down = false;
 
-        if (e.key === "ArrowLeft")
+
+        if (
+            e.key === "ArrowLeft"
+        )
             keys.left = false;
 
-        if (e.key === "ArrowRight")
+
+        if (
+            e.key === "ArrowRight"
+        )
             keys.right = false;
 
     }
 );
 
 
-
-/* =========================
+/* ==================================================
    تغيير حجم الشاشة
-========================= */
+================================================== */
 
 window.addEventListener(
     "resize",
@@ -1151,26 +1448,40 @@ window.addEventListener(
 
 
         playerX =
-            Math.min(
-                playerX,
-                gameWidth - 25
+            Math.max(
+                24,
+                Math.min(
+                    gameWidth - 24,
+                    playerX
+                )
             );
 
 
         playerY =
-            Math.min(
-                playerY,
-                gameHeight - 25
+            Math.max(
+                24,
+                Math.min(
+                    gameHeight - 24,
+                    playerY
+                )
             );
+
+
+        if (!ballMoving) {
+
+            placeBallWithPlayer();
+
+        }
 
     }
 );
 
 
-
-/* =========================
+/* ==================================================
    البداية
-========================= */
+================================================== */
+
+placeBallWithPlayer();
 
 draw();
 
@@ -1179,4 +1490,5 @@ update();
 </script>
 
 </body>
+
 </html>
