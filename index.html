@@ -345,6 +345,114 @@ body {
 
 
 /* =========================================
+   وحدة تحكم الحركة
+========================================= */
+
+#movePad {
+
+    position: absolute;
+
+    left: 22px;
+    bottom: 28px;
+
+    width: 150px;
+    height: 150px;
+
+    z-index: 40;
+
+    touch-action: none;
+}
+
+
+/* =========================================
+   أزرار الحركة
+========================================= */
+
+.moveBtn {
+
+    position: absolute;
+
+    width: 50px;
+    height: 50px;
+
+    border-radius: 14px;
+
+    border:
+        3px solid white;
+
+    background:
+        rgba(0,0,0,0.35);
+
+    color: white;
+
+    font-size: 23px;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    box-shadow:
+        0 4px 8px
+        rgba(0,0,0,0.3);
+
+    touch-action: none;
+
+    transition:
+        transform 0.05s ease,
+        background 0.05s ease;
+}
+
+
+/* أعلى */
+
+#moveUp {
+
+    left: 50px;
+    top: 0;
+}
+
+
+/* أسفل */
+
+#moveDown {
+
+    left: 50px;
+    bottom: 0;
+}
+
+
+/* يسار */
+
+#moveLeft {
+
+    left: 0;
+    top: 50px;
+}
+
+
+/* يمين */
+
+#moveRight {
+
+    right: 0;
+    top: 50px;
+}
+
+
+/* ضغط الزر */
+
+.moveBtn.active {
+
+    transform:
+        scale(0.90);
+
+    background:
+        rgba(0,0,0,0.60);
+}
+
+
+/* =========================================
    وحدة تحكم الركلة
 ========================================= */
 
@@ -453,7 +561,7 @@ body {
 
     position: absolute;
 
-    bottom: 20px;
+    bottom: 8px;
     left: 50%;
 
     transform:
@@ -461,19 +569,21 @@ body {
 
     color: white;
 
-    font-size: 13px;
+    font-size: 12px;
 
     background:
         rgba(0,0,0,0.35);
 
     padding:
-        7px 14px;
+        6px 12px;
 
     border-radius: 20px;
 
     z-index: 30;
 
     white-space: nowrap;
+
+    pointer-events: none;
 }
 
 </style>
@@ -515,7 +625,42 @@ body {
     </div>
 
 
-    <!-- وحدة تحكم الركلة -->
+    <!-- =====================================
+         لوحة حركة اللاعب
+    ====================================== -->
+
+    <div id="movePad">
+
+        <div
+            class="moveBtn"
+            id="moveUp">
+            ▲
+        </div>
+
+        <div
+            class="moveBtn"
+            id="moveDown">
+            ▼
+        </div>
+
+        <div
+            class="moveBtn"
+            id="moveLeft">
+            ◀
+        </div>
+
+        <div
+            class="moveBtn"
+            id="moveRight">
+            ▶
+        </div>
+
+    </div>
+
+
+    <!-- =====================================
+         وحدة تحكم الركلة
+    ====================================== -->
 
     <div id="kickControl">
 
@@ -529,7 +674,7 @@ body {
 
 
     <div id="info">
-        اسحب اللاعب للتحرك • استخدم إطار الركلة لتحديد الاتجاه
+        الحركة 8 اتجاهات • يمكنك التحرك والركل معًا
     </div>
 
 </div>
@@ -564,6 +709,23 @@ const kickDot =
 
 const powerBar =
     document.getElementById("power");
+
+
+/* =================================================
+   أزرار الحركة
+================================================= */
+
+const moveUp =
+    document.getElementById("moveUp");
+
+const moveDown =
+    document.getElementById("moveDown");
+
+const moveLeft =
+    document.getElementById("moveLeft");
+
+const moveRight =
+    document.getElementById("moveRight");
 
 
 /* =================================================
@@ -668,14 +830,7 @@ let kickTouching = false;
 
 
 /* =================================================
-   مركز وحدة الركل
-================================================= */
-
-const controlRadius = 42;
-
-
-/* =================================================
-   لوحة المفاتيح
+   مفاتيح الحركة
 ================================================= */
 
 let keys = {
@@ -777,8 +932,12 @@ function movePlayer(dx, dy) {
         return;
 
 
-    dx /= length;
+    /*
+       التطبيع مهم جدًا:
+       الحركة القطرية لا تصبح أسرع
+    */
 
+    dx /= length;
     dy /= length;
 
 
@@ -827,7 +986,6 @@ function movePlayer(dx, dy) {
 
 function update() {
 
-
     let dx = 0;
 
     let dy = 0;
@@ -845,6 +1003,11 @@ function update() {
     if (keys.down)
         dy += 1;
 
+
+    /*
+       هنا بالضبط يتم السماح
+       بالحركة القطرية
+    */
 
     movePlayer(dx, dy);
 
@@ -868,8 +1031,6 @@ function update() {
         const ballRadius = 15;
 
 
-        /* اليمين */
-
         if (
             ballX >
             gameWidth - ballRadius
@@ -885,8 +1046,6 @@ function update() {
         }
 
 
-        /* اليسار */
-
         if (
             ballX <
             ballRadius
@@ -900,8 +1059,6 @@ function update() {
 
         }
 
-
-        /* الأعلى */
 
         if (
             ballY <
@@ -917,8 +1074,6 @@ function update() {
         }
 
 
-        /* الأسفل */
-
         if (
             ballY >
             gameHeight - ballRadius
@@ -933,10 +1088,6 @@ function update() {
 
         }
 
-
-        /* -----------------------------------------
-           إيقاف الكرة
-        ----------------------------------------- */
 
         const speed =
             Math.sqrt(
@@ -969,7 +1120,108 @@ function update() {
 
 
 /* =================================================
-   حركة اللاعب باللمس
+   أزرار الحركة
+   Multi-touch
+================================================= */
+
+function bindMoveButton(button, direction) {
+
+    button.addEventListener(
+        "pointerdown",
+        function(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+
+            keys[direction] = true;
+
+            button.classList.add("active");
+
+
+            /*
+               يمسك الإصبع بالزر
+               حتى لو تحرك قليلًا خارجه
+            */
+
+            try {
+
+                button.setPointerCapture(
+                    e.pointerId
+                );
+
+            } catch (error) {}
+
+        }
+    );
+
+
+    function stop(e) {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+
+        keys[direction] = false;
+
+        button.classList.remove("active");
+
+    }
+
+
+    button.addEventListener(
+        "pointerup",
+        stop
+    );
+
+
+    button.addEventListener(
+        "pointercancel",
+        stop
+    );
+
+
+    button.addEventListener(
+        "lostpointercapture",
+        function() {
+
+            keys[direction] = false;
+
+            button.classList.remove("active");
+
+        }
+    );
+
+}
+
+
+/* =================================================
+   ربط أزرار الحركة
+================================================= */
+
+bindMoveButton(
+    moveUp,
+    "up"
+);
+
+bindMoveButton(
+    moveDown,
+    "down"
+);
+
+bindMoveButton(
+    moveLeft,
+    "left"
+);
+
+bindMoveButton(
+    moveRight,
+    "right"
+);
+
+
+/* =================================================
+   سحب اللاعب مباشرة
 ================================================= */
 
 player.addEventListener(
@@ -1100,7 +1352,6 @@ player.addEventListener(
     stopPlayerTouch
 );
 
-
 player.addEventListener(
     "pointercancel",
     stopPlayerTouch
@@ -1108,7 +1359,7 @@ player.addEventListener(
 
 
 /* =================================================
-   تحديد الاتجاه من وحدة الركلة
+   تحديد اتجاه الركلة
 ================================================= */
 
 function updateKickDirection(
@@ -1145,10 +1396,6 @@ function updateKickDirection(
         );
 
 
-    /*
-       الاتجاه الجديد
-    */
-
     if (distance > 5) {
 
         aimAngle =
@@ -1159,11 +1406,6 @@ function updateKickDirection(
 
     }
 
-
-    /*
-       نحرك النقطة البيضاء
-       داخل إطار التحكم
-    */
 
     const maxDotDistance = 30;
 
@@ -1196,13 +1438,9 @@ function updateKickDirection(
         `calc(50% + ${dotY}px)`;
 
 
-    kickDot.style.opacity = "1";
+    kickDot.style.opacity =
+        "1";
 
-
-    /*
-       إذا أصبح الإصبع قريبًا
-       من المركز
-    */
 
     if (
         distance < 20
@@ -1213,10 +1451,6 @@ function updateKickDirection(
 
     }
 
-
-    /*
-       الكرة تتبع اتجاه السهم
-    */
 
     if (!ballMoving) {
 
@@ -1268,7 +1502,7 @@ kickControl.addEventListener(
 
 
 /* =================================================
-   تحريك الإصبع داخل وحدة الركلة
+   تحريك الإصبع داخل الركلة
 ================================================= */
 
 kickControl.addEventListener(
@@ -1291,10 +1525,6 @@ kickControl.addEventListener(
             e.clientY
         );
 
-
-        /*
-           نحسب المسافة من المركز
-        */
 
         const rect =
             kickControl.getBoundingClientRect();
@@ -1327,11 +1557,6 @@ kickControl.addEventListener(
             );
 
 
-        /*
-           عندما يدخل الإصبع
-           إلى المركز تبدأ الشحن
-        */
-
         if (
             distance < 20 &&
             !charging
@@ -1341,12 +1566,6 @@ kickControl.addEventListener(
 
         }
 
-
-        /*
-           إذا خرج الإصبع من المركز
-           نتوقف عن الشحن
-           لكن لا نركل بعد
-        */
 
         if (
             distance >= 20 &&
@@ -1362,7 +1581,7 @@ kickControl.addEventListener(
 
 
 /* =================================================
-   بدء شحن الركلة
+   بدء الشحن
 ================================================= */
 
 function startCharging() {
@@ -1435,10 +1654,6 @@ kickControl.addEventListener(
             return;
 
 
-        /*
-           هل الإصبع في المركز؟
-        */
-
         const rect =
             kickControl.getBoundingClientRect();
 
@@ -1469,11 +1684,6 @@ kickControl.addEventListener(
                 dy * dy
             );
 
-
-        /*
-           الركلة فقط إذا
-           انتهى اللمس في المركز
-        */
 
         if (
             charging &&
