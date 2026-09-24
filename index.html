@@ -6,6 +6,7 @@
       content="width=device-width,
                initial-scale=1.0,
                maximum-scale=1.0,
+               minimum-scale=1.0,
                user-scalable=no,
                viewport-fit=cover">
 
@@ -19,6 +20,7 @@
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -28,6 +30,8 @@ body {
     overflow: hidden;
     background: #333333;
     touch-action: none;
+    overscroll-behavior: none;
+    position: fixed;
 }
 
 #game {
@@ -35,6 +39,7 @@ body {
     inset: 0;
     background: #333333;
     overflow: hidden;
+    touch-action: none;
 }
 
 /* الدائرة M */
@@ -73,6 +78,7 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 5;
+    touch-action: none;
 }
 
 /* لوحة MIRROR */
@@ -82,10 +88,13 @@ body {
     height: 150px;
     background: rgba(51, 51, 51, 0.9);
     border-radius: 20px;
-    touch-action: manipulation;
+
+    /* منع التكبير والنقر المزدوج */
+    touch-action: none;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* النص MIRROR */
@@ -105,7 +114,7 @@ body {
     pointer-events: none;
 }
 
-/* الأسهم باستخدام SVG لضمان عدم تحويلها لصور */
+/* الأسهم */
 .arrow {
     position: absolute;
     width: 20px;
@@ -114,25 +123,10 @@ body {
     pointer-events: none;
 }
 
-.up {
-    top: 10px;
-    left: 65px;
-}
-
-.down {
-    bottom: 10px;
-    left: 65px;
-}
-
-.left {
-    left: 8px;
-    top: 65px;
-}
-
-.right {
-    right: 8px;
-    top: 65px;
-}
+.up { top: 10px; left: 65px; }
+.down { bottom: 10px; left: 65px; }
+.left { left: 8px; top: 65px; }
+.right { right: 8px; top: 65px; }
 </style>
 </head>
 
@@ -147,7 +141,6 @@ body {
 
             <div id="mirror">MIRROR</div>
 
-            <!-- استخدام SVG بدلاً من الرموز النصية -->
             <svg class="arrow up" viewBox="0 0 24 24"><path d="M12 4l-8 8h16z"/></svg>
             <svg class="arrow down" viewBox="0 0 24 24"><path d="M12 20l8-8H4z"/></svg>
             <svg class="arrow left" viewBox="0 0 24 24"><path d="M4 12l8-8v16z"/></svg>
@@ -159,6 +152,35 @@ body {
 </div>
 
 <script>
+
+// منع التكبير بإصبعين (Pinch Zoom) على مستوى الصفحة بالكامل
+document.addEventListener('touchmove', function(e) {
+    if (e.touches.length > 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// منع التكبير بالنقر المزدوج (Double Tap Zoom)
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+// منع التكبير بالإيماءات (Gesture Events) الخاصة بـ Safari
+document.addEventListener('gesturestart', function(e) {
+    e.preventDefault();
+});
+document.addEventListener('gesturechange', function(e) {
+    e.preventDefault();
+});
+document.addEventListener('gestureend', function(e) {
+    e.preventDefault();
+});
+
 
 const game = document.getElementById("game");
 const circle = document.getElementById("circle");
