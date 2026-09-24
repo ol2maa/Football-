@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
@@ -50,24 +50,14 @@ body {
     align-items: center;
     justify-content: center;
 
-    font-family: -apple-system,
-                 BlinkMacSystemFont,
-                 "Segoe UI",
-                 sans-serif;
-
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 28px;
     font-weight: 900;
     color: black;
 
     z-index: 2;
-
     transform: translate3d(0, 0, 0);
     will-change: transform;
-    
-    /* منع تحديد النص أو التكبير عند اللمس */
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
     pointer-events: none;
 }
 
@@ -82,7 +72,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-
     z-index: 5;
 }
 
@@ -91,14 +80,9 @@ body {
     position: relative;
     width: 150px;
     height: 150px;
-
     background: rgba(51, 51, 51, 0.9);
     border-radius: 20px;
-
-    /* هذه الخاصية تمنع تكبير الشاشة عند اللمس السريع */
     touch-action: manipulation;
-    
-    /* منع تحديد النص */
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
@@ -111,33 +95,22 @@ body {
     top: 0;
     width: 150px;
     height: 150px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     color: white;
-
-    font-family: -apple-system,
-                 BlinkMacSystemFont,
-                 "Segoe UI",
-                 sans-serif;
-
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 18px;
     font-weight: 700;
-
     pointer-events: none;
 }
 
-/* الأسهم */
+/* الأسهم باستخدام SVG لضمان عدم تحويلها لصور */
 .arrow {
     position: absolute;
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 20px;
-    font-weight: bold;
-    line-height: 1;
-
+    width: 20px;
+    height: 20px;
+    fill: white;
     pointer-events: none;
 }
 
@@ -174,10 +147,11 @@ body {
 
             <div id="mirror">MIRROR</div>
 
-            <div class="arrow up">▲</div>
-            <div class="arrow down">▼</div>
-            <div class="arrow left">◀</div>
-            <div class="arrow right">▶</div>
+            <!-- استخدام SVG بدلاً من الرموز النصية -->
+            <svg class="arrow up" viewBox="0 0 24 24"><path d="M12 4l-8 8h16z"/></svg>
+            <svg class="arrow down" viewBox="0 0 24 24"><path d="M12 20l8-8H4z"/></svg>
+            <svg class="arrow left" viewBox="0 0 24 24"><path d="M4 12l8-8v16z"/></svg>
+            <svg class="arrow right" viewBox="0 0 24 24"><path d="M20 12l-8 8V4z"/></svg>
 
         </div>
     </div>
@@ -201,47 +175,33 @@ let activePointerId = null;
 let x = 0;
 let y = 0;
 
-/*
-    تحديد موقع الدائرة في المنتصف
-*/
 function centerCircle() {
     const width = game.clientWidth;
     const height = game.clientHeight;
-
     x = (width - CIRCLE_SIZE) / 2;
     y = (height - CIRCLE_SIZE) / 2;
-
     drawCircle();
 }
 
 function drawCircle() {
-    circle.style.transform =
-        `translate3d(${x}px, ${y}px, 0)`;
+    circle.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 }
 
 function keepInsideScreen() {
     const maxX = game.clientWidth - CIRCLE_SIZE;
     const maxY = game.clientHeight - CIRCLE_SIZE;
-
     if (x < 0) x = 0;
     if (x > maxX) x = maxX;
     if (y < 0) y = 0;
     if (y > maxY) y = maxY;
 }
 
-/*
-    تحديث الاتجاه (يدعم 8 اتجاهات)
-*/
 function updateDirection(clientX, clientY) {
-
     const rect = pad.getBoundingClientRect();
-
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-
     const offsetX = clientX - centerX;
     const offsetY = clientY - centerY;
-
     const deadZone = 12;
     const distance = Math.hypot(offsetX, offsetY);
 
@@ -255,36 +215,22 @@ function updateDirection(clientX, clientY) {
     dy = (offsetY / distance) * SPEED;
 }
 
-/*
-    بداية اللمس
-*/
 pad.addEventListener("pointerdown", function(event) {
     event.preventDefault();
     touching = true;
     activePointerId = event.pointerId;
-
-    if (pad.setPointerCapture) {
-        pad.setPointerCapture(event.pointerId);
-    }
-
+    if (pad.setPointerCapture) pad.setPointerCapture(event.pointerId);
     updateDirection(event.clientX, event.clientY);
 }, { passive: false });
 
-/*
-    تحريك الإصبع
-*/
 pad.addEventListener("pointermove", function(event) {
     if (!touching || event.pointerId !== activePointerId) return;
     event.preventDefault();
     updateDirection(event.clientX, event.clientY);
 }, { passive: false });
 
-/*
-    رفع الإصبع
-*/
 function stopMovement(event) {
     if (activePointerId !== null && event.pointerId !== activePointerId) return;
-
     touching = false;
     activePointerId = null;
     dx = 0;
@@ -301,9 +247,6 @@ pad.addEventListener("lostpointercapture", function() {
     dy = 0;
 });
 
-/*
-    حلقة الحركة
-*/
 function gameLoop() {
     if (touching) {
         x += dx;
