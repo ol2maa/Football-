@@ -831,7 +831,7 @@ let aimAngle =
    2.0
 */
 
-const playerSpeed = 2.0;
+const playerSpeed = 1.0;
 
 
 /* =================================================
@@ -1872,9 +1872,41 @@ function kick() {
 
 
 /* =================================================
-   منع التكبير والإيماءات
+   منع التكبير والإيماءات في iPhone / Safari
 ================================================= */
 
+/*
+   منع Double Tap Zoom
+*/
+let lastTouchEnd = 0;
+
+document.addEventListener(
+    "touchend",
+    function(e) {
+
+        const now =
+            Date.now();
+
+        if (
+            now - lastTouchEnd <= 300
+        ) {
+
+            e.preventDefault();
+
+        }
+
+        lastTouchEnd = now;
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/*
+   منع pinch zoom
+*/
 document.addEventListener(
     "gesturestart",
     function(e) {
@@ -1886,7 +1918,6 @@ document.addEventListener(
         passive: false
     }
 );
-
 
 document.addEventListener(
     "gesturechange",
@@ -1900,9 +1931,59 @@ document.addEventListener(
     }
 );
 
-
 document.addEventListener(
     "gestureend",
+    function(e) {
+
+        e.preventDefault();
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/*
+   منع المتصفح من تحريك الصفحة
+   أثناء لمس الملعب.
+*/
+game.addEventListener(
+    "touchmove",
+    function(e) {
+
+        e.preventDefault();
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/*
+   منع سلوك اللمس الافتراضي
+   داخل الملعب.
+*/
+game.addEventListener(
+    "touchstart",
+    function(e) {
+
+        e.preventDefault();
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/*
+   منع التكبير بالضغط المزدوج
+   في بعض إصدارات Safari.
+*/
+game.addEventListener(
+    "dblclick",
     function(e) {
 
         e.preventDefault();
