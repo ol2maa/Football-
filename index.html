@@ -1430,20 +1430,22 @@ function collideWithPost(
     */
 
     if (
-        velocityAlongNormal < 0
-    ) {
+    velocityAlongNormal < 0
+) {
 
-        ballVX -=
-            2 *
-            velocityAlongNormal *
-            nx;
+    const bounce = 0.55;
 
-        ballVY -=
-            2 *
-            velocityAlongNormal *
-            ny;
+    ballVX -=
+        (1 + bounce) *
+        velocityAlongNormal *
+        nx;
 
-    }
+    ballVY -=
+        (1 + bounce) *
+        velocityAlongNormal *
+        ny;
+
+}
 
 }
 
