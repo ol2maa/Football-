@@ -425,6 +425,8 @@ body {
 
     touch-action: none;
 }
+
+
 /* =========================================
    الزميل
 ========================================= */
@@ -495,17 +497,13 @@ body {
     opacity: 0;
 
     pointer-events: none;
-
 }
 
-
-/* اللاعب المتحكم فقط */
 
 #player.controlled .controlArrow,
 #teammate.controlled .controlArrow {
 
     opacity: 1;
-
 }
 
 
@@ -959,9 +957,9 @@ body {
     class="goal"
     id="topGoal">
 
-    <div class="goalNet"></div>
+        <div class="goalNet"></div>
 
-</div>
+    </div>
 
 
     <!-- =====================================
@@ -972,9 +970,9 @@ body {
     class="goal"
     id="bottomGoal">
 
-    <div class="goalNet"></div>
+        <div class="goalNet"></div>
 
-</div>
+    </div>
 
 
     <!-- =====================================
@@ -995,26 +993,34 @@ body {
     </div>
 
 
+    <!-- =====================================
+         اللاعب الأساسي
+    ====================================== -->
+
     <div id="player">
 
-    <div class="controlArrow">
-        ▼
+        <div class="controlArrow">
+            ▼
+        </div>
+
+        🧍
+
     </div>
 
-    🧍
 
-</div>
+    <!-- =====================================
+         الزميل
+    ====================================== -->
 
+    <div id="teammate">
 
-<div id="teammate">
+        <div class="controlArrow">
+            ▼
+        </div>
 
-    <div class="controlArrow">
-        ▼
+        🧍
+
     </div>
-
-    🧍
-
-</div>
 
 
     <div id="ball">
@@ -1105,6 +1111,7 @@ const game =
 
 const player =
     document.getElementById("player");
+
 const teammate =
     document.getElementById("teammate");
 
@@ -1153,7 +1160,7 @@ let gameHeight =
 
 
 /* =================================================
-   اللاعب
+   اللاعب الأساسي
 ================================================= */
 
 let playerX =
@@ -1161,6 +1168,8 @@ let playerX =
 
 let playerY =
     gameHeight / 2;
+
+
 /* =================================================
    الزميل
 ================================================= */
@@ -1215,6 +1224,7 @@ let ballVX = 0;
 let ballVY = 0;
 
 let ballMoving = false;
+
 let hasBall = true;
 
 
@@ -1290,6 +1300,13 @@ let kickTouching = false;
 
 
 /* =================================================
+   إعدادات اختيار اللاعب
+================================================= */
+
+const playerSwitchMargin = 8;
+
+
+/* =================================================
    الكرة أمام اللاعب المتحكم
 ================================================= */
 
@@ -1303,6 +1320,7 @@ function placeBallWithPlayer() {
 
 
     let controlledX;
+
     let controlledY;
 
 
@@ -1360,43 +1378,9 @@ function updateScore() {
 
 function draw() {
 
-    player.style.left =
-        playerX + "px";
-
-    player.style.top =
-        playerY + "px";
-
-
-    ball.style.left =
-        ballX + "px";
-
-    ball.style.top =
-        ballY + "px";
-
-
-    aim.style.left =
-        ballX + "px";
-
-    aim.style.top =
-        ballY + "px";
-
-
-    aim.style.transform =
-        `rotate(${aimAngle}rad)`;
-
-
-    if (ballMoving) {
-
-        aim.style.opacity =
-            "0.25";
-
-    } else {
-
-        aim.style.opacity =
-            "1";
-
-    }
-    function draw() {
+    /*
+       اللاعب الأساسي
+    */
 
     player.style.left =
         playerX + "px";
@@ -1404,6 +1388,10 @@ function draw() {
     player.style.top =
         playerY + "px";
 
+
+    /*
+       الزميل
+    */
 
     teammate.style.left =
         teammateX + "px";
@@ -1411,6 +1399,10 @@ function draw() {
     teammate.style.top =
         teammateY + "px";
 
+
+    /*
+       سهم اللاعب المتحكم
+    */
 
     player.classList.toggle(
         "controlled",
@@ -1424,12 +1416,20 @@ function draw() {
     );
 
 
+    /*
+       الكرة
+    */
+
     ball.style.left =
         ballX + "px";
 
     ball.style.top =
         ballY + "px";
 
+
+    /*
+       سهم اتجاه الركلة
+    */
 
     aim.style.left =
         ballX + "px";
@@ -1455,6 +1455,102 @@ function draw() {
     }
 
 }
+
+
+/* =================================================
+   المسافة بين نقطتين
+================================================= */
+
+function distanceBetween(
+    x1,
+    y1,
+    x2,
+    y2
+) {
+
+    const dx =
+        x2 - x1;
+
+    const dy =
+        y2 - y1;
+
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
+}
+
+
+/* =================================================
+   اختيار اللاعب الأقرب للكرة
+================================================= */
+
+function updateActivePlayer() {
+
+    /*
+       إذا كانت الكرة مع لاعب،
+       لا نغير اللاعب المتحكم.
+    */
+
+    if (hasBall)
+        return;
+
+
+    const playerDistance =
+        distanceBetween(
+            ballX,
+            ballY,
+            playerX,
+            playerY
+        );
+
+
+    const teammateDistance =
+        distanceBetween(
+            ballX,
+            ballY,
+            teammateX,
+            teammateY
+        );
+
+
+    /*
+       هامش بسيط يمنع التبديل
+       كل إطار عندما تكون المسافة
+       متقاربة جدًا.
+    */
+
+    if (
+        activePlayer === "player"
+    ) {
+
+        if (
+            teammateDistance +
+            playerSwitchMargin <
+            playerDistance
+        ) {
+
+            activePlayer =
+                "teammate";
+
+        }
+
+    } else {
+
+        if (
+            playerDistance +
+            playerSwitchMargin <
+            teammateDistance
+        ) {
+
+            activePlayer =
+                "player";
+
+        }
+
+    }
 
 }
 
@@ -1477,6 +1573,7 @@ function movePlayer(dx, dy) {
 
 
     dx /= length;
+
     dy /= length;
 
 
@@ -1545,6 +1642,11 @@ function movePlayer(dx, dy) {
     }
 
 
+    /*
+       إذا كان اللاعب المتحكم
+       يحمل الكرة، نحرك الكرة معه.
+    */
+
     if (hasBall) {
 
         placeBallWithPlayer();
@@ -1590,12 +1692,14 @@ function collideWithPost(
 
 
     let nx;
+
     let ny;
 
 
     if (distance < 0.001) {
 
         nx = 1;
+
         ny = 0;
 
     } else {
@@ -1631,10 +1735,12 @@ function collideWithPost(
 
         const bounce = 0.55;
 
+
         ballVX -=
             (1 + bounce) *
             velocityAlongNormal *
             nx;
+
 
         ballVY -=
             (1 + bounce) *
@@ -1664,6 +1770,7 @@ function handleGoalPosts() {
         10
     );
 
+
     collideWithPost(
         topRightX,
         10
@@ -1681,6 +1788,7 @@ function handleGoalPosts() {
         bottomLeftX,
         gameHeight - 10
     );
+
 
     collideWithPost(
         bottomRightX,
@@ -1706,6 +1814,7 @@ function checkGoal() {
     const insideGoalWidth =
         ballX - ballRadius >
             goalLeft &&
+
         ballX + ballRadius <
             goalRight;
 
@@ -1765,6 +1874,7 @@ function scoreGoal(
     charging = false;
 
     power = 0;
+
 
     powerBar.style.width =
         "0%";
@@ -1836,29 +1946,36 @@ function resetAfterGoal() {
 
     playerY =
         gameHeight / 2;
+
+
     teammateX =
-    playerX + 75;
+        playerX + 75;
 
-teammateY =
-    playerY;
+    teammateY =
+        playerY;
 
-activePlayer =
-    "player";
 
-hasBall = true;
-
-ballMoving = false;
-
-ballVX = 0;
-ballVY = 0;
+    activePlayer =
+        "player";
 
 
     hasBall = true;
 
     ballMoving = false;
 
+
     ballVX = 0;
+
     ballVY = 0;
+
+
+    charging = false;
+
+    power = 0;
+
+
+    powerBar.style.width =
+        "0%";
 
 
     placeBallWithPlayer();
@@ -1879,56 +1996,42 @@ function tryPickupBall() {
         return;
 
 
-    let controlledX;
-    let controlledY;
-
-
-    if (
-        activePlayer ===
-        "teammate"
-    ) {
-
-        controlledX =
-            teammateX;
-
-        controlledY =
-            teammateY;
-
-    } else {
-
-        controlledX =
-            playerX;
-
-        controlledY =
-            playerY;
-
-    }
-
-
-    const dx =
-        ballX - controlledX;
-
-    const dy =
-        ballY - controlledY;
-
-
-    const distance =
-        Math.sqrt(
-            dx * dx +
-            dy * dy
-        );
-
-
     const pickupDistance = 32;
 
 
+    const playerDistance =
+        distanceBetween(
+            ballX,
+            ballY,
+            playerX,
+            playerY
+        );
+
+
+    const teammateDistance =
+        distanceBetween(
+            ballX,
+            ballY,
+            teammateX,
+            teammateY
+        );
+
+
+    /*
+       لا نلتقط الكرة إلا إذا
+       أحد اللاعبين وصل إليها.
+    */
+
     if (
-        distance <=
+        playerDistance <=
         pickupDistance
     ) {
 
-        hasBall = true;
+        activePlayer =
+            "player";
 
+
+        hasBall = true;
 
         ballMoving = false;
 
@@ -1941,71 +2044,35 @@ function tryPickupBall() {
         placeBallWithPlayer();
 
 
-        draw();
+        return;
 
     }
 
-}
-/* =================================================
-   اختيار اللاعب الأقرب للكرة
-================================================= */
-
-function updateActivePlayer() {
-
-    /*
-       إذا كان أحد اللاعبين حامل الكرة
-       لا نغيّر التحكم عنه.
-    */
-
-    if (hasBall)
-        return;
-
-
-    const playerDX =
-        ballX - playerX;
-
-    const playerDY =
-        ballY - playerY;
-
-
-    const playerDistance =
-        Math.sqrt(
-            playerDX * playerDX +
-            playerDY * playerDY
-        );
-
-
-    const teammateDX =
-        ballX - teammateX;
-
-    const teammateDY =
-        ballY - teammateY;
-
-
-    const teammateDistance =
-        Math.sqrt(
-            teammateDX * teammateDX +
-            teammateDY * teammateDY
-        );
-
 
     if (
-        teammateDistance <
-        playerDistance
+        teammateDistance <=
+        pickupDistance
     ) {
 
         activePlayer =
             "teammate";
 
-    } else {
 
-        activePlayer =
-            "player";
+        hasBall = true;
+
+        ballMoving = false;
+
+
+        ballVX = 0;
+
+        ballVY = 0;
+
+
+        placeBallWithPlayer();
 
     }
 
 }
-
 
 
 /* =================================================
@@ -2017,20 +2084,29 @@ function update() {
     if (!goalScored) {
 
         /*
-   إذا كانت الكرة حرة،
-   نحدد من الأقرب إليها.
-*/
+           إذا كانت الكرة حرة،
+           نحدد الأقرب إليها.
+        */
 
-updateActivePlayer();
-
-
-movePlayer(
-    moveX,
-    moveY
-);
+        updateActivePlayer();
 
 
-tryPickupBall();
+        /*
+           الـJoystick يتحكم
+           في اللاعب المتحكم.
+        */
+
+        movePlayer(
+            moveX,
+            moveY
+        );
+
+
+        /*
+           محاولة التقاط الكرة.
+        */
+
+        tryPickupBall();
 
 
         /* =========================================
@@ -2049,8 +2125,16 @@ tryPickupBall();
             ballVY *= friction;
 
 
+            /*
+               تصادم القائمين.
+            */
+
             handleGoalPosts();
 
+
+            /*
+               فحص الهدف.
+            */
 
             const goal =
                 checkGoal();
@@ -2061,6 +2145,10 @@ tryPickupBall();
                 scoreGoal(goal);
 
             } else {
+
+                /*
+                   حدود الملعب الجانبية.
+                */
 
                 const sideRadius = 15;
 
@@ -2074,6 +2162,7 @@ tryPickupBall();
                     ballX =
                         gameWidth -
                         sideRadius;
+
 
                     ballVX =
                         -Math.abs(
@@ -2091,6 +2180,7 @@ tryPickupBall();
                     ballX =
                         sideRadius;
 
+
                     ballVX =
                         Math.abs(
                             ballVX
@@ -2099,9 +2189,15 @@ tryPickupBall();
                 }
 
 
+                /*
+                   حدود الأعلى والأسفل
+                   خارج منطقة المرمى.
+                */
+
                 const goalLeft =
                     (gameWidth -
                      goalWidth) / 2;
+
 
                 const goalRight =
                     goalLeft +
@@ -2127,6 +2223,7 @@ tryPickupBall();
                     ballY =
                         ballRadius;
 
+
                     ballVY =
                         Math.abs(
                             ballVY
@@ -2146,6 +2243,7 @@ tryPickupBall();
                         gameHeight -
                         ballRadius;
 
+
                     ballVY =
                         -Math.abs(
                             ballVY
@@ -2153,6 +2251,11 @@ tryPickupBall();
 
                 }
 
+
+                /*
+                   إيقاف الكرة عندما تصبح
+                   سرعتها منخفضة جدًا.
+                */
 
                 const speed =
                     Math.sqrt(
@@ -2242,6 +2345,7 @@ function updateMoveJoystick(
             (dx / distance) *
             maxDistance;
 
+
         dy =
             (dy / distance) *
             maxDistance;
@@ -2253,6 +2357,7 @@ function updateMoveJoystick(
 
         moveX =
             dx / maxDistance;
+
 
         moveY =
             dy / maxDistance;
@@ -2394,6 +2499,7 @@ movePad.addEventListener(
 
         moveY = 0;
 
+
         joystickCenter.style.transform =
             "translate(-50%, -50%)";
 
@@ -2453,22 +2559,9 @@ function updateKickDirection(
         );
 
 
-    /*
-       نحفظ المسافة من مركز الزر.
-       هذه القيمة تستخدم فقط
-       لمعرفة متى يبدأ الشحن.
-    */
-
     kickDirectionDistance =
         distance;
 
-
-    /*
-       تحديد اتجاه التسديد.
-
-       لا يوجد هنا أي كود
-       خاص بالشحن.
-    */
 
     if (distance > 3) {
 
@@ -2480,10 +2573,6 @@ function updateKickDirection(
 
     }
 
-
-    /*
-       تحريك النقطة البيضاء.
-    */
 
     const maxDotDistance = 30;
 
@@ -2501,6 +2590,7 @@ function updateKickDirection(
         dotX =
             (dx / distance) *
             maxDotDistance;
+
 
         dotY =
             (dy / distance) *
@@ -2520,11 +2610,6 @@ function updateKickDirection(
     kickDot.style.opacity =
         "1";
 
-
-    /*
-       إذا كان اللاعب حامل الكرة،
-       تتحرك الكرة مع اتجاه التسديد.
-    */
 
     if (
         hasBall &&
@@ -2547,32 +2632,13 @@ function updateKickDirection(
 
 function checkKickCharging() {
 
-    /*
-       إذا بدأ الشحن بالفعل
-       لا نفعل شيئًا.
-    */
-
     if (charging)
         return;
 
 
-    /*
-       إذا لم يكن اللاعب حامل الكرة
-       لا يمكن الشحن.
-    */
-
     if (!hasBall)
         return;
 
-
-    /*
-       إذا تجاوز الإصبع 35px
-       يبدأ الشحن.
-
-       لاحظ:
-       هذه الدالة منفصلة تمامًا
-       عن updateKickDirection().
-    */
 
     if (
         kickDirectionDistance >=
@@ -2622,12 +2688,6 @@ kickControl.addEventListener(
         } catch (error) {}
 
 
-        /*
-           بداية جديدة تمامًا.
-
-           لا يوجد شحن عند الضغط.
-        */
-
         charging = false;
 
         power = 0;
@@ -2642,10 +2702,6 @@ kickControl.addEventListener(
         kickButton.style.transform =
             "scale(1)";
 
-
-        /*
-           نحدد الاتجاه فقط.
-        */
 
         updateKickDirection(
             e.clientX,
@@ -2678,22 +2734,11 @@ kickControl.addEventListener(
         e.preventDefault();
 
 
-        /*
-           أولًا:
-           نحدث اتجاه التسديد.
-        */
-
         updateKickDirection(
             e.clientX,
             e.clientY
         );
 
-
-        /*
-           ثانيًا:
-           بشكل منفصل تمامًا،
-           نفحص هل حان وقت الشحن.
-        */
 
         checkKickCharging();
 
@@ -2793,23 +2838,11 @@ kickControl.addEventListener(
         e.preventDefault();
 
 
-        /*
-           نأخذ آخر اتجاه قبل الركل.
-        */
-
         updateKickDirection(
             e.clientX,
             e.clientY
         );
 
-
-        /*
-           إذا كان الشحن بدأ:
-           ننفذ الركلة.
-
-           إذا لم يبدأ:
-           نلغي العملية.
-        */
 
         if (
             charging &&
@@ -2860,6 +2893,7 @@ kickControl.addEventListener(
 
         power = 0;
 
+
         powerBar.style.width =
             "0%";
 
@@ -2898,8 +2932,10 @@ function kick() {
 
         power = 0;
 
+
         powerBar.style.width =
             "0%";
+
 
         return;
 
@@ -2909,16 +2945,8 @@ function kick() {
     charging = false;
 
 
-    /*
-       اللاعب فقد الكرة.
-    */
-
     hasBall = false;
 
-
-    /*
-       أقل قوة ممكنة.
-    */
 
     if (power < 1)
         power = 1;
@@ -2967,12 +2995,14 @@ function kick() {
 
 let lastTouchEnd = 0;
 
+
 document.addEventListener(
     "touchend",
     function(e) {
 
         const now =
             Date.now();
+
 
         if (
             now - lastTouchEnd <= 300
@@ -2981,6 +3011,7 @@ document.addEventListener(
             e.preventDefault();
 
         }
+
 
         lastTouchEnd = now;
 
@@ -3100,6 +3131,26 @@ window.addEventListener(
                 Math.min(
                     gameHeight - 19,
                     playerY
+                )
+            );
+
+
+        teammateX =
+            Math.max(
+                19,
+                Math.min(
+                    gameWidth - 19,
+                    teammateX
+                )
+            );
+
+
+        teammateY =
+            Math.max(
+                19,
+                Math.min(
+                    gameHeight - 19,
+                    teammateY
                 )
             );
 
