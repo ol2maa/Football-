@@ -1162,14 +1162,6 @@ let gameHeight =
    اللاعبين
 ================================================= */
 
-/*
-   فريقك يهاجم المرمى العلوي.
-
-   forward = مهاجم
-   wing    = جناح
-   defense = مدافع
-*/
-
 const teamPlayers = [
 
     {
@@ -1405,7 +1397,7 @@ const kickChargeDistance = 35;
 
 
 /* =================================================
-   التبديل
+   التبديل اليدوي
 ================================================= */
 
 const manualSwitchMinDistance = 55;
@@ -1422,6 +1414,15 @@ let manualSwitchArmed = true;
 
 
 /* =================================================
+   التبديل التلقائي
+================================================= */
+
+let lastAutoSwitchTime = 0;
+
+const autoSwitchCooldown = 300;
+
+
+/* =================================================
    دالة المسافة
 ================================================= */
 
@@ -1432,13 +1433,17 @@ function distanceBetween(
     y2
 ) {
 
-    const dx = x2 - x1;
-    const dy = y2 - y1;
+    const dx =
+        x2 - x1;
+
+    const dy =
+        y2 - y1;
 
     return Math.sqrt(
         dx * dx +
         dy * dy
     );
+
 }
 
 
@@ -1481,6 +1486,158 @@ function isTeamPlayer(p) {
 
 
 /* =================================================
+   اختيار أقرب لاعب للكرة
+================================================= */
+
+function autoSelectClosestPlayer() {
+
+    if (goalScored)
+        return;
+
+
+    /*
+       إذا الكرة مع أحد لاعبي فريقنا،
+       يصبح هذا اللاعب هو المتحكم.
+    */
+
+    if (
+        ballOwner &&
+        isTeamPlayer(ballOwner)
+    ) {
+
+        const index =
+            teamPlayers.indexOf(
+                ballOwner
+            );
+
+
+        if (
+            index !== -1 &&
+            index !== activePlayerIndex
+        ) {
+
+            activePlayerIndex =
+                index;
+
+            manualControlLock =
+                false;
+
+            manualSwitchArmed =
+                true;
+
+        }
+
+        return;
+
+    }
+
+
+    /*
+       الكرة مع الخصم أو حرة.
+       نبحث عن أقرب لاعب أزرق.
+    */
+
+    const now =
+        Date.now();
+
+
+    if (
+        now -
+        lastAutoSwitchTime <
+        autoSwitchCooldown
+    )
+        return;
+
+
+    let closestIndex = -1;
+
+    let closestDistance =
+        Infinity;
+
+
+    teamPlayers.forEach(
+        function(p, index) {
+
+            const d =
+                distanceBetween(
+                    p.x,
+                    p.y,
+                    ballX,
+                    ballY
+                );
+
+
+            if (
+                d <
+                closestDistance
+            ) {
+
+                closestDistance =
+                    d;
+
+                closestIndex =
+                    index;
+
+            }
+
+        }
+    );
+
+
+    if (
+        closestIndex === -1
+    )
+        return;
+
+
+    const active =
+        getActivePlayer();
+
+
+    const activeDistance =
+        distanceBetween(
+            active.x,
+            active.y,
+            ballX,
+            ballY
+        );
+
+
+    /*
+       إذا اللاعب الجديد أقرب بشكل
+       واضح، ننقل التحكم إليه.
+    */
+
+    if (
+        closestIndex !==
+        activePlayerIndex
+    ) {
+
+        if (
+            closestDistance <
+            activeDistance - 20
+        ) {
+
+            activePlayerIndex =
+                closestIndex;
+
+            lastAutoSwitchTime =
+                now;
+
+            manualControlLock =
+                false;
+
+            manualSwitchArmed =
+                true;
+
+        }
+
+    }
+
+}
+
+
+/* =================================================
    وضع الكرة أمام اللاعب
 ================================================= */
 
@@ -1489,12 +1646,15 @@ function placeBallWithOwner() {
     if (!ballOwner)
         return;
 
+
     const distance = 34;
+
 
     ballX =
         ballOwner.x +
         Math.cos(aimAngle) *
         distance;
+
 
     ballY =
         ballOwner.y +
@@ -1567,6 +1727,7 @@ function draw() {
     aim.style.top =
         ballY + "px";
 
+
     aim.style.transform =
         `rotate(${aimAngle}rad)`;
 
@@ -1611,11 +1772,13 @@ function getRoleBounds(
         if (p.role === "defense") {
 
             return {
+
                 minY:
                     gameHeight * 0.48,
 
                 maxY:
                     gameHeight - 35
+
             };
 
         }
@@ -1624,11 +1787,13 @@ function getRoleBounds(
         if (p.role === "wing") {
 
             return {
+
                 minY:
                     gameHeight * 0.25,
 
                 maxY:
                     gameHeight * 0.78
+
             };
 
         }
@@ -1641,6 +1806,7 @@ function getRoleBounds(
 
             maxY:
                 gameHeight * 0.62
+
         };
 
     }
@@ -1658,6 +1824,7 @@ function getRoleBounds(
 
             maxY:
                 gameHeight * 0.52
+
         };
 
     }
@@ -1672,6 +1839,7 @@ function getRoleBounds(
 
             maxY:
                 gameHeight * 0.75
+
         };
 
     }
@@ -1684,6 +1852,7 @@ function getRoleBounds(
 
         maxY:
             gameHeight - 55
+
     };
 
 }
@@ -1786,7 +1955,8 @@ function getTeamAITarget(p) {
 
             return {
 
-                x: ballX,
+                x:
+                    ballX,
 
                 y:
                     Math.max(
@@ -1805,6 +1975,7 @@ function getTeamAITarget(p) {
                 p.anchorX < 0.5
                     ? -1
                     : 1;
+
 
             return {
 
@@ -1839,9 +2010,7 @@ function getTeamAITarget(p) {
 
 
     /*
-       الكرة حرة:
-       يتحرك كل لاعب نحو الكرة
-       بقدر يناسب دوره.
+       الكرة حرة.
     */
 
     if (!ballOwner) {
@@ -1871,6 +2040,7 @@ function getTeamAITarget(p) {
                 p.anchorX < 0.5
                     ? -1
                     : 1;
+
 
             return {
 
@@ -1942,6 +2112,7 @@ function getTeamAITarget(p) {
                 p.anchorX < 0.5
                     ? -1
                     : 1;
+
 
             let targetX =
                 ballX +
@@ -2166,6 +2337,7 @@ function getOpponentTarget(p) {
                     ? -1
                     : 1;
 
+
             return {
 
                 x:
@@ -2224,6 +2396,7 @@ function getOpponentTarget(p) {
                 p.anchorX < 0.5
                     ? -1
                     : 1;
+
 
             return {
 
@@ -2381,6 +2554,10 @@ function updatePlayersAI() {
 
 function tryManualPlayerSwitch() {
 
+    if (goalScored)
+        return false;
+
+
     /*
        إذا الكرة مع أحد لاعبي فريقنا،
        لا نبدل أثناء امتلاك الكرة.
@@ -2390,10 +2567,6 @@ function tryManualPlayerSwitch() {
         ballOwner &&
         isTeamPlayer(ballOwner)
     )
-        return false;
-
-
-    if (goalScored)
         return false;
 
 
@@ -2409,7 +2582,8 @@ function tryManualPlayerSwitch() {
         0.25
     ) {
 
-        manualSwitchArmed = true;
+        manualSwitchArmed =
+            true;
 
         return false;
 
@@ -2439,70 +2613,18 @@ function tryManualPlayerSwitch() {
         getActivePlayer();
 
 
-    /*
-       إذا كان اتجاه العصا نحو الكرة،
-       نعتبره حركة وليس تبديل.
-    */
-
-    const ballDX =
-        ballX -
-        active.x;
-
-    const ballDY =
-        ballY -
-        active.y;
-
-
-    const ballDistance =
-        Math.sqrt(
-            ballDX * ballDX +
-            ballDY * ballDY
-        );
-
-
-    if (
-        ballDistance > 1
-    ) {
-
-        const ballDirX =
-            ballDX /
-            ballDistance;
-
-        const ballDirY =
-            ballDY /
-            ballDistance;
-
-
-        const ballDot =
-            moveX *
-            ballDirX +
-
-            moveY *
-            ballDirY;
-
-
-        if (
-            ballDot >
-            0.55
-        ) {
-
-            return false;
-
-        }
-
-    }
-
-
-    /*
-       ابحث عن الزميل الموجود
-       في اتجاه العصا.
-    */
-
     let bestIndex = -1;
 
     let bestDot =
         manualSwitchDot;
 
+
+    /*
+       ابحث عن زميل في اتجاه العصا.
+
+       لا يوجد هنا شرط يمنع التبديل
+       بسبب اتجاه الكرة.
+    */
 
     teamPlayers.forEach(
         function(p, index) {
@@ -2784,8 +2906,13 @@ function tryPickupBall() {
         manualControlLock =
             false;
 
+
         manualSwitchArmed =
             true;
+
+
+        lastAutoSwitchTime =
+            Date.now();
 
 
         /*
@@ -2886,8 +3013,7 @@ function aiKickOpponent(p) {
         speed;
 
 
-    ballMoving =
-        true;
+    ballMoving = true;
 
 
     opponentKickCooldown =
@@ -2958,6 +3084,7 @@ function collideWithPost(
         postX +
         nx *
         collisionDistance;
+
 
     ballY =
         postY +
@@ -3236,7 +3363,8 @@ function resetAfterGoal() {
         gameHeight * 0.30;
 
 
-    activePlayerIndex = 0;
+    activePlayerIndex =
+        0;
 
 
     manualControlLock =
@@ -3244,6 +3372,10 @@ function resetAfterGoal() {
 
 
     lastManualSwitchTime =
+        0;
+
+
+    lastAutoSwitchTime =
         0;
 
 
@@ -3325,7 +3457,7 @@ function updateBall() {
 
         /*
            إذا كان الخصم يملك الكرة
-           يتحرك بالكرة معه.
+           تتحرك الكرة معه.
         */
 
         if (
@@ -3518,6 +3650,13 @@ function update() {
         */
 
         updatePlayersAI();
+
+
+        /*
+           اختيار أقرب لاعب للكرة
+        */
+
+        autoSelectClosestPlayer();
 
 
         /*
@@ -4399,6 +4538,7 @@ window.addEventListener(
                         )
                     );
 
+
                 p.y =
                     Math.max(
                         19,
@@ -4423,6 +4563,7 @@ window.addEventListener(
                             p.x
                         )
                     );
+
 
                 p.y =
                     Math.max(
