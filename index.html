@@ -1288,25 +1288,9 @@ const playerSwitchMargin = 8;
    التبديل اليدوي
 ================================================= */
 
-/*
-   أقل مسافة بين اللاعبين حتى نسمح
-   بالتبديل اليدوي.
-*/
-
 const manualSwitchMinDistance = 55;
 
-
-/*
-   قوة اتجاه الـJoystick المطلوبة
-   حتى نعتبر الحركة أمر تبديل.
-*/
-
 const manualSwitchDot = 0.72;
-
-
-/*
-   منع التبديل المتكرر بسرعة.
-*/
 
 const manualSwitchCooldown = 500;
 
@@ -1324,6 +1308,14 @@ let manualControlLock = false;
 */
 
 let lastManualSwitchTime = 0;
+
+
+/*
+   يمنع التبديل عدة مرات أثناء
+   استمرار الضغط على نفس الاتجاه.
+*/
+
+let manualSwitchArmed = true;
 
 
 /* =================================================
@@ -1583,10 +1575,24 @@ function tryManualPlayerSwitch() {
         );
 
 
+    /*
+       إذا ترك المستخدم العصا،
+       نعيد تسليح التبديل.
+    */
+
     if (
         joystickLength <
-        0.65
-    )
+        0.25
+    ) {
+
+        manualSwitchArmed = true;
+
+        return false;
+
+    }
+
+
+    if (!manualSwitchArmed)
         return false;
 
 
@@ -1684,33 +1690,6 @@ function tryManualPlayerSwitch() {
 
 
     /*
-       هنا النقطة المهمة:
-
-       نحن نريد التبديل عندما يحرك
-       المستخدم العصا عكس اتجاه اللاعب
-       الآخر.
-
-       مثال:
-
-       المتحكم تحت
-       اللاعب الآخر فوق
-
-       dy = سالب
-
-       المستخدم يضغط DOWN
-       moveY = موجب
-
-       لذلك نقارن مع الاتجاه المعكوس.
-    */
-
-    const targetX =
-        -dx / distance;
-
-    const targetY =
-        -dy / distance;
-
-
-    /*
        اتجاه الـJoystick.
     */
 
@@ -1721,13 +1700,89 @@ function tryManualPlayerSwitch() {
         moveY / joystickLength;
 
 
+    /* =========================================
+       الأولوية للكرة
+
+       إذا كان المستخدم يحرك اللاعب
+       باتجاه الكرة، فهذا أمر حركة وليس
+       أمر تبديل.
+    ========================================= */
+
+    const ballDX =
+        ballX -
+        activeX;
+
+    const ballDY =
+        ballY -
+        activeY;
+
+
+    const ballDistance =
+        Math.sqrt(
+            ballDX * ballDX +
+            ballDY * ballDY
+        );
+
+
+    if (
+        ballDistance > 1
+    ) {
+
+        const ballDirX =
+            ballDX /
+            ballDistance;
+
+        const ballDirY =
+            ballDY /
+            ballDistance;
+
+
+        const ballDot =
+            joystickX *
+            ballDirX +
+
+            joystickY *
+            ballDirY;
+
+
+        /*
+           إذا كان اتجاه العصا نحو الكرة،
+           نترك اللاعب يتحرك نحوها.
+        */
+
+        if (
+            ballDot >
+            0.55
+        ) {
+
+            return false;
+
+        }
+
+    }
+
+
+    /*
+       الاتجاه المعاكس لمكان اللاعب الآخر.
+    */
+
+    const targetX =
+        -dx / distance;
+
+    const targetY =
+        -dy / distance;
+
+
     /*
        Dot Product.
     */
 
     const dot =
-        joystickX * targetX +
-        joystickY * targetY;
+        joystickX *
+        targetX +
+
+        joystickY *
+        targetY;
 
 
     /*
@@ -1778,6 +1833,15 @@ function tryManualPlayerSwitch() {
         now;
 
 
+    /*
+       لا نسمح بتبديل آخر حتى
+       يترك المستخدم العصا.
+    */
+
+    manualSwitchArmed =
+        false;
+
+
     return true;
 
 }
@@ -1821,11 +1885,43 @@ function updatePlayerAI() {
         return;
 
 
-    let targetY =
-        Math.min(
-            playerY,
-            gameHeight * 0.18
-        );
+    const radius = 19;
+
+
+    /*
+       الهدف الهجومي الطبيعي.
+    */
+
+    const attackTargetY =
+        gameHeight * 0.18;
+
+
+    /*
+       إذا كانت الكرة خلف اللاعب
+       بمسافة واضحة، تصبح الكرة هي
+       الهدف بدل الاستمرار للأمام.
+    */
+
+    let targetY;
+
+
+    if (
+        ballY >
+        playerY + 45
+    ) {
+
+        targetY =
+            ballY;
+
+    } else {
+
+        targetY =
+            Math.min(
+                playerY,
+                attackTargetY
+            );
+
+    }
 
 
     let targetX =
@@ -1851,7 +1947,20 @@ function updatePlayerAI() {
     }
 
 
-    const radius = 19;
+    /*
+       إذا كانت الكرة خلف اللاعب،
+       نقترب منها أفقيًا أيضًا.
+    */
+
+    if (
+        ballY >
+        playerY + 45
+    ) {
+
+        targetX =
+            ballX;
+
+    }
 
 
     targetX =
@@ -1944,15 +2053,38 @@ function updateTeammateAI() {
         return;
 
 
+    const radius = 19;
+
+
     const attackTargetY =
         gameHeight * 0.18;
 
 
-    let targetY =
-        Math.min(
-            teammateY,
-            attackTargetY
-        );
+    /*
+       إذا كانت الكرة خلف الزميل،
+       يتجه إليها مباشرة.
+    */
+
+    let targetY;
+
+
+    if (
+        ballY >
+        teammateY + 45
+    ) {
+
+        targetY =
+            ballY;
+
+    } else {
+
+        targetY =
+            Math.min(
+                teammateY,
+                attackTargetY
+            );
+
+    }
 
 
     let targetX =
@@ -1978,7 +2110,20 @@ function updateTeammateAI() {
     }
 
 
-    const radius = 19;
+    /*
+       عندما تكون الكرة خلف الزميل،
+       نذهب مباشرة باتجاه الكرة.
+    */
+
+    if (
+        ballY >
+        teammateY + 45
+    ) {
+
+        targetX =
+            ballX;
+
+    }
 
 
     targetX =
@@ -2472,6 +2617,10 @@ function resetAfterGoal() {
         0;
 
 
+    manualSwitchArmed =
+        true;
+
+
     hasBall = true;
 
     ballMoving = false;
@@ -2553,6 +2702,10 @@ function tryPickupBall() {
             false;
 
 
+        manualSwitchArmed =
+            true;
+
+
         placeBallWithPlayer();
 
 
@@ -2584,6 +2737,10 @@ function tryPickupBall() {
             false;
 
 
+        manualSwitchArmed =
+            true;
+
+
         placeBallWithPlayer();
 
     }
@@ -2599,6 +2756,11 @@ function update() {
 
     if (!goalScored) {
 
+        /*
+           تحريك اللاعب غير المتحكم
+           بالذكاء الاصطناعي.
+        */
+
         updatePlayersAI();
 
 
@@ -2610,11 +2772,20 @@ function update() {
         updateActivePlayer();
 
 
+        /*
+           اللاعب المتحكم يتحرك دائمًا
+           حسب الـJoystick.
+        */
+
         movePlayer(
             moveX,
             moveY
         );
 
+
+        /*
+           محاولة التقاط الكرة.
+        */
 
         tryPickupBall();
 
@@ -2964,6 +3135,15 @@ function stopMoveJoystick(e) {
     moveY = 0;
 
 
+    /*
+       إعادة تسليح التبديل اليدوي
+       بعد ترك العصا.
+    */
+
+    manualSwitchArmed =
+        true;
+
+
     joystickCenter.style.transform =
         "translate(-50%, -50%)";
 
@@ -2993,6 +3173,10 @@ movePad.addEventListener(
         moveX = 0;
 
         moveY = 0;
+
+
+        manualSwitchArmed =
+            true;
 
 
         joystickCenter.style.transform =
@@ -3454,6 +3638,10 @@ function kick() {
 
     lastManualSwitchTime =
         0;
+
+
+    manualSwitchArmed =
+        true;
 
 
     if (power < 1)
