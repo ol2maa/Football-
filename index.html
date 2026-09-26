@@ -1219,19 +1219,9 @@ const playerSpeed = 1.0;
    سرعة الزميل الهجومية
 ================================================= */
 
-/*
-   السرعة الطبيعية للزميل.
-   أقل قليلًا من اللاعب المتحكم.
-*/
-
 const teammateAttackSpeed =
     0.85;
 
-
-/*
-   عندما يكون فريقنا متأخرًا،
-   يصبح الزميل أسرع قليلًا.
-*/
 
 const teammateBehindSpeed =
     1.05;
@@ -1400,10 +1390,6 @@ function updateScore() {
 
 function draw() {
 
-    /*
-       اللاعب الأساسي
-    */
-
     player.style.left =
         playerX + "px";
 
@@ -1411,20 +1397,12 @@ function draw() {
         playerY + "px";
 
 
-    /*
-       الزميل
-    */
-
     teammate.style.left =
         teammateX + "px";
 
     teammate.style.top =
         teammateY + "px";
 
-
-    /*
-       سهم اللاعب المتحكم
-    */
 
     player.classList.toggle(
         "controlled",
@@ -1438,20 +1416,12 @@ function draw() {
     );
 
 
-    /*
-       الكرة
-    */
-
     ball.style.left =
         ballX + "px";
 
     ball.style.top =
         ballY + "px";
 
-
-    /*
-       سهم اتجاه الركلة
-    */
 
     aim.style.left =
         ballX + "px";
@@ -1538,12 +1508,6 @@ function updateActivePlayer() {
         );
 
 
-    /*
-       هامش بسيط يمنع التبديل
-       كل إطار عندما تكون المسافة
-       متقاربة جدًا.
-    */
-
     if (
         activePlayer === "player"
     ) {
@@ -1578,58 +1542,223 @@ function updateActivePlayer() {
 
 
 /* =================================================
-   ذكاء حركة الزميل
+   ذكاء اللاعبين AI
 ================================================= */
 
-function updateTeammateAI() {
+function updatePlayersAI() {
 
     /*
-       إذا كان الزميل هو اللاعب
-       المتحكم حاليًا، لا نتدخل
-       في حركته.
+       اللاعب الأساسي يصبح AI
+       عندما يكون الزميل هو المتحكم.
     */
 
     if (
-        activePlayer ===
-        "teammate"
-    )
-        return;
+        activePlayer !== "player"
+    ) {
+
+        updatePlayerAI();
+
+    }
 
 
     /*
-       إذا كان هناك هدف أو توقف
-       اللعب، لا نحرك الزميل.
+       الزميل يصبح AI
+       عندما يكون اللاعب الأساسي
+       هو المتحكم.
     */
+
+    if (
+        activePlayer !== "teammate"
+    ) {
+
+        updateTeammateAI();
+
+    }
+
+}
+
+
+/* =================================================
+   AI اللاعب الأساسي
+================================================= */
+
+function updatePlayerAI() {
 
     if (goalScored)
         return;
 
 
     /*
-       الزميل يتقدم دائمًا باتجاه
-       المرمى العلوي.
+       اللاعب السابق يتحرك للأمام
+       لمساندة الهجمة.
 
-       نحاول أن نجعله يتقدم إلى
-       المنطقة الهجومية دون أن
-       يدخل داخل المرمى.
+       لا نرسله إلى نفس مكان
+       اللاعب المتحكم.
     */
 
-    const attackTargetY =
+    let targetY =
+        Math.min(
+            playerY,
+            gameHeight * 0.38
+        );
+
+
+    /*
+       يتحرك أفقيًا مع الكرة
+       مع مسافة جانبية.
+    */
+
+    let targetX =
+        ballX;
+
+
+    const sideOffset = 85;
+
+
+    if (
+        ballX <
+        gameWidth / 2
+    ) {
+
+        targetX =
+            ballX + sideOffset;
+
+    } else {
+
+        targetX =
+            ballX - sideOffset;
+
+    }
+
+
+    /*
+       حدود الملعب.
+    */
+
+    const radius = 19;
+
+
+    targetX =
         Math.max(
-            80,
+            radius,
             Math.min(
-                gameHeight * 0.42,
-                ballY - 80
+                gameWidth - radius,
+                targetX
+            )
+        );
+
+
+    targetY =
+        Math.max(
+            55,
+            Math.min(
+                gameHeight - 55,
+                targetY
             )
         );
 
 
     /*
-       إذا كانت الكرة خلف الزميل،
-       لا نجعله يرجع للخلف.
+       اتجاه الحركة.
+    */
 
-       الزميل لاعب هجومي، لذلك
-       حركته الأساسية إلى الأمام.
+    let dx =
+        targetX -
+        playerX;
+
+    let dy =
+        targetY -
+        playerY;
+
+
+    const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+
+    if (
+        distance < 1
+    )
+        return;
+
+
+    dx /= distance;
+
+    dy /= distance;
+
+
+    /*
+       سرعة AI.
+    */
+
+    const speed =
+        0.78;
+
+
+    playerX +=
+        dx * speed;
+
+    playerY +=
+        dy * speed;
+
+
+    /*
+       منع الخروج من الملعب.
+    */
+
+    playerX =
+        Math.max(
+            radius,
+            Math.min(
+                gameWidth - radius,
+                playerX
+            )
+        );
+
+
+    playerY =
+        Math.max(
+            radius,
+            Math.min(
+                gameHeight - radius,
+                playerY
+            )
+        );
+
+}
+
+
+/* =================================================
+   AI الزميل
+================================================= */
+
+function updateTeammateAI() {
+
+    if (goalScored)
+        return;
+
+
+    /*
+       الهدف الهجومي.
+
+       18% من ارتفاع الملعب يعني
+       أن الزميل سيقترب كثيرًا
+       من مرمى الخصم.
+    */
+
+    const attackTargetY =
+        gameHeight * 0.18;
+
+
+    /*
+       لا نريد أن يرجع الزميل
+       للخلف أثناء الهجمة.
+
+       لذلك يتحرك إلى الأمام
+       فقط حتى يصل للمنطقة
+       الهجومية.
     */
 
     let targetY =
@@ -1640,22 +1769,14 @@ function updateTeammateAI() {
 
 
     /*
-       عندما تكون الكرة في جهة
-       معينة من الملعب، يتحرك
-       الزميل أفقيًا معها أيضًا.
-
-       هذا يجعله يفتح مساحة
-       للتمرير بدل الوقوف في الوسط.
+       الحركة الأفقية تكون مرتبطة
+       بمكان الكرة حتى يفتح
+       مساحة للتمرير.
     */
 
     let targetX =
         ballX;
 
-
-    /*
-       تقليل مقدار الحركة الأفقية
-       حتى لا يلتصق الزميل بالكرة.
-    */
 
     const sideOffset = 70;
 
@@ -1677,7 +1798,7 @@ function updateTeammateAI() {
 
 
     /*
-       الحدود الآمنة.
+       حدود الملعب.
     */
 
     const radius = 19;
@@ -1724,8 +1845,7 @@ function updateTeammateAI() {
 
 
     if (
-        distance <
-        1
+        distance < 1
     )
         return;
 
@@ -1736,9 +1856,7 @@ function updateTeammateAI() {
 
 
     /*
-       إذا كان فريقنا متأخرًا
-       في النتيجة، يصبح الزميل
-       أسرع قليلًا.
+       سرعة الزميل AI.
     */
 
     let speed =
@@ -2252,8 +2370,7 @@ function tryPickupBall() {
 
 
     /*
-       لا نلتقط الكرة إلا إذا
-       أحد اللاعبين وصل إليها.
+       اللاعب الأساسي يلتقط الكرة.
     */
 
     if (
@@ -2282,6 +2399,10 @@ function tryPickupBall() {
 
     }
 
+
+    /*
+       الزميل يلتقط الكرة.
+    */
 
     if (
         teammateDistance <=
@@ -2318,14 +2439,13 @@ function update() {
     if (!goalScored) {
 
         /*
-           ذكاء الزميل.
+           ذكاء اللاعبين.
 
-           يجب أن يعمل قبل حركة
-           اللاعب المتحكم حتى يكون
-           الزميل مستقلًا عنه.
+           اللاعب غير المتحكم
+           يتحرك بواسطة AI.
         */
 
-        updateTeammateAI();
+        updatePlayersAI();
 
 
         /*
