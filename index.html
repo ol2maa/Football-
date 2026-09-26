@@ -2516,11 +2516,21 @@ function updateOpponentAI() {
                من مسافة بعيدة.
             */
 
-            if (
-                ballOwner &&
-                ballOwner !== p &&
-                p.role === "wing"
-            ) {
+            /*
+   الأجنحة تحافظ على مراكزها
+   ولا تتجمع مع بقية الفريق حول الكرة
+*/
+
+if (p.role === "wing") {
+
+    moveAITo(
+        p,
+        target.x,
+        target.y
+    );
+
+    return;
+}
 
                 const d =
                     distanceBetween(
