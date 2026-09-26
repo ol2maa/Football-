@@ -2055,7 +2055,21 @@ movePad.addEventListener(
 
 
 /* =================================================
-   تحديد اتجاه الركلة
+   إعدادات التسديد
+================================================= */
+
+const kickChargeDistance = 35;
+
+
+/* =================================================
+   حالة التسديد
+================================================= */
+
+let kickDirectionDistance = 0;
+
+
+/* =================================================
+   تحديد اتجاه الركلة فقط
 ================================================= */
 
 function updateKickDirection(
@@ -2093,8 +2107,20 @@ function updateKickDirection(
 
 
     /*
-       اتجاه التسديد يتبع الإصبع
-       بمجرد تحريكه.
+       نحفظ المسافة من مركز الزر.
+       هذه القيمة تستخدم فقط
+       لمعرفة متى يبدأ الشحن.
+    */
+
+    kickDirectionDistance =
+        distance;
+
+
+    /*
+       تحديد اتجاه التسديد.
+
+       لا يوجد هنا أي كود
+       خاص بالشحن.
     */
 
     if (distance > 3) {
@@ -2109,13 +2135,14 @@ function updateKickDirection(
 
 
     /*
-       تحريك النقطة البيضاء
+       تحريك النقطة البيضاء.
     */
 
     const maxDotDistance = 30;
 
 
     let dotX = dx;
+
     let dotY = dy;
 
 
@@ -2148,8 +2175,8 @@ function updateKickDirection(
 
 
     /*
-       إذا كانت الكرة مع اللاعب
-       نضعها في اتجاه التسديد.
+       إذا كان اللاعب حامل الكرة،
+       تتحرك الكرة مع اتجاه التسديد.
     */
 
     if (
@@ -2164,19 +2191,45 @@ function updateKickDirection(
 
     draw();
 
+}
+
+
+/* =================================================
+   فحص هل حان وقت بدء الشحن
+================================================= */
+
+function checkKickCharging() {
 
     /*
-       يبدأ الشحن فقط بعد أن
-       يتحرك الإصبع مسافة 20px.
+       إذا بدأ الشحن بالفعل
+       لا نفعل شيئًا.
     */
 
-    const chargingDistance = 20;
+    if (charging)
+        return;
 
+
+    /*
+       إذا لم يكن اللاعب حامل الكرة
+       لا يمكن الشحن.
+    */
+
+    if (!hasBall)
+        return;
+
+
+    /*
+       إذا تجاوز الإصبع 35px
+       يبدأ الشحن.
+
+       لاحظ:
+       هذه الدالة منفصلة تمامًا
+       عن updateKickDirection().
+    */
 
     if (
-        kickTouching &&
-        !charging &&
-        distance >= chargingDistance
+        kickDirectionDistance >=
+        kickChargeDistance
     ) {
 
         startCharging();
@@ -2199,17 +2252,9 @@ kickControl.addEventListener(
         e.stopPropagation();
 
 
-        /*
-           لا يمكن الركل بدون الكرة.
-        */
-
         if (!hasBall)
             return;
 
-
-        /*
-           لا يمكن الركل والكرة تتحرك.
-        */
 
         if (ballMoving)
             return;
@@ -2231,18 +2276,29 @@ kickControl.addEventListener(
 
 
         /*
-           نبدأ بتحديد الاتجاه فقط.
+           بداية جديدة تمامًا.
 
-           الشحن لا يبدأ هنا.
+           لا يوجد شحن عند الضغط.
         */
 
         charging = false;
 
         power = 0;
 
+        kickDirectionDistance = 0;
+
+
         powerBar.style.width =
             "0%";
 
+
+        kickButton.style.transform =
+            "scale(1)";
+
+
+        /*
+           نحدد الاتجاه فقط.
+        */
 
         updateKickDirection(
             e.clientX,
@@ -2276,14 +2332,23 @@ kickControl.addEventListener(
 
 
         /*
-           الاتجاه يتبع الإصبع
-           باستمرار.
+           أولًا:
+           نحدث اتجاه التسديد.
         */
 
         updateKickDirection(
             e.clientX,
             e.clientY
         );
+
+
+        /*
+           ثانيًا:
+           بشكل منفصل تمامًا،
+           نفحص هل حان وقت الشحن.
+        */
+
+        checkKickCharging();
 
     }
 );
@@ -2349,10 +2414,6 @@ function chargePower() {
         power + "%";
 
 
-    /*
-       نستمر حتى تصل القوة إلى 100%.
-    */
-
     if (
         power <
         maxPower
@@ -2386,7 +2447,7 @@ kickControl.addEventListener(
 
 
         /*
-           نأخذ آخر اتجاه قبل التسديد.
+           نأخذ آخر اتجاه قبل الركل.
         */
 
         updateKickDirection(
@@ -2396,8 +2457,11 @@ kickControl.addEventListener(
 
 
         /*
-           إذا بدأ الشحن:
-           التسديد عند رفع الإصبع.
+           إذا كان الشحن بدأ:
+           ننفذ الركلة.
+
+           إذا لم يبدأ:
+           نلغي العملية.
         */
 
         if (
@@ -2408,11 +2472,6 @@ kickControl.addEventListener(
             kick();
 
         } else {
-
-            /*
-               رفع الإصبع قبل 20px
-               يعني إلغاء العملية.
-            */
 
             charging = false;
 
@@ -2435,6 +2494,8 @@ kickControl.addEventListener(
         kickTouching = false;
 
         kickPointerId = null;
+
+        kickDirectionDistance = 0;
 
     }
 );
@@ -2468,6 +2529,8 @@ kickControl.addEventListener(
 
         kickPointerId = null;
 
+        kickDirectionDistance = 0;
+
     }
 );
 
@@ -2499,11 +2562,15 @@ function kick() {
     charging = false;
 
 
+    /*
+       اللاعب فقد الكرة.
+    */
+
     hasBall = false;
 
 
     /*
-       أقل قوة ممكنة = 1
+       أقل قوة ممكنة.
     */
 
     if (power < 1)
