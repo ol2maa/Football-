@@ -174,15 +174,11 @@ body {
 }
 
 
-/* مرمى الأعلى */
-
 #topGoal {
 
     top: 0;
 }
 
-
-/* مرمى الأسفل */
 
 #bottomGoal {
 
@@ -248,16 +244,12 @@ body {
 }
 
 
-/* القائم الأيسر */
-
 .goalPost.left {
 
     left: 0;
     top: 0;
 }
 
-
-/* القائم الأيمن */
 
 .goalPost.right {
 
@@ -267,7 +259,7 @@ body {
 
 
 /* =========================================
-   شريط المرمى العلوي
+   شريط المرمى
 ========================================= */
 
 .goalCrossbar {
@@ -290,15 +282,12 @@ body {
 }
 
 
-/* =========================================
-   عكس المرمى السفلي
-========================================= */
-
 #bottomGoal .goalPost {
 
     top: auto;
     bottom: 0;
 }
+
 
 #bottomGoal .goalCrossbar {
 
@@ -1153,14 +1142,6 @@ let goalTimer = null;
    أبعاد المرمى
 ================================================= */
 
-/*
-   المسافة بين القائمين.
-
-   يجب أن تتجاوز الكرة
-   هذه المنطقة بالكامل
-   قبل أن تعتبر هدفًا.
-*/
-
 const goalWidth = 190;
 
 const postWidth = 12;
@@ -1225,6 +1206,7 @@ function updateScore() {
 
     scoreElement.textContent =
         `${topScore} - ${bottomScore}`;
+
 }
 
 
@@ -1327,9 +1309,9 @@ function movePlayer(dx, dy) {
 
     if (hasBall) {
 
-    placeBallWithPlayer();
+        placeBallWithPlayer();
 
-}
+    }
 
 }
 
@@ -1369,10 +1351,6 @@ function collideWithPost(
         return;
 
 
-    /*
-       منع الكرة من الدخول داخل القائم.
-    */
-
     let nx;
     let ny;
 
@@ -1404,38 +1382,28 @@ function collideWithPost(
         collisionDistance;
 
 
-    /*
-       انعكاس سرعة الكرة
-       حسب سطح الاصطدام.
-    */
-
     const velocityAlongNormal =
         ballVX * nx +
         ballVY * ny;
 
 
-    /*
-       إذا كانت الكرة تتحرك
-       باتجاه القائم فقط نعكسها.
-    */
-
     if (
-    velocityAlongNormal < 0
-) {
+        velocityAlongNormal < 0
+    ) {
 
-    const bounce = 0.55;
+        const bounce = 0.55;
 
-    ballVX -=
-        (1 + bounce) *
-        velocityAlongNormal *
-        nx;
+        ballVX -=
+            (1 + bounce) *
+            velocityAlongNormal *
+            nx;
 
-    ballVY -=
-        (1 + bounce) *
-        velocityAlongNormal *
-        ny;
+        ballVY -=
+            (1 + bounce) *
+            velocityAlongNormal *
+            ny;
 
-}
+    }
 
 }
 
@@ -1446,20 +1414,12 @@ function collideWithPost(
 
 function handleGoalPosts() {
 
-    /*
-       مرمى الأعلى
-    */
-
     const topLeftX =
         (gameWidth - goalWidth) / 2;
 
     const topRightX =
         topLeftX + goalWidth;
 
-
-    /*
-       القائمان عند خط المرمى
-    */
 
     collideWithPost(
         topLeftX,
@@ -1471,10 +1431,6 @@ function handleGoalPosts() {
         10
     );
 
-
-    /*
-       مرمى الأسفل
-    */
 
     const bottomLeftX =
         topLeftX;
@@ -1502,20 +1458,12 @@ function handleGoalPosts() {
 
 function checkGoal() {
 
-    /*
-       حدود منطقة المرمى
-    */
-
     const goalLeft =
         (gameWidth - goalWidth) / 2;
 
     const goalRight =
         goalLeft + goalWidth;
 
-
-    /*
-       هل مركز الكرة داخل عرض المرمى؟
-    */
 
     const insideGoalWidth =
         ballX - ballRadius >
@@ -1528,16 +1476,6 @@ function checkGoal() {
         return false;
 
 
-    /*
-       الهدف في الأعلى.
-
-       الكرة يجب أن تختفي
-       بالكامل خلف الشاشة.
-
-       لذلك مركزها يجب أن يصبح
-       أقل من - نصف قطر الكرة.
-    */
-
     if (
         ballY <
         -ballRadius
@@ -1547,10 +1485,6 @@ function checkGoal() {
 
     }
 
-
-    /*
-       الهدف في الأسفل.
-    */
 
     if (
         ballY >
@@ -1617,10 +1551,6 @@ function scoreGoal(
     );
 
 
-    /*
-       إخفاء الكرة لحظة الهدف.
-    */
-
     ball.style.opacity =
         "0";
 
@@ -1628,11 +1558,6 @@ function scoreGoal(
     aim.style.opacity =
         "0";
 
-
-    /*
-       بعد ثانية ونصف
-       نعيد اللعب.
-    */
 
     clearTimeout(goalTimer);
 
@@ -1668,10 +1593,6 @@ function resetAfterGoal() {
         "1";
 
 
-    /*
-       اللاعب يرجع للمنتصف.
-    */
-
     playerX =
         gameWidth / 2;
 
@@ -1679,9 +1600,13 @@ function resetAfterGoal() {
         gameHeight / 2;
 
 
-    /*
-       نضع الكرة أمام اللاعب.
-    */
+    hasBall = true;
+
+    ballMoving = false;
+
+    ballVX = 0;
+    ballVY = 0;
+
 
     placeBallWithPlayer();
 
@@ -1689,7 +1614,9 @@ function resetAfterGoal() {
     draw();
 
 }
-    /* =================================================
+
+
+/* =================================================
    التقاط الكرة
 ================================================= */
 
@@ -1754,6 +1681,8 @@ function update() {
             moveX,
             moveY
         );
+
+
         tryPickupBall();
 
 
@@ -1762,13 +1691,6 @@ function update() {
         ========================================= */
 
         if (ballMoving) {
-
-            const oldBallX =
-                ballX;
-
-            const oldBallY =
-                ballY;
-
 
             ballX += ballVX;
 
@@ -1780,16 +1702,8 @@ function update() {
             ballVY *= friction;
 
 
-            /*
-               تصادم القائمين
-            */
-
             handleGoalPosts();
 
-
-            /*
-               فحص الهدف بعد التصادم.
-            */
 
             const goal =
                 checkGoal();
@@ -1800,13 +1714,6 @@ function update() {
                 scoreGoal(goal);
 
             } else {
-
-                /*
-                   حدود الملعب الجانبية فقط.
-
-                   الأعلى والأسفل لا نمنع الكرة
-                   منهما لأن المرمى موجود هناك.
-                */
 
                 const sideRadius = 15;
 
@@ -1845,14 +1752,6 @@ function update() {
                 }
 
 
-                /*
-                   إذا وصلت الكرة للأعلى
-                   أو الأسفل خارج فتحة المرمى
-                   نرجعها إلى الملعب.
-
-                   هذا يعني أنها لم تدخل المرمى.
-                */
-
                 const goalLeft =
                     (gameWidth -
                      goalWidth) / 2;
@@ -1872,10 +1771,6 @@ function update() {
                     goalRight;
 
 
-                /*
-                   أعلى الملعب
-                */
-
                 if (
                     ballY <
                     ballRadius &&
@@ -1892,10 +1787,6 @@ function update() {
 
                 }
 
-
-                /*
-                   أسفل الملعب
-                */
 
                 if (
                     ballY >
@@ -1927,17 +1818,17 @@ function update() {
 
 
                 if (
-    speed <
-    0.15
-) {
+                    speed <
+                    0.15
+                ) {
 
-    ballVX = 0;
+                    ballVX = 0;
 
-    ballVY = 0;
+                    ballVY = 0;
 
-    ballMoving = false;
+                    ballMoving = false;
 
-}
+                }
 
             }
 
@@ -1955,7 +1846,7 @@ function update() {
 
 
 /* =================================================
-   حساب اتجاه Joystick
+   حساب اتجاه Joystick الحركة
 ================================================= */
 
 function updateMoveJoystick(
@@ -2201,7 +2092,13 @@ function updateKickDirection(
         );
 
 
-    if (distance > 5) {
+    /*
+       الاتجاه يتبع الإصبع
+       بمجرد أن يتحرك خارج
+       المنطقة الصغيرة حول المركز.
+    */
+
+    if (distance > 3) {
 
         aimAngle =
             Math.atan2(
@@ -2211,6 +2108,11 @@ function updateKickDirection(
 
     }
 
+
+    /*
+       تحريك النقطة البيضاء
+       مع الإصبع.
+    */
 
     const maxDotDistance = 30;
 
@@ -2248,17 +2150,16 @@ function updateKickDirection(
         "1";
 
 
+    /*
+       إذا كان اللاعب حامل الكرة
+       تبقى الكرة أمامه في اتجاه
+       التسديد الجديد.
+    */
+
     if (
-        distance < 20
+        hasBall &&
+        !ballMoving
     ) {
-
-        kickDot.style.opacity =
-            "0";
-
-    }
-
-
-    if (!ballMoving) {
 
         placeBallWithPlayer();
 
@@ -2271,7 +2172,7 @@ function updateKickDirection(
 
 
 /* =================================================
-   بداية الركلة
+   بداية الركلة الجديدة
 ================================================= */
 
 kickControl.addEventListener(
@@ -2282,6 +2183,19 @@ kickControl.addEventListener(
 
         e.stopPropagation();
 
+
+        /*
+           لا يمكن التسديد بدون الكرة.
+        */
+
+        if (!hasBall)
+            return;
+
+
+        /*
+           الكرة لا يمكن ركلها
+           وهي تتحرك.
+        */
 
         if (ballMoving)
             return;
@@ -2302,10 +2216,23 @@ kickControl.addEventListener(
         } catch (error) {}
 
 
+        /*
+           نحدد الاتجاه أولًا
+           حسب مكان الإصبع.
+        */
+
         updateKickDirection(
             e.clientX,
             e.clientY
         );
+
+
+        /*
+           يبدأ الشحن مباشرة
+           من لحظة الضغط.
+        */
+
+        startCharging();
 
     }
 );
@@ -2333,61 +2260,15 @@ kickControl.addEventListener(
         e.preventDefault();
 
 
+        /*
+           الاتجاه يتبع الإصبع
+           أثناء الشحن.
+        */
+
         updateKickDirection(
             e.clientX,
             e.clientY
         );
-
-
-        const rect =
-            kickControl.getBoundingClientRect();
-
-
-        const centerX =
-            rect.left +
-            rect.width / 2;
-
-
-        const centerY =
-            rect.top +
-            rect.height / 2;
-
-
-        const dx =
-            e.clientX -
-            centerX;
-
-
-        const dy =
-            e.clientY -
-            centerY;
-
-
-        const distance =
-            Math.sqrt(
-                dx * dx +
-                dy * dy
-            );
-
-
-        if (
-            distance < 20 &&
-            !charging
-        ) {
-
-            startCharging();
-
-        }
-
-
-        if (
-            distance >= 20 &&
-            charging
-        ) {
-
-            charging = false;
-
-        }
 
     }
 );
@@ -2400,6 +2281,14 @@ kickControl.addEventListener(
 function startCharging() {
 
     if (ballMoving)
+        return;
+
+
+    if (!hasBall)
+        return;
+
+
+    if (charging)
         return;
 
 
@@ -2467,40 +2356,32 @@ kickControl.addEventListener(
             return;
 
 
-        const rect =
-            kickControl.getBoundingClientRect();
+        e.preventDefault();
 
 
-        const centerX =
-            rect.left +
-            rect.width / 2;
+        /*
+           تحديث الاتجاه للمرة الأخيرة
+           قبل تنفيذ التسديدة.
+        */
+
+        updateKickDirection(
+            e.clientX,
+            e.clientY
+        );
 
 
-        const centerY =
-            rect.top +
-            rect.height / 2;
+        /*
+           بمجرد رفع الإصبع
+           يتم تنفيذ الركلة.
 
-
-        const dx =
-            e.clientX -
-            centerX;
-
-
-        const dy =
-            e.clientY -
-            centerY;
-
-
-        const distance =
-            Math.sqrt(
-                dx * dx +
-                dy * dy
-            );
-
+           لا يهم بعد الآن
+           هل الإصبع في المركز
+           أو على الحافة.
+        */
 
         if (
             charging &&
-            distance < 20
+            hasBall
         ) {
 
             kick();
@@ -2575,12 +2456,41 @@ function kick() {
         return;
 
 
+    if (!hasBall) {
+
+        charging = false;
+
+        power = 0;
+
+        powerBar.style.width =
+            "0%";
+
+        return;
+
+    }
+
+
     charging = false;
+
+
+    /*
+       اللاعب فقد الكرة
+       لأنها أصبحت في الملعب.
+    */
+
     hasBall = false;
 
 
-    if (power < 5)
-        power = 5;
+    /*
+       الحد الأدنى الحقيقي للقوة
+       أصبح 1 بدل 5.
+
+       هذا يسمح بتجربة
+       الركلات الضعيفة جدًا.
+    */
+
+    if (power < 1)
+        power = 1;
 
 
     const minSpeed = 3;
@@ -2763,7 +2673,10 @@ window.addEventListener(
             );
 
 
-        if (!ballMoving) {
+        if (
+            hasBall &&
+            !ballMoving
+        ) {
 
             placeBallWithPlayer();
 
