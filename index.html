@@ -1836,24 +1836,56 @@ function getRoleBounds(p) {
     }
 
 
-    /*
+        /*
        الخصم يهاجم للأسفل.
     */
 
-    if (p.role === "defense") {
+
+    /*
+       المدافع الثابت
+       يبقى قريبًا من مرماه
+       ولا يتقدم إلى الوسط.
+    */
+
+    if (p.defensive === true) {
 
         return {
 
             minY:
-                35,
+                gameHeight * 0.76,
 
             maxY:
-                gameHeight * 0.50
+                gameHeight - 35
 
         };
 
     }
 
+
+    /*
+       مدافع بناء الهجمة
+       يتحرك بين الدفاع والوسط.
+    */
+
+    if (p.role === "builder") {
+
+        return {
+
+            minY:
+                gameHeight * 0.40,
+
+            maxY:
+                gameHeight * 0.76
+
+        };
+
+    }
+
+
+    /*
+       الأجنحة
+       تبقى واسعة.
+    */
 
     if (p.role === "wing") {
 
@@ -1870,13 +1902,37 @@ function getRoleBounds(p) {
     }
 
 
+    /*
+       أي لاعب دفاعي قديم
+       كاحتياط فقط.
+    */
+
+    if (p.role === "defense") {
+
+        return {
+
+            minY:
+                gameHeight * 0.55,
+
+            maxY:
+                gameHeight - 35
+
+        };
+
+    }
+
+
+    /*
+       المهاجم.
+    */
+
     return {
 
         minY:
-            gameHeight * 0.38,
+            gameHeight * 0.12,
 
         maxY:
-            gameHeight - 55
+            gameHeight * 0.40
 
     };
 
