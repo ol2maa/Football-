@@ -425,6 +425,88 @@ body {
 
     touch-action: none;
 }
+/* =========================================
+   الزميل
+========================================= */
+
+#teammate {
+
+    position: absolute;
+
+    width: 38px;
+    height: 38px;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: #1769ff;
+
+    border:
+        4px solid white;
+
+    box-shadow:
+        0 4px 10px
+        rgba(0,0,0,0.35);
+
+    z-index: 10;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    font-size: 25px;
+
+    touch-action: none;
+}
+
+
+/* =========================================
+   سهم اللاعب المتحكم
+========================================= */
+
+.controlArrow {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: -19px;
+
+    transform:
+        translateX(-50%);
+
+    color: #ffd400;
+
+    font-size: 15px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    text-shadow:
+        0 2px 3px black;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+}
+
+
+/* اللاعب المتحكم فقط */
+
+#player.controlled .controlArrow,
+#teammate.controlled .controlArrow {
+
+    opacity: 1;
+
+}
 
 
 /* =========================================
@@ -914,8 +996,25 @@ body {
 
 
     <div id="player">
-        🧍
+
+    <div class="controlArrow">
+        ▼
     </div>
+
+    🧍
+
+</div>
+
+
+<div id="teammate">
+
+    <div class="controlArrow">
+        ▼
+    </div>
+
+    🧍
+
+</div>
 
 
     <div id="ball">
@@ -1006,6 +1105,8 @@ const game =
 
 const player =
     document.getElementById("player");
+const teammate =
+    document.getElementById("teammate");
 
 const ball =
     document.getElementById("ball");
@@ -1060,6 +1161,23 @@ let playerX =
 
 let playerY =
     gameHeight / 2;
+/* =================================================
+   الزميل
+================================================= */
+
+let teammateX =
+    playerX + 75;
+
+let teammateY =
+    playerY;
+
+
+/* =================================================
+   اللاعب المتحكم
+================================================= */
+
+let activePlayer =
+    "player";
 
 
 /* =================================================
@@ -1172,7 +1290,7 @@ let kickTouching = false;
 
 
 /* =================================================
-   الكرة أمام اللاعب
+   الكرة أمام اللاعب المتحكم
 ================================================= */
 
 function placeBallWithPlayer() {
@@ -1184,14 +1302,40 @@ function placeBallWithPlayer() {
     const distance = 34;
 
 
+    let controlledX;
+    let controlledY;
+
+
+    if (
+        activePlayer ===
+        "teammate"
+    ) {
+
+        controlledX =
+            teammateX;
+
+        controlledY =
+            teammateY;
+
+    } else {
+
+        controlledX =
+            playerX;
+
+        controlledY =
+            playerY;
+
+    }
+
+
     ballX =
-        playerX +
+        controlledX +
         Math.cos(aimAngle) *
         distance;
 
 
     ballY =
-        playerY +
+        controlledY +
         Math.sin(aimAngle) *
         distance;
 
@@ -1252,12 +1396,71 @@ function draw() {
             "1";
 
     }
+    function draw() {
+
+    player.style.left =
+        playerX + "px";
+
+    player.style.top =
+        playerY + "px";
+
+
+    teammate.style.left =
+        teammateX + "px";
+
+    teammate.style.top =
+        teammateY + "px";
+
+
+    player.classList.toggle(
+        "controlled",
+        activePlayer === "player"
+    );
+
+
+    teammate.classList.toggle(
+        "controlled",
+        activePlayer === "teammate"
+    );
+
+
+    ball.style.left =
+        ballX + "px";
+
+    ball.style.top =
+        ballY + "px";
+
+
+    aim.style.left =
+        ballX + "px";
+
+    aim.style.top =
+        ballY + "px";
+
+
+    aim.style.transform =
+        `rotate(${aimAngle}rad)`;
+
+
+    if (ballMoving) {
+
+        aim.style.opacity =
+            "0.25";
+
+    } else {
+
+        aim.style.opacity =
+            "1";
+
+    }
+
+}
 
 }
 
 
 /* =================================================
-   حركة اللاعب
+   حركة اللاعب المتحكم
 ================================================= */
 
 function movePlayer(dx, dy) {
@@ -1277,34 +1480,69 @@ function movePlayer(dx, dy) {
     dy /= length;
 
 
-    playerX +=
-        dx * playerSpeed;
-
-    playerY +=
-        dy * playerSpeed;
-
-
     const radius = 19;
 
 
-    playerX =
-        Math.max(
-            radius,
-            Math.min(
-                gameWidth - radius,
-                playerX
-            )
-        );
+    if (
+        activePlayer ===
+        "teammate"
+    ) {
+
+        teammateX +=
+            dx * playerSpeed;
+
+        teammateY +=
+            dy * playerSpeed;
 
 
-    playerY =
-        Math.max(
-            radius,
-            Math.min(
-                gameHeight - radius,
-                playerY
-            )
-        );
+        teammateX =
+            Math.max(
+                radius,
+                Math.min(
+                    gameWidth - radius,
+                    teammateX
+                )
+            );
+
+
+        teammateY =
+            Math.max(
+                radius,
+                Math.min(
+                    gameHeight - radius,
+                    teammateY
+                )
+            );
+
+    } else {
+
+        playerX +=
+            dx * playerSpeed;
+
+        playerY +=
+            dy * playerSpeed;
+
+
+        playerX =
+            Math.max(
+                radius,
+                Math.min(
+                    gameWidth - radius,
+                    playerX
+                )
+            );
+
+
+        playerY =
+            Math.max(
+                radius,
+                Math.min(
+                    gameHeight - radius,
+                    playerY
+                )
+            );
+
+    }
 
 
     if (hasBall) {
@@ -1598,6 +1836,21 @@ function resetAfterGoal() {
 
     playerY =
         gameHeight / 2;
+    teammateX =
+    playerX + 75;
+
+teammateY =
+    playerY;
+
+activePlayer =
+    "player";
+
+hasBall = true;
+
+ballMoving = false;
+
+ballVX = 0;
+ballVY = 0;
 
 
     hasBall = true;
@@ -1626,11 +1879,37 @@ function tryPickupBall() {
         return;
 
 
+    let controlledX;
+    let controlledY;
+
+
+    if (
+        activePlayer ===
+        "teammate"
+    ) {
+
+        controlledX =
+            teammateX;
+
+        controlledY =
+            teammateY;
+
+    } else {
+
+        controlledX =
+            playerX;
+
+        controlledY =
+            playerY;
+
+    }
+
+
     const dx =
-        ballX - playerX;
+        ballX - controlledX;
 
     const dy =
-        ballY - playerY;
+        ballY - controlledY;
 
 
     const distance =
@@ -1667,6 +1946,66 @@ function tryPickupBall() {
     }
 
 }
+/* =================================================
+   اختيار اللاعب الأقرب للكرة
+================================================= */
+
+function updateActivePlayer() {
+
+    /*
+       إذا كان أحد اللاعبين حامل الكرة
+       لا نغيّر التحكم عنه.
+    */
+
+    if (hasBall)
+        return;
+
+
+    const playerDX =
+        ballX - playerX;
+
+    const playerDY =
+        ballY - playerY;
+
+
+    const playerDistance =
+        Math.sqrt(
+            playerDX * playerDX +
+            playerDY * playerDY
+        );
+
+
+    const teammateDX =
+        ballX - teammateX;
+
+    const teammateDY =
+        ballY - teammateY;
+
+
+    const teammateDistance =
+        Math.sqrt(
+            teammateDX * teammateDX +
+            teammateDY * teammateDY
+        );
+
+
+    if (
+        teammateDistance <
+        playerDistance
+    ) {
+
+        activePlayer =
+            "teammate";
+
+    } else {
+
+        activePlayer =
+            "player";
+
+    }
+
+}
+
 
 
 /* =================================================
@@ -1677,13 +2016,21 @@ function update() {
 
     if (!goalScored) {
 
-        movePlayer(
-            moveX,
-            moveY
-        );
+        /*
+   إذا كانت الكرة حرة،
+   نحدد من الأقرب إليها.
+*/
+
+updateActivePlayer();
 
 
-        tryPickupBall();
+movePlayer(
+    moveX,
+    moveY
+);
+
+
+tryPickupBall();
 
 
         /* =========================================
