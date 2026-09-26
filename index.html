@@ -175,13 +175,11 @@ body {
 
 
 #topGoal {
-
     top: 0;
 }
 
 
 #bottomGoal {
-
     bottom: 0;
 }
 
@@ -949,10 +947,6 @@ body {
     <div class="center-circle"></div>
 
 
-    <!-- =====================================
-         المرمى العلوي
-    ====================================== -->
-
     <div
     class="goal"
     id="topGoal">
@@ -961,10 +955,6 @@ body {
 
     </div>
 
-
-    <!-- =====================================
-         المرمى السفلي
-    ====================================== -->
 
     <div
     class="goal"
@@ -975,27 +965,15 @@ body {
     </div>
 
 
-    <!-- =====================================
-         النتيجة
-    ====================================== -->
-
     <div id="score">
         0 - 0
     </div>
 
 
-    <!-- =====================================
-         رسالة الهدف
-    ====================================== -->
-
     <div id="goalMessage">
         GOAL! ⚽️🎉
     </div>
 
-
-    <!-- =====================================
-         اللاعب الأساسي
-    ====================================== -->
 
     <div id="player">
 
@@ -1007,10 +985,6 @@ body {
 
     </div>
 
-
-    <!-- =====================================
-         الزميل
-    ====================================== -->
 
     <div id="teammate">
 
@@ -1043,10 +1017,6 @@ body {
     </div>
 
 
-    <!-- =====================================
-         JOYSTICK الحركة
-    ====================================== -->
-
     <div id="movePad">
 
         <div
@@ -1077,10 +1047,6 @@ body {
 
     </div>
 
-
-    <!-- =====================================
-         الركلة
-    ====================================== -->
 
     <div id="kickControl">
 
@@ -1312,47 +1278,42 @@ let kickTouching = false;
 
 
 /* =================================================
-   إعدادات اختيار اللاعب
+   اختيار اللاعب الأقرب
 ================================================= */
 
 const playerSwitchMargin = 8;
 
 
 /* =================================================
-   التبديل اليدوي بين اللاعبين
+   التبديل اليدوي
 ================================================= */
 
 /*
    أقل مسافة بين اللاعبين حتى نسمح
    بالتبديل اليدوي.
-
-   إذا كان اللاعبان متقاربين جدًا
-   لا نريد تبديلًا غير مقصود.
 */
 
 const manualSwitchMinDistance = 55;
 
 
 /*
-   يجب أن يكون اتجاه الـJoystick
-   قريبًا من اتجاه اللاعب الآخر.
-
-   0.72 ≈ زاوية حوالي 44 درجة.
+   قوة اتجاه الـJoystick المطلوبة
+   حتى نعتبر الحركة أمر تبديل.
 */
 
 const manualSwitchDot = 0.72;
 
 
 /*
-   حماية من التبديل السريع.
+   منع التبديل المتكرر بسرعة.
 */
 
 const manualSwitchCooldown = 500;
 
 
 /*
-   عندما يختار المستخدم لاعبًا يدويًا،
-   نوقف الاختيار التلقائي مؤقتًا.
+   بعد التبديل اليدوي يبقى اللاعب
+   الذي اخترته تحت تحكم المستخدم.
 */
 
 let manualControlLock = false;
@@ -1528,22 +1489,13 @@ function distanceBetween(
 
 function updateActivePlayer() {
 
-    /*
-       إذا كانت الكرة مع لاعب،
-       لا نغير اللاعب المتحكم.
-    */
-
     if (hasBall)
         return;
 
 
     /*
        إذا اختار المستخدم لاعبًا يدويًا،
-       نحافظ على اختياره.
-
-       لن يعود النظام تلقائيًا
-       للاعب الأقرب إلا بعد انتهاء
-       حالة التثبيت اليدوي.
+       لا نرجع للأقرب مباشرة.
     */
 
     if (manualControlLock)
@@ -1569,7 +1521,8 @@ function updateActivePlayer() {
 
 
     if (
-        activePlayer === "player"
+        activePlayer ===
+        "player"
     ) {
 
         if (
@@ -1608,11 +1561,7 @@ function updateActivePlayer() {
 function tryManualPlayerSwitch() {
 
     /*
-       لا نبدل أثناء وجود الكرة
-       مع اللاعب المتحكم.
-
-       هنا التبديل اليدوي مخصص
-       عندما تكون الكرة حرة.
+       لا نبدل إذا كانت الكرة مع اللاعب.
     */
 
     if (hasBall)
@@ -1624,7 +1573,7 @@ function tryManualPlayerSwitch() {
 
 
     /*
-       نحتاج حركة واضحة في الـJoystick.
+       نحتاج حركة واضحة في العصا.
     */
 
     const joystickLength =
@@ -1642,7 +1591,7 @@ function tryManualPlayerSwitch() {
 
 
     /*
-       حماية من التبديل المتكرر.
+       حماية من التبديل السريع.
     */
 
     const now =
@@ -1704,7 +1653,8 @@ function tryManualPlayerSwitch() {
 
 
     /*
-       اتجاه اللاعب الآخر.
+       اتجاه اللاعب الآخر بالنسبة
+       للاعب المتحكم.
     */
 
     const dx =
@@ -1723,11 +1673,6 @@ function tryManualPlayerSwitch() {
         );
 
 
-    /*
-       اللاعبان قريبان جدًا.
-       لا نعتبر الحركة تبديلًا.
-    */
-
     if (
         distance <
         manualSwitchMinDistance
@@ -1739,15 +1684,30 @@ function tryManualPlayerSwitch() {
 
 
     /*
-       نحول اتجاه اللاعب الآخر
-       إلى متجه Unit Vector.
+       هنا النقطة المهمة:
+
+       نحن نريد التبديل عندما يحرك
+       المستخدم العصا عكس اتجاه اللاعب
+       الآخر.
+
+       مثال:
+
+       المتحكم تحت
+       اللاعب الآخر فوق
+
+       dy = سالب
+
+       المستخدم يضغط DOWN
+       moveY = موجب
+
+       لذلك نقارن مع الاتجاه المعكوس.
     */
 
     const targetX =
-        dx / distance;
+        -dx / distance;
 
     const targetY =
-        dy / distance;
+        -dy / distance;
 
 
     /*
@@ -1763,16 +1723,18 @@ function tryManualPlayerSwitch() {
 
     /*
        Dot Product.
-
-       إذا كانت النتيجة عالية،
-       فهذا يعني أن المستخدم يدفع
-       الـJoystick باتجاه اللاعب الآخر.
     */
 
     const dot =
         joystickX * targetX +
         joystickY * targetY;
 
+
+    /*
+       إذا كانت الحركة في الاتجاه
+       المعاكس لمكان اللاعب الآخر،
+       نبدل التحكم.
+    */
 
     if (
         dot <
@@ -1805,10 +1767,11 @@ function tryManualPlayerSwitch() {
 
 
     /*
-       تثبيت الاختيار اليدوي.
+       تثبيت اللاعب الجديد.
     */
 
-    manualControlLock = true;
+    manualControlLock =
+        true;
 
 
     lastManualSwitchTime =
@@ -1826,13 +1789,9 @@ function tryManualPlayerSwitch() {
 
 function updatePlayersAI() {
 
-    /*
-       اللاعب الأساسي يصبح AI
-       عندما يكون الزميل هو المتحكم.
-    */
-
     if (
-        activePlayer !== "player"
+        activePlayer !==
+        "player"
     ) {
 
         updatePlayerAI();
@@ -1840,14 +1799,9 @@ function updatePlayersAI() {
     }
 
 
-    /*
-       الزميل يصبح AI
-       عندما يكون اللاعب الأساسي
-       هو المتحكم.
-    */
-
     if (
-        activePlayer !== "teammate"
+        activePlayer !==
+        "teammate"
     ) {
 
         updateTeammateAI();
@@ -1867,25 +1821,12 @@ function updatePlayerAI() {
         return;
 
 
-    /*
-       اللاعب السابق يتحرك للأمام
-       لمساندة الهجمة.
-
-       لا نرسله إلى نفس مكان
-       اللاعب المتحكم.
-    */
-
     let targetY =
         Math.min(
             playerY,
             gameHeight * 0.18
         );
 
-
-    /*
-       يتحرك أفقيًا مع الكرة
-       مع مسافة جانبية.
-    */
 
     let targetX =
         ballX;
@@ -1910,10 +1851,6 @@ function updatePlayerAI() {
     }
 
 
-    /*
-       حدود الملعب.
-    */
-
     const radius = 19;
 
 
@@ -1936,10 +1873,6 @@ function updatePlayerAI() {
             )
         );
 
-
-    /*
-       اتجاه الحركة.
-    */
 
     let dx =
         targetX -
@@ -1968,10 +1901,6 @@ function updatePlayerAI() {
     dy /= distance;
 
 
-    /*
-       سرعة AI.
-    */
-
     const speed =
         0.78;
 
@@ -1982,10 +1911,6 @@ function updatePlayerAI() {
     playerY +=
         dy * speed;
 
-
-    /*
-       منع الخروج من الملعب.
-    */
 
     playerX =
         Math.max(
@@ -2019,26 +1944,9 @@ function updateTeammateAI() {
         return;
 
 
-    /*
-       الهدف الهجومي.
-
-       18% من ارتفاع الملعب يعني
-       أن الزميل سيقترب كثيرًا
-       من مرمى الخصم.
-    */
-
     const attackTargetY =
         gameHeight * 0.18;
 
-
-    /*
-       لا نريد أن يرجع الزميل
-       للخلف أثناء الهجمة.
-
-       لذلك يتحرك إلى الأمام
-       فقط حتى يصل للمنطقة
-       الهجومية.
-    */
 
     let targetY =
         Math.min(
@@ -2046,12 +1954,6 @@ function updateTeammateAI() {
             attackTargetY
         );
 
-
-    /*
-       الحركة الأفقية تكون مرتبطة
-       بمكان الكرة حتى يفتح
-       مساحة للتمرير.
-    */
 
     let targetX =
         ballX;
@@ -2076,10 +1978,6 @@ function updateTeammateAI() {
     }
 
 
-    /*
-       حدود الملعب.
-    */
-
     const radius = 19;
 
 
@@ -2102,10 +2000,6 @@ function updateTeammateAI() {
             )
         );
 
-
-    /*
-       اتجاه الحركة.
-    */
 
     let dx =
         targetX -
@@ -2134,10 +2028,6 @@ function updateTeammateAI() {
     dy /= distance;
 
 
-    /*
-       سرعة الزميل AI.
-    */
-
     let speed =
         teammateAttackSpeed;
 
@@ -2159,10 +2049,6 @@ function updateTeammateAI() {
     teammateY +=
         dy * speed;
 
-
-    /*
-       منع الخروج من الملعب.
-    */
 
     teammateX =
         Math.max(
@@ -2272,11 +2158,6 @@ function movePlayer(dx, dy) {
 
     }
 
-
-    /*
-       إذا كان اللاعب المتحكم
-       يحمل الكرة، نحرك الكرة معه.
-    */
 
     if (hasBall) {
 
@@ -2408,21 +2289,14 @@ function handleGoalPosts() {
     );
 
 
-    const bottomLeftX =
-        topLeftX;
-
-    const bottomRightX =
-        topRightX;
-
-
     collideWithPost(
-        bottomLeftX,
+        topLeftX,
         gameHeight - 10
     );
 
 
     collideWithPost(
-        bottomRightX,
+        topRightX,
         gameHeight - 10
     );
 
@@ -2590,13 +2464,9 @@ function resetAfterGoal() {
         "player";
 
 
-    /*
-       نلغي أي اختيار يدوي سابق
-       بعد بداية هجمة جديدة.
-    */
-
     manualControlLock =
         false;
+
 
     lastManualSwitchTime =
         0;
@@ -2660,10 +2530,6 @@ function tryPickupBall() {
         );
 
 
-    /*
-       اللاعب الأساسي يلتقط الكرة.
-    */
-
     if (
         playerDistance <=
         pickupDistance
@@ -2683,11 +2549,6 @@ function tryPickupBall() {
         ballVY = 0;
 
 
-        /*
-           بمجرد امتلاك الكرة،
-           ينتهي الاختيار اليدوي.
-        */
-
         manualControlLock =
             false;
 
@@ -2699,10 +2560,6 @@ function tryPickupBall() {
 
     }
 
-
-    /*
-       الزميل يلتقط الكرة.
-    */
 
     if (
         teammateDistance <=
@@ -2723,11 +2580,6 @@ function tryPickupBall() {
         ballVY = 0;
 
 
-        /*
-           بمجرد امتلاك الكرة،
-           ينتهي الاختيار اليدوي.
-        */
-
         manualControlLock =
             false;
 
@@ -2747,42 +2599,22 @@ function update() {
 
     if (!goalScored) {
 
-        /*
-           ذكاء اللاعبين.
-
-           اللاعب غير المتحكم
-           يتحرك بواسطة AI.
-        */
-
         updatePlayersAI();
 
 
         /*
-           إذا كانت الكرة حرة،
-           نحدد الأقرب إليها.
-
-           إذا كان المستخدم قد اختار
-           لاعبًا يدويًا، سيتم تجاهل
-           الاختيار التلقائي مؤقتًا.
+           اختيار الأقرب يعمل فقط
+           عندما لا يوجد اختيار يدوي مثبت.
         */
 
         updateActivePlayer();
 
-
-        /*
-           الـJoystick يتحكم
-           في اللاعب المتحكم.
-        */
 
         movePlayer(
             moveX,
             moveY
         );
 
-
-        /*
-           محاولة التقاط الكرة.
-        */
 
         tryPickupBall();
 
@@ -2803,16 +2635,8 @@ function update() {
             ballVY *= friction;
 
 
-            /*
-               تصادم القائمين.
-            */
-
             handleGoalPosts();
 
-
-            /*
-               فحص الهدف.
-            */
 
             const goal =
                 checkGoal();
@@ -2823,10 +2647,6 @@ function update() {
                 scoreGoal(goal);
 
             } else {
-
-                /*
-                   حدود الملعب الجانبية.
-                */
 
                 const sideRadius = 15;
 
@@ -2866,11 +2686,6 @@ function update() {
 
                 }
 
-
-                /*
-                   حدود الأعلى والأسفل
-                   خارج منطقة المرمى.
-                */
 
                 const goalLeft =
                     (gameWidth -
@@ -2929,11 +2744,6 @@ function update() {
 
                 }
 
-
-                /*
-                   إيقاف الكرة عندما تصبح
-                   سرعتها منخفضة جدًا.
-                */
 
                 const speed =
                     Math.sqrt(
@@ -3051,10 +2861,6 @@ function updateMoveJoystick(
 
     /*
        فحص التبديل اليدوي.
-
-       يتم بعد حساب اتجاه الـJoystick
-       مباشرة، لذلك لا نحتاج إلى
-       أي زر إضافي.
     */
 
     tryManualPlayerSwitch();
@@ -3638,12 +3444,13 @@ function kick() {
 
 
     /*
-       بعد الركلة نرجع إلى النظام
-       التلقائي لاختيار الأقرب.
+       بعد الركلة نرجع إلى الاختيار
+       التلقائي للأقرب.
     */
 
     manualControlLock =
         false;
+
 
     lastManualSwitchTime =
         0;
