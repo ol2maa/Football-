@@ -1319,6 +1319,53 @@ const playerSwitchMargin = 8;
 
 
 /* =================================================
+   التبديل اليدوي بين اللاعبين
+================================================= */
+
+/*
+   أقل مسافة بين اللاعبين حتى نسمح
+   بالتبديل اليدوي.
+
+   إذا كان اللاعبان متقاربين جدًا
+   لا نريد تبديلًا غير مقصود.
+*/
+
+const manualSwitchMinDistance = 55;
+
+
+/*
+   يجب أن يكون اتجاه الـJoystick
+   قريبًا من اتجاه اللاعب الآخر.
+
+   0.72 ≈ زاوية حوالي 44 درجة.
+*/
+
+const manualSwitchDot = 0.72;
+
+
+/*
+   حماية من التبديل السريع.
+*/
+
+const manualSwitchCooldown = 500;
+
+
+/*
+   عندما يختار المستخدم لاعبًا يدويًا،
+   نوقف الاختيار التلقائي مؤقتًا.
+*/
+
+let manualControlLock = false;
+
+
+/*
+   وقت آخر تبديل يدوي.
+*/
+
+let lastManualSwitchTime = 0;
+
+
+/* =================================================
    الكرة أمام اللاعب المتحكم
 ================================================= */
 
@@ -1490,6 +1537,19 @@ function updateActivePlayer() {
         return;
 
 
+    /*
+       إذا اختار المستخدم لاعبًا يدويًا،
+       نحافظ على اختياره.
+
+       لن يعود النظام تلقائيًا
+       للاعب الأقرب إلا بعد انتهاء
+       حالة التثبيت اليدوي.
+    */
+
+    if (manualControlLock)
+        return;
+
+
     const playerDistance =
         distanceBetween(
             ballX,
@@ -1537,6 +1597,225 @@ function updateActivePlayer() {
         }
 
     }
+
+}
+
+
+/* =================================================
+   التبديل اليدوي بين اللاعبين
+================================================= */
+
+function tryManualPlayerSwitch() {
+
+    /*
+       لا نبدل أثناء وجود الكرة
+       مع اللاعب المتحكم.
+
+       هنا التبديل اليدوي مخصص
+       عندما تكون الكرة حرة.
+    */
+
+    if (hasBall)
+        return false;
+
+
+    if (goalScored)
+        return false;
+
+
+    /*
+       نحتاج حركة واضحة في الـJoystick.
+    */
+
+    const joystickLength =
+        Math.sqrt(
+            moveX * moveX +
+            moveY * moveY
+        );
+
+
+    if (
+        joystickLength <
+        0.65
+    )
+        return false;
+
+
+    /*
+       حماية من التبديل المتكرر.
+    */
+
+    const now =
+        Date.now();
+
+
+    if (
+        now -
+        lastManualSwitchTime <
+        manualSwitchCooldown
+    ) {
+
+        return false;
+
+    }
+
+
+    let activeX;
+
+    let activeY;
+
+    let otherX;
+
+    let otherY;
+
+
+    if (
+        activePlayer ===
+        "player"
+    ) {
+
+        activeX =
+            playerX;
+
+        activeY =
+            playerY;
+
+        otherX =
+            teammateX;
+
+        otherY =
+            teammateY;
+
+    } else {
+
+        activeX =
+            teammateX;
+
+        activeY =
+            teammateY;
+
+        otherX =
+            playerX;
+
+        otherY =
+            playerY;
+
+    }
+
+
+    /*
+       اتجاه اللاعب الآخر.
+    */
+
+    const dx =
+        otherX -
+        activeX;
+
+    const dy =
+        otherY -
+        activeY;
+
+
+    const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+
+    /*
+       اللاعبان قريبان جدًا.
+       لا نعتبر الحركة تبديلًا.
+    */
+
+    if (
+        distance <
+        manualSwitchMinDistance
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+       نحول اتجاه اللاعب الآخر
+       إلى متجه Unit Vector.
+    */
+
+    const targetX =
+        dx / distance;
+
+    const targetY =
+        dy / distance;
+
+
+    /*
+       اتجاه الـJoystick.
+    */
+
+    const joystickX =
+        moveX / joystickLength;
+
+    const joystickY =
+        moveY / joystickLength;
+
+
+    /*
+       Dot Product.
+
+       إذا كانت النتيجة عالية،
+       فهذا يعني أن المستخدم يدفع
+       الـJoystick باتجاه اللاعب الآخر.
+    */
+
+    const dot =
+        joystickX * targetX +
+        joystickY * targetY;
+
+
+    if (
+        dot <
+        manualSwitchDot
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+       تبديل اللاعب.
+    */
+
+    if (
+        activePlayer ===
+        "player"
+    ) {
+
+        activePlayer =
+            "teammate";
+
+    } else {
+
+        activePlayer =
+            "player";
+
+    }
+
+
+    /*
+       تثبيت الاختيار اليدوي.
+    */
+
+    manualControlLock = true;
+
+
+    lastManualSwitchTime =
+        now;
+
+
+    return true;
 
 }
 
@@ -2311,6 +2590,18 @@ function resetAfterGoal() {
         "player";
 
 
+    /*
+       نلغي أي اختيار يدوي سابق
+       بعد بداية هجمة جديدة.
+    */
+
+    manualControlLock =
+        false;
+
+    lastManualSwitchTime =
+        0;
+
+
     hasBall = true;
 
     ballMoving = false;
@@ -2392,6 +2683,15 @@ function tryPickupBall() {
         ballVY = 0;
 
 
+        /*
+           بمجرد امتلاك الكرة،
+           ينتهي الاختيار اليدوي.
+        */
+
+        manualControlLock =
+            false;
+
+
         placeBallWithPlayer();
 
 
@@ -2423,6 +2723,15 @@ function tryPickupBall() {
         ballVY = 0;
 
 
+        /*
+           بمجرد امتلاك الكرة،
+           ينتهي الاختيار اليدوي.
+        */
+
+        manualControlLock =
+            false;
+
+
         placeBallWithPlayer();
 
     }
@@ -2451,6 +2760,10 @@ function update() {
         /*
            إذا كانت الكرة حرة،
            نحدد الأقرب إليها.
+
+           إذا كان المستخدم قد اختار
+           لاعبًا يدويًا، سيتم تجاهل
+           الاختيار التلقائي مؤقتًا.
         */
 
         updateActivePlayer();
@@ -2734,6 +3047,17 @@ function updateMoveJoystick(
         moveY = 0;
 
     }
+
+
+    /*
+       فحص التبديل اليدوي.
+
+       يتم بعد حساب اتجاه الـJoystick
+       مباشرة، لذلك لا نحتاج إلى
+       أي زر إضافي.
+    */
+
+    tryManualPlayerSwitch();
 
 
     joystickCenter.style.transform =
@@ -3311,6 +3635,18 @@ function kick() {
 
 
     hasBall = false;
+
+
+    /*
+       بعد الركلة نرجع إلى النظام
+       التلقائي لاختيار الأقرب.
+    */
+
+    manualControlLock =
+        false;
+
+    lastManualSwitchTime =
+        0;
 
 
     if (power < 1)
