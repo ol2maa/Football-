@@ -2299,169 +2299,198 @@ function updateTeamAI() {
 }
 
 
-/* =================================================
-   هدف الخصم
-================================================= */
-
 function getOpponentTarget(p) {
 
     /*
-       الخصم صاحب الكرة.
+       =================================================
+       المدافع الثابت
+       يبقى قريبًا من مرماه ولا يطارد الكرة
+       =================================================
     */
 
-    if (
-        ballOwner === p
-    ) {
+    if (p.defensive === true) {
 
         return {
-
             x:
-                gameWidth / 2,
+                gameWidth * 0.50 +
+                (ballX - gameWidth * 0.50) * 0.30,
 
             y:
-                gameHeight - 80
-
+                gameHeight * 0.86
         };
-
     }
 
 
     /*
-       الكرة مع فريقنا.
+       =================================================
+       مدافع بناء الهجمة
+       يتحرك بين الدفاع والوسط
+       =================================================
     */
 
-    if (
-        ballOwner &&
-        isTeamPlayer(ballOwner)
-    ) {
+    if (p.role === "builder") {
 
-        if (p.role === "defense") {
+        let targetX =
+            gameWidth * 0.50 +
+            (ballX - gameWidth * 0.50) * 0.45;
 
-            return {
+        let targetY;
 
-                x:
-                    p.anchorX *
-                    gameWidth * 0.75 +
-                    ballX * 0.25,
 
-                y:
+        /*
+           إذا كانت الكرة مع الأحمر
+           يتحرك أمام المدافع الثابت
+           ويساند بناء الهجمة
+        */
+
+        if (ballOwner && !isTeamPlayer(ballOwner)) {
+
+            targetY =
+                Math.max(
+                    gameHeight * 0.45,
+                    ballY - 90
+                );
+
+            targetY =
+                Math.min(
+                    targetY,
+                    gameHeight * 0.72
+                );
+
+        } else {
+
+            /*
+               إذا كانت الكرة مع الأزرق
+               يتقدم قليلًا للضغط
+               لكن لا يترك منطقته
+            */
+
+            targetY =
+                Math.max(
+                    gameHeight * 0.48,
+                    ballY - 60
+                );
+
+            targetY =
+                Math.min(
+                    targetY,
+                    gameHeight * 0.72
+                );
+        }
+
+
+        return {
+            x: targetX,
+            y: targetY
+        };
+    }
+
+
+    /*
+       =================================================
+       المهاجم
+       يبقى متقدمًا ولا يرجع مع الكرة
+       =================================================
+    */
+
+    if (p.role === "forward") {
+
+        return {
+            x:
+                gameWidth * 0.50 +
+                (ballX - gameWidth * 0.50) * 0.35,
+
+            y:
+                Math.max(
+                    gameHeight * 0.12,
                     Math.min(
-                        gameHeight * 0.45,
-                        ballY - 30
+                        gameHeight * 0.35,
+                        ballY - 120
                     )
-
-            };
-
-        }
-
-
-        if (p.role === "wing") {
-
-            const side =
-                p.anchorX < 0.5
-                    ? -1
-                    : 1;
-
-
-            return {
-
-                x:
-                    ballX +
-                    side * 90,
-
-                y:
-                    ballY - 25
-
-            };
-
-        }
-
-
-        return {
-
-            x:
-                ballX,
-
-            y:
-                ballY - 35
-
+                )
         };
-
     }
 
 
     /*
-       الكرة حرة.
+       =================================================
+       الأجنحة
+       تبقى واسعة على الجانبين
+       =================================================
     */
 
-    if (!ballOwner) {
+    if (p.role === "wing") {
 
-        if (p.role === "defense") {
+        const side =
+            p.anchorX < 0.5 ? -1 : 1;
 
-            return {
 
-                x:
-                    p.anchorX *
-                    gameWidth,
+        let targetX =
+            p.anchorX * gameWidth +
+            (ballX - p.anchorX * gameWidth) * 0.18;
 
-                y:
-                    Math.max(
-                        50,
-                        ballY - 85
-                    )
 
-            };
+        /*
+           نحافظ على الجناح بعيدًا عن المنتصف
+        */
 
+        if (side < 0) {
+
+            targetX =
+                Math.min(
+                    targetX,
+                    gameWidth * 0.35
+                );
+
+        } else {
+
+            targetX =
+                Math.max(
+                    targetX,
+                    gameWidth * 0.65
+                );
         }
 
 
-        if (p.role === "wing") {
-
-            const side =
-                p.anchorX < 0.5
-                    ? -1
-                    : 1;
+        let targetY =
+            ballY - 40;
 
 
-            return {
+        targetY =
+            Math.max(
+                gameHeight * 0.25,
+                targetY
+            );
 
-                x:
-                    ballX +
-                    side * 80,
 
-                y:
-                    ballY - 25
-
-            };
-
-        }
+        targetY =
+            Math.min(
+                gameHeight * 0.55,
+                targetY
+            );
 
 
         return {
-
-            x:
-                ballX,
-
-            y:
-                ballY - 25
-
+            x: targetX,
+            y: targetY
         };
-
     }
 
+
+    /*
+       =================================================
+       أي لاعب آخر
+       يعود إلى مركزه الأصلي
+       =================================================
+    */
 
     return {
-
         x:
-            p.anchorX *
-            gameWidth,
+            p.anchorX * gameWidth,
 
         y:
-            p.anchorY *
-            gameHeight
-
+            p.anchorY * gameHeight
     };
-
 }
 
 
