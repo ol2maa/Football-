@@ -1699,10 +1699,6 @@ function tryPickupBall() {
         return;
 
 
-    if (ballMoving)
-        return;
-
-
     const dx =
         ballX - playerX;
 
@@ -1717,7 +1713,7 @@ function tryPickupBall() {
         );
 
 
-    const pickupDistance = 38;
+    const pickupDistance = 32;
 
 
     if (
@@ -1726,6 +1722,14 @@ function tryPickupBall() {
     ) {
 
         hasBall = true;
+
+
+        ballMoving = false;
+
+
+        ballVX = 0;
+
+        ballVY = 0;
 
 
         placeBallWithPlayer();
