@@ -885,18 +885,12 @@ body {
     ====================================== -->
 
     <div
-        class="goal"
-        id="topGoal">
+    class="goal"
+    id="topGoal">
 
-        <div class="goalNet"></div>
+    <div class="goalNet"></div>
 
-        <div class="goalPost left"></div>
-
-        <div class="goalPost right"></div>
-
-        <div class="goalCrossbar"></div>
-
-    </div>
+</div>
 
 
     <!-- =====================================
@@ -904,18 +898,12 @@ body {
     ====================================== -->
 
     <div
-        class="goal"
-        id="bottomGoal">
+    class="goal"
+    id="bottomGoal">
 
-        <div class="goalNet"></div>
+    <div class="goalNet"></div>
 
-        <div class="goalPost left"></div>
-
-        <div class="goalPost right"></div>
-
-        <div class="goalCrossbar"></div>
-
-    </div>
+</div>
 
 
     <!-- =====================================
@@ -1120,6 +1108,7 @@ let ballVX = 0;
 let ballVY = 0;
 
 let ballMoving = false;
+let hasBall = true;
 
 
 /* =================================================
@@ -1207,7 +1196,7 @@ let kickTouching = false;
 
 function placeBallWithPlayer() {
 
-    if (ballMoving)
+    if (!hasBall)
         return;
 
 
@@ -1224,6 +1213,7 @@ function placeBallWithPlayer() {
         playerY +
         Math.sin(aimAngle) *
         distance;
+
 }
 
 
@@ -1335,11 +1325,11 @@ function movePlayer(dx, dy) {
         );
 
 
-    if (!ballMoving) {
+    if (hasBall) {
 
-        placeBallWithPlayer();
+    placeBallWithPlayer();
 
-    }
+}
 
 }
 
@@ -1699,6 +1689,53 @@ function resetAfterGoal() {
     draw();
 
 }
+    /* =================================================
+   التقاط الكرة
+================================================= */
+
+function tryPickupBall() {
+
+    if (hasBall)
+        return;
+
+
+    if (ballMoving)
+        return;
+
+
+    const dx =
+        ballX - playerX;
+
+    const dy =
+        ballY - playerY;
+
+
+    const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+
+    const pickupDistance = 38;
+
+
+    if (
+        distance <=
+        pickupDistance
+    ) {
+
+        hasBall = true;
+
+
+        placeBallWithPlayer();
+
+
+        draw();
+
+    }
+
+}
 
 
 /* =================================================
@@ -1713,6 +1750,7 @@ function update() {
             moveX,
             moveY
         );
+        tryPickupBall();
 
 
         /* =========================================
@@ -1885,19 +1923,17 @@ function update() {
 
 
                 if (
-                    speed <
-                    0.15
-                ) {
+    speed <
+    0.15
+) {
 
-                    ballVX = 0;
+    ballVX = 0;
 
-                    ballVY = 0;
+    ballVY = 0;
 
-                    ballMoving = false;
+    ballMoving = false;
 
-                    placeBallWithPlayer();
-
-                }
+}
 
             }
 
@@ -2536,6 +2572,7 @@ function kick() {
 
 
     charging = false;
+    hasBall = false;
 
 
     if (power < 5)
