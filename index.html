@@ -2093,9 +2093,8 @@ function updateKickDirection(
 
 
     /*
-       الاتجاه يتبع الإصبع
-       بمجرد أن يتحرك خارج
-       المنطقة الصغيرة حول المركز.
+       اتجاه التسديد يتبع الإصبع
+       بمجرد تحريكه.
     */
 
     if (distance > 3) {
@@ -2111,14 +2110,12 @@ function updateKickDirection(
 
     /*
        تحريك النقطة البيضاء
-       مع الإصبع.
     */
 
     const maxDotDistance = 30;
 
 
     let dotX = dx;
-
     let dotY = dy;
 
 
@@ -2151,9 +2148,8 @@ function updateKickDirection(
 
 
     /*
-       إذا كان اللاعب حامل الكرة
-       تبقى الكرة أمامه في اتجاه
-       التسديد الجديد.
+       إذا كانت الكرة مع اللاعب
+       نضعها في اتجاه التسديد.
     */
 
     if (
@@ -2168,11 +2164,30 @@ function updateKickDirection(
 
     draw();
 
+
+    /*
+       يبدأ الشحن فقط بعد أن
+       يتحرك الإصبع مسافة 20px.
+    */
+
+    const chargingDistance = 20;
+
+
+    if (
+        kickTouching &&
+        !charging &&
+        distance >= chargingDistance
+    ) {
+
+        startCharging();
+
+    }
+
 }
 
 
 /* =================================================
-   بداية الركلة الجديدة
+   بداية الركلة
 ================================================= */
 
 kickControl.addEventListener(
@@ -2185,7 +2200,7 @@ kickControl.addEventListener(
 
 
         /*
-           لا يمكن التسديد بدون الكرة.
+           لا يمكن الركل بدون الكرة.
         */
 
         if (!hasBall)
@@ -2193,8 +2208,7 @@ kickControl.addEventListener(
 
 
         /*
-           الكرة لا يمكن ركلها
-           وهي تتحرك.
+           لا يمكن الركل والكرة تتحرك.
         */
 
         if (ballMoving)
@@ -2217,22 +2231,23 @@ kickControl.addEventListener(
 
 
         /*
-           نحدد الاتجاه أولًا
-           حسب مكان الإصبع.
+           نبدأ بتحديد الاتجاه فقط.
+
+           الشحن لا يبدأ هنا.
         */
+
+        charging = false;
+
+        power = 0;
+
+        powerBar.style.width =
+            "0%";
+
 
         updateKickDirection(
             e.clientX,
             e.clientY
         );
-
-
-        /*
-           يبدأ الشحن مباشرة
-           من لحظة الضغط.
-        */
-
-        startCharging();
 
     }
 );
@@ -2262,7 +2277,7 @@ kickControl.addEventListener(
 
         /*
            الاتجاه يتبع الإصبع
-           أثناء الشحن.
+           باستمرار.
         */
 
         updateKickDirection(
@@ -2320,7 +2335,7 @@ function chargePower() {
 
 
     if (
-        power >
+        power >=
         maxPower
     ) {
 
@@ -2334,9 +2349,20 @@ function chargePower() {
         power + "%";
 
 
-    requestAnimationFrame(
-        chargePower
-    );
+    /*
+       نستمر حتى تصل القوة إلى 100%.
+    */
+
+    if (
+        power <
+        maxPower
+    ) {
+
+        requestAnimationFrame(
+            chargePower
+        );
+
+    }
 
 }
 
@@ -2360,8 +2386,7 @@ kickControl.addEventListener(
 
 
         /*
-           تحديث الاتجاه للمرة الأخيرة
-           قبل تنفيذ التسديدة.
+           نأخذ آخر اتجاه قبل التسديد.
         */
 
         updateKickDirection(
@@ -2371,12 +2396,8 @@ kickControl.addEventListener(
 
 
         /*
-           بمجرد رفع الإصبع
-           يتم تنفيذ الركلة.
-
-           لا يهم بعد الآن
-           هل الإصبع في المركز
-           أو على الحافة.
+           إذا بدأ الشحن:
+           التسديد عند رفع الإصبع.
         */
 
         if (
@@ -2387,6 +2408,11 @@ kickControl.addEventListener(
             kick();
 
         } else {
+
+            /*
+               رفع الإصبع قبل 20px
+               يعني إلغاء العملية.
+            */
 
             charging = false;
 
@@ -2473,20 +2499,11 @@ function kick() {
     charging = false;
 
 
-    /*
-       اللاعب فقد الكرة
-       لأنها أصبحت في الملعب.
-    */
-
     hasBall = false;
 
 
     /*
-       الحد الأدنى الحقيقي للقوة
-       أصبح 1 بدل 5.
-
-       هذا يسمح بتجربة
-       الركلات الضعيفة جدًا.
+       أقل قوة ممكنة = 1
     */
 
     if (power < 1)
