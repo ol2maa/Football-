@@ -1216,6 +1216,28 @@ const playerSpeed = 1.0;
 
 
 /* =================================================
+   سرعة الزميل الهجومية
+================================================= */
+
+/*
+   السرعة الطبيعية للزميل.
+   أقل قليلًا من اللاعب المتحكم.
+*/
+
+const teammateAttackSpeed =
+    0.85;
+
+
+/*
+   عندما يكون فريقنا متأخرًا،
+   يصبح الزميل أسرع قليلًا.
+*/
+
+const teammateBehindSpeed =
+    1.05;
+
+
+/* =================================================
    حركة الكرة
 ================================================= */
 
@@ -1551,6 +1573,218 @@ function updateActivePlayer() {
         }
 
     }
+
+}
+
+
+/* =================================================
+   ذكاء حركة الزميل
+================================================= */
+
+function updateTeammateAI() {
+
+    /*
+       إذا كان الزميل هو اللاعب
+       المتحكم حاليًا، لا نتدخل
+       في حركته.
+    */
+
+    if (
+        activePlayer ===
+        "teammate"
+    )
+        return;
+
+
+    /*
+       إذا كان هناك هدف أو توقف
+       اللعب، لا نحرك الزميل.
+    */
+
+    if (goalScored)
+        return;
+
+
+    /*
+       الزميل يتقدم دائمًا باتجاه
+       المرمى العلوي.
+
+       نحاول أن نجعله يتقدم إلى
+       المنطقة الهجومية دون أن
+       يدخل داخل المرمى.
+    */
+
+    const attackTargetY =
+        Math.max(
+            80,
+            Math.min(
+                gameHeight * 0.42,
+                ballY - 80
+            )
+        );
+
+
+    /*
+       إذا كانت الكرة خلف الزميل،
+       لا نجعله يرجع للخلف.
+
+       الزميل لاعب هجومي، لذلك
+       حركته الأساسية إلى الأمام.
+    */
+
+    let targetY =
+        Math.min(
+            teammateY,
+            attackTargetY
+        );
+
+
+    /*
+       عندما تكون الكرة في جهة
+       معينة من الملعب، يتحرك
+       الزميل أفقيًا معها أيضًا.
+
+       هذا يجعله يفتح مساحة
+       للتمرير بدل الوقوف في الوسط.
+    */
+
+    let targetX =
+        ballX;
+
+
+    /*
+       تقليل مقدار الحركة الأفقية
+       حتى لا يلتصق الزميل بالكرة.
+    */
+
+    const sideOffset = 70;
+
+
+    if (
+        ballX <
+        gameWidth / 2
+    ) {
+
+        targetX =
+            ballX + sideOffset;
+
+    } else {
+
+        targetX =
+            ballX - sideOffset;
+
+    }
+
+
+    /*
+       الحدود الآمنة.
+    */
+
+    const radius = 19;
+
+
+    targetX =
+        Math.max(
+            radius,
+            Math.min(
+                gameWidth - radius,
+                targetX
+            )
+        );
+
+
+    targetY =
+        Math.max(
+            55,
+            Math.min(
+                gameHeight - 55,
+                targetY
+            )
+        );
+
+
+    /*
+       اتجاه الحركة.
+    */
+
+    let dx =
+        targetX -
+        teammateX;
+
+    let dy =
+        targetY -
+        teammateY;
+
+
+    const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+
+    if (
+        distance <
+        1
+    )
+        return;
+
+
+    dx /= distance;
+
+    dy /= distance;
+
+
+    /*
+       إذا كان فريقنا متأخرًا
+       في النتيجة، يصبح الزميل
+       أسرع قليلًا.
+    */
+
+    let speed =
+        teammateAttackSpeed;
+
+
+    if (
+        bottomScore >
+        topScore
+    ) {
+
+        speed =
+            teammateBehindSpeed;
+
+    }
+
+
+    teammateX +=
+        dx * speed;
+
+    teammateY +=
+        dy * speed;
+
+
+    /*
+       منع الخروج من الملعب.
+    */
+
+    teammateX =
+        Math.max(
+            radius,
+            Math.min(
+                gameWidth - radius,
+                teammateX
+            )
+        );
+
+
+    teammateY =
+        Math.max(
+            radius,
+            Math.min(
+                gameHeight - radius,
+                teammateY
+            )
+        );
 
 }
 
@@ -2082,6 +2316,17 @@ function tryPickupBall() {
 function update() {
 
     if (!goalScored) {
+
+        /*
+           ذكاء الزميل.
+
+           يجب أن يعمل قبل حركة
+           اللاعب المتحكم حتى يكون
+           الزميل مستقلًا عنه.
+        */
+
+        updateTeammateAI();
+
 
         /*
            إذا كانت الكرة حرة،
