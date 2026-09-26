@@ -1232,6 +1232,7 @@ const opponents = [
 
     /*
        0 - المهاجم
+       يبقى متقدمًا وقريبًا من دفاع الأزرق
     */
 
     {
@@ -1241,10 +1242,10 @@ const opponents = [
         role: "forward",
 
         x: gameWidth * 0.50,
-        y: gameHeight * 0.38,
+        y: gameHeight * 0.20,
 
         anchorX: 0.50,
-        anchorY: 0.38,
+        anchorY: 0.20,
 
         speed: 0.62
     },
@@ -1260,11 +1261,11 @@ const opponents = [
 
         role: "wing",
 
-        x: gameWidth * 0.20,
-        y: gameHeight * 0.44,
+        x: gameWidth * 0.18,
+        y: gameHeight * 0.38,
 
-        anchorX: 0.20,
-        anchorY: 0.44,
+        anchorX: 0.18,
+        anchorY: 0.38,
 
         speed: 0.65
     },
@@ -1280,18 +1281,19 @@ const opponents = [
 
         role: "wing",
 
-        x: gameWidth * 0.80,
-        y: gameHeight * 0.44,
+        x: gameWidth * 0.82,
+        y: gameHeight * 0.38,
 
-        anchorX: 0.80,
-        anchorY: 0.44,
+        anchorX: 0.82,
+        anchorY: 0.38,
 
         speed: 0.65
     },
 
 
     /*
-       3 - الدفاع الأيسر
+       3 - المدافع الثابت
+       لا يتجاوز تقريبًا خط الـ18
     */
 
     {
@@ -1300,31 +1302,34 @@ const opponents = [
 
         role: "defense",
 
-        x: gameWidth * 0.30,
-        y: gameHeight * 0.30,
+        defensive: true,
 
-        anchorX: 0.30,
-        anchorY: 0.30,
+        x: gameWidth * 0.50,
+        y: gameHeight * 0.88,
 
-        speed: 0.58
+        anchorX: 0.50,
+        anchorY: 0.88,
+
+        speed: 0.50
     },
 
 
     /*
-       4 - الدفاع الأيمن
+       4 - مدافع بناء الهجمة
+       يتحرك من الدفاع باتجاه الوسط
     */
 
     {
         id: "opponent5",
         el: document.getElementById("opponent5"),
 
-        role: "defense",
+        role: "builder",
 
-        x: gameWidth * 0.70,
-        y: gameHeight * 0.30,
+        x: gameWidth * 0.50,
+        y: gameHeight * 0.65,
 
-        anchorX: 0.70,
-        anchorY: 0.30,
+        anchorX: 0.50,
+        anchorY: 0.65,
 
         speed: 0.58
     }
