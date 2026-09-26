@@ -2516,21 +2516,7 @@ function updateOpponentAI() {
                من مسافة بعيدة.
             */
 
-            /*
-   الأجنحة تحافظ على مراكزها
-   ولا تتجمع مع بقية الفريق حول الكرة
-*/
-
-if (p.role === "wing") {
-
-    moveAITo(
-        p,
-        target.x,
-        target.y
-    );
-
-    return;
-}
+            
 
                 const d =
                     distanceBetween(
