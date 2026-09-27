@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<title>كرة القدم ⚽️ v3.6</title>
+<title>كرة القدم ⚽️ v3.7</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#16803c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:none;overscroll-behavior:none}
@@ -251,7 +251,6 @@ function pointToSegmentDistance(px,py,x1,y1,x2,y2){
     t=clamp(t,0,1);
     return distanceBetween(px,py,x1+t*dx,y1+t*dy);
 }
-
 function canPassTo(from,to,blockers){
     if(!to)return false;
     for(let i=0;i<blockers.length;i++){
@@ -364,38 +363,52 @@ function draw(){
 }
 
 /* =================================================
-   ✅ حدود المراكز - v3.6 (مرنة حسب موقع الكرة)
+   ✅ حدود المراكز - v3.7
+   ✅ الضاغط حر تماماً، باقي اللاعبين أوسع
 ================================================= */
 function getRoleBounds(p){
     /* ============ الفريق الأزرق ============ */
     if(isTeamPlayer(p)){
+        // صاحب الكرة الأزرق
         if(p===ballOwner){
             if(p.isGuard)return{minY:gameHeight*.50,maxY:gameHeight-30};
             return{minY:30,maxY:gameHeight-30};
         }
+        // GUARD الأزرق
         if(p.isGuard){
             return{minY:gameHeight*(BLUE_GUARD_Y-0.02),
                    maxY:gameHeight*(BLUE_GUARD_Y+0.02)};
         }
-        if(p.role==="defender")return{minY:gameHeight*.55,maxY:gameHeight*.92};
-        if(p.role==="forward")return{minY:gameHeight*.25,maxY:gameHeight*.75};
-        if(p.role==="wing")return{minY:gameHeight*.25,maxY:gameHeight*.75};
+        // ✅ الضاغط الأزرق: حر تماماً
+        if(teamPlayers.indexOf(p)===bluePressIndex){
+            return{minY:30,maxY:gameHeight-30};
+        }
+        // باقي الأزرق: حدود أوسع
+        if(p.role==="defender")return{minY:gameHeight*.30,maxY:gameHeight*.92};
+        if(p.role==="forward")return{minY:gameHeight*.30,maxY:gameHeight*.92};
+        if(p.role==="wing")return{minY:gameHeight*.25,maxY:gameHeight*.90};
         return{minY:gameHeight*.40,maxY:gameHeight-35};
     }
 
     /* ============ الفريق الأحمر ============ */
+    // صاحب الكرة الأحمر: حر
     if(p===ballOwner&&opponents.indexOf(p)!==-1){
         if(p.isGuard)return{minY:30,maxY:gameHeight-40};
         return{minY:30,maxY:gameHeight-40};
     }
+    // GUARD الأحمر
     if(p.isGuard){
         return{minY:gameHeight*(GUARD_Y-0.02),maxY:gameHeight*(GUARD_Y+0.02)};
     }
-    // ✅ حدود أوسع بكثير لتمكين الضغط في أي مكان
-    if(p.role==="defender")return{minY:gameHeight*.08,maxY:gameHeight*.55};
-    if(p.role==="forward")return{minY:gameHeight*.08,maxY:gameHeight*.55};
-    if(p.role==="wing")return{minY:gameHeight*.10,maxY:gameHeight*.65};
-    return{minY:gameHeight*.10,maxY:gameHeight*.45};
+    // ✅ الضاغط الأحمر: حر تماماً
+    if(opponents.indexOf(p)===redPressIndex){
+        return{minY:30,maxY:gameHeight-30};
+    }
+    // باقي الأحمر: حدود أوسع (كانت ضيقة جداً)
+    if(p.role==="defender")return{minY:gameHeight*.08,maxY:gameHeight*.70};
+    if(p.role==="forward")return{minY:gameHeight*.08,maxY:gameHeight*.70};
+    if(p.role==="wing")return{minY:gameHeight*.10,maxY:gameHeight*.78};
+    return{minY:gameHeight*.10,maxY:gameHeight*.55};
 }
 
 /* =================================================
@@ -472,8 +485,7 @@ function chooseBluePressPlayer(){
         const p=teamPlayers[i];
         if(p.isGuard)continue;
         let d=distanceBetween(p.x,p.y,ballX,ballY);
-        if(p.role==="wing")d+=20;
-        if(p.role==="forward")d-=25;
+        if(p.role==="forward")d-=15;
         if(p.role==="defender")d-=10;
         if(d<bestScore){bestScore=d;best=i}
     }
@@ -481,7 +493,6 @@ function chooseBluePressPlayer(){
 }
 
 function getTeamAITarget(p){
-    // GUARD الأزرق
     if(p.isGuard){
         if(ballOwner===p)return{x:p.x,y:p.y};
         const targetX=clamp(ballX,gameWidth*BLUE_GUARD_MIN_X,gameWidth*BLUE_GUARD_MAX_X);
@@ -490,10 +501,10 @@ function getTeamAITarget(p){
 
     const ballYRatio=ballY/gameHeight;
     let ballZone="mid";
-    if(ballYRatio>0.65)ballZone="blueDefenseZone";   // الكرة في ملعب الأحمر
-    else if(ballYRatio<0.35)ballZone="blueAttackZone"; // الكرة في ملعب الأزرق
+    if(ballYRatio>0.65)ballZone="redHalf";
+    else if(ballYRatio<0.35)ballZone="blueHalf";
 
-    // الحالة 1: الكرة مع الأزرق (هجوم)
+    // الكرة مع الأزرق
     if(ballOwner&&isTeamPlayer(ballOwner)){
         if(p===ballOwner)return{x:p.x,y:p.y};
         if(p.role==="defender"){
@@ -501,15 +512,13 @@ function getTeamAITarget(p){
                    y:Math.min(gameHeight*.88,ballY+90)};
         }
         if(p.role==="wing"){
-            return{
-                x:p.anchorX*gameWidth,
-                y:clamp(ballY-40,gameHeight*.30,gameHeight*.62)
-            };
+            return{x:p.anchorX*gameWidth,
+                   y:clamp(ballY-40,gameHeight*.30,gameHeight*.62)};
         }
         return{x:gameWidth*.50+(ballX-gameWidth*.50)*.20,y:gameHeight*.82};
     }
 
-    // الحالة 2: الكرة مع الأحمر (دفاع) - ديناميكي
+    // الكرة مع الأحمر
     if(ballOwner&&isOpponent(ballOwner)){
         const isPresser=(teamPlayers.indexOf(p)===bluePressIndex);
         if(isPresser)return{x:ballX,y:ballY};
@@ -518,7 +527,7 @@ function getTeamAITarget(p){
             return{x:gameWidth*.50+(ballX-gameWidth*.50)*.35,y:gameHeight*.75};
         }
         if(p.role==="forward"){
-            if(ballZone==="blueAttackZone"){
+            if(ballZone==="redHalf"){
                 return{x:gameWidth*.50+(ballX-gameWidth*.50)*.20,y:gameHeight*.55};
             }else if(ballZone==="mid"){
                 return{x:gameWidth*.50+(ballX-gameWidth*.50)*.20,y:gameHeight*.62};
@@ -529,20 +538,15 @@ function getTeamAITarget(p){
         if(p.role==="wing"){
             const side=p.anchorX<.5?-1:1;
             const ballSide=ballX<gameWidth/2?-1:1;
-            const isBallSide=(side===ballSide);
-            if(isBallSide){
-                return{
-                    x:clamp(ballX+side*70,45,gameWidth-45),
-                    y:clamp(ballY-50,gameHeight*.52,gameHeight*.70)
-                };
-            }else{
-                return{x:p.anchorX*gameWidth,y:gameHeight*.58};
+            if(side===ballSide){
+                return{x:clamp(ballX+side*70,45,gameWidth-45),
+                       y:clamp(ballY-50,gameHeight*.52,gameHeight*.70)};
             }
+            return{x:p.anchorX*gameWidth,y:gameHeight*.58};
         }
         return{x:p.anchorX*gameWidth,y:gameHeight*.65};
     }
 
-    // الكرة حرة
     if(!ballOwner){
         const nearest=getNearestBlueToBall();
         if(nearest.player===p&&nearest.distance<BLUE_NEAR_BALL_DIST){
@@ -577,8 +581,8 @@ function updateTeamAI(dt){
 }
 
 /* =================================================
-   ✅ AI الأحمر - v3.6
-   ضغط ديناميكي حسب منطقة الكرة
+   ✅ AI الأحمر - v3.7
+   الضاغط حر + الفريق كله يتابع الضغط
 ================================================= */
 function chooseRedPressPlayer(){
     if(!ballOwner||!isTeamPlayer(ballOwner)){
@@ -590,8 +594,7 @@ function chooseRedPressPlayer(){
         const p=opponents[i];
         if(p.isGuard)continue;
         let d=distanceBetween(p.x,p.y,ballX,ballY);
-        if(p.role==="wing")d+=20;
-        if(p.role==="forward")d-=25;
+        if(p.role==="forward")d-=15;
         if(p.role==="defender")d-=10;
         if(d<bestScore){bestScore=d;best=i}
     }
@@ -600,7 +603,7 @@ function chooseRedPressPlayer(){
 
 function getRedFormationTarget(p,index){
     /* ================================
-       🧤 GUARD الأحمر
+       🧤 GUARD
     ================================ */
     if(p.isGuard){
         if(ballOwner===p)return{x:p.x,y:p.y};
@@ -609,10 +612,7 @@ function getRedFormationTarget(p,index){
     }
 
     /* ================================
-       حساب منطقة الكرة
-       redHalf: y>65% (ملعب الأحمر - دفاع)
-       mid: 35%-65%
-       blueHalf: y<35% (ملعب الأزرق - ضغط عالي)
+       منطقة الكرة
     ================================ */
     const ballYRatio=ballY/gameHeight;
     let ballZone="mid";
@@ -620,7 +620,7 @@ function getRedFormationTarget(p,index){
     else if(ballYRatio<0.35)ballZone="blueHalf";
 
     /* ================================
-       الحالة 1: الكرة مع الأحمر (هجوم)
+       الحالة 1: الكرة مع الأحمر
     ================================ */
     if(ballOwner&&opponents.indexOf(ballOwner)!==-1){
         if(p===ballOwner)return{x:p.x,y:p.y};
@@ -634,7 +634,7 @@ function getRedFormationTarget(p,index){
     }
 
     /* ================================
-       الحالة 2: الكرة مع الأزرق (دفاع ديناميكي) ✅ الجديد
+       الحالة 2: الكرة مع الأزرق (دفاع)
     ================================ */
     if(ballOwner&&isTeamPlayer(ballOwner)){
         const isPresser=index===redPressIndex;
@@ -645,21 +645,14 @@ function getRedFormationTarget(p,index){
         // 🔴 2) Defender
         if(p.role==="defender"){
             if(ballZone==="redHalf"){
-                // الكرة في ملعبنا → الدفاع يرجع لحماية المرمى
-                return{
-                    x:gameWidth*.50+(ballX-gameWidth*.50)*.25,
-                    y:gameHeight*.20
-                };
+                return{x:gameWidth*.50+(ballX-gameWidth*.50)*.25,y:gameHeight*.20};
             }else if(ballZone==="mid"){
-                return{
-                    x:gameWidth*.50+(ballX-gameWidth*.50)*.35,
-                    y:gameHeight*.28
-                };
+                return{x:gameWidth*.50+(ballX-gameWidth*.50)*.35,y:gameHeight*.28};
             }else{
-                // blueHalf: الكرة في ملعب الأزرق → الدفاع يتقدم
+                // ✅ blueHalf: يتقدم للضغط
                 return{
                     x:gameWidth*.50+(ballX-gameWidth*.50)*.40,
-                    y:gameHeight*.38
+                    y:clamp(ballY-80,gameHeight*.28,gameHeight*.42)
                 };
             }
         }
@@ -667,20 +660,14 @@ function getRedFormationTarget(p,index){
         // 🔴 3) Forward
         if(p.role==="forward"){
             if(ballZone==="redHalf"){
-                return{
-                    x:gameWidth*.50+(ballX-gameWidth*.50)*.20,
-                    y:gameHeight*.42
-                };
+                return{x:gameWidth*.50+(ballX-gameWidth*.50)*.20,y:gameHeight*.42};
             }else if(ballZone==="mid"){
-                return{
-                    x:gameWidth*.50+(ballX-gameWidth*.50)*.20,
-                    y:gameHeight*.38
-                };
+                return{x:gameWidth*.50+(ballX-gameWidth*.50)*.20,y:gameHeight*.38};
             }else{
-                // blueHalf: يتقدم للضغط العالي
+                // ✅ blueHalf: يتقدم للضغط العالي
                 return{
                     x:gameWidth*.50+(ballX-gameWidth*.50)*.15,
-                    y:gameHeight*.25
+                    y:clamp(ballY-50,gameHeight*.20,gameHeight*.35)
                 };
             }
         }
@@ -692,7 +679,6 @@ function getRedFormationTarget(p,index){
             const isBallSide=(side===ballSide);
 
             if(ballZone==="redHalf"){
-                // الكرة في ملعبنا → ضغط عالي
                 if(isBallSide){
                     return{
                         x:clamp(ballX+side*60,45,gameWidth-45),
@@ -711,14 +697,17 @@ function getRedFormationTarget(p,index){
                     return{x:p.anchorX*gameWidth,y:gameHeight*.42};
                 }
             }else{
-                // blueHalf: يتقدم للضغط في نصف الأزرق
+                // ✅ blueHalf: يتابعون الضغط في ملعب الأزرق
                 if(isBallSide){
                     return{
                         x:clamp(ballX+side*50,45,gameWidth-45),
                         y:clamp(ballY+30,gameHeight*.18,gameHeight*.35)
                     };
                 }else{
-                    return{x:p.anchorX*gameWidth,y:gameHeight*.30};
+                    return{
+                        x:p.anchorX*gameWidth,
+                        y:clamp(ballY-20,gameHeight*.22,gameHeight*.35)
+                    };
                 }
             }
         }
@@ -837,7 +826,7 @@ function findBestBluePasser(p){
         if(q===p)continue;
         const dist=distanceBetween(p.x,p.y,q.x,q.y);
         if(dist<40||dist>BLUE_PASS_DISTANCE*1.3)continue;
-        const forward=p.y-q.y; // الأزرق يهاجم للأعلى
+        const forward=p.y-q.y;
         let score=forward*1.4-dist*.35;
         if(q.role==="forward")score+=40;
         if(q.role==="wing")score+=20;
@@ -1139,14 +1128,12 @@ function resetAfterGoal(){
     goalMessage.classList.remove("show");
     ball.style.opacity="1";
 
-    // الأزرق
     teamPlayers[0].x=gameWidth*.50;teamPlayers[0].y=gameHeight*.62;
     teamPlayers[1].x=gameWidth*.15;teamPlayers[1].y=gameHeight*.58;
     teamPlayers[2].x=gameWidth*.85;teamPlayers[2].y=gameHeight*.58;
     teamPlayers[3].x=gameWidth*.50;teamPlayers[3].y=gameHeight*.75;
     teamPlayers[4].x=gameWidth*.50;teamPlayers[4].y=gameHeight*.94;
 
-    // الأحمر
     opponents[0].x=gameWidth*.50;opponents[0].y=gameHeight*.38;
     opponents[1].x=gameWidth*.15;opponents[1].y=gameHeight*.42;
     opponents[2].x=gameWidth*.85;opponents[2].y=gameHeight*.42;
