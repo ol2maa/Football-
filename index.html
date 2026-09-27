@@ -12,7 +12,7 @@ user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
 
-<title>كرة القدم ⚽️ v3.11</title>
+<title>كرة القدم ⚽️ v3.10</title>
 
 <style>
 
@@ -522,10 +522,7 @@ body{
     GOAL! ⚽️🎉
 </div>
 
-
-<!-- ================================
-     الفريق الأزرق
-================================ -->
+<!-- الفريق الأزرق -->
 
 <div id="player" class="playerUnit blue">
     <div class="controlArrow">▼</div>🧍
@@ -547,10 +544,7 @@ body{
     <div class="controlArrow">▼</div>🧍
 </div>
 
-
-<!-- ================================
-     الفريق الأحمر
-================================ -->
+<!-- الفريق الأحمر -->
 
 <div id="opponent1" class="playerUnit red">🧍</div>
 <div id="opponent2" class="playerUnit red">🧍</div>
@@ -594,7 +588,6 @@ body{
 <div id="hint"></div>
 
 </div>
-
 
 <script>
 
@@ -640,9 +633,22 @@ const KICK_CHARGE_DISTANCE=35;
 const PLAYER_RADIUS=19;
 const BALL_RADIUS=11;
 
+/*
+   المسافة العادية لالتقاط الكرة الحرة
+*/
 const BALL_PICKUP_BLUE=32;
 const BALL_PICKUP_RED=30;
 
+/*
+   v3.10
+   الافتكاك لا يعتمد على لمس جسم اللاعب.
+   يجب لمس الكرة نفسها.
+   
+   نصف قطر اللاعب 19
+   نصف قطر الكرة 11
+   المجموع = 30
+   أضفنا هامشًا صغيرًا 2px.
+*/
 const BALL_STEAL_TOUCH_DISTANCE=32;
 
 const GOAL_WIDTH=190;
@@ -660,26 +666,6 @@ const AUTO_SWITCH_COOLDOWN=300;
 
 /* =================================================
    الفريق الأزرق
-   v3.11
-   
-   التوزيع الجديد:
-   
-   اللاعب:
-   مهاجم مركزي في عمق نصف الخصم
-   
-   الجناح 1:
-   قريب من خط التماس الأيسر
-   وفي نصف ملعب الخصم
-   
-   الجناح 2:
-   قريب من خط التماس الأيمن
-   وفي نصف ملعب الخصم
-   
-   المدافع:
-   خلف الهجوم
-   
-   الحارس:
-   قريب من مرماه
 ================================================= */
 
 const teamPlayers=[
@@ -688,13 +674,10 @@ const teamPlayers=[
         id:"player",
         el:document.getElementById("player"),
         role:"forward",
-
         x:gameWidth*.50,
-        y:gameHeight*.32,
-
+        y:gameHeight*.62,
         anchorX:.50,
-        anchorY:.32,
-
+        anchorY:.62,
         speed:130
     },
 
@@ -702,13 +685,10 @@ const teamPlayers=[
         id:"teammate1",
         el:document.getElementById("teammate1"),
         role:"wing",
-
-        x:gameWidth*.12,
-        y:gameHeight*.30,
-
-        anchorX:.12,
-        anchorY:.30,
-
+        x:gameWidth*.15,
+        y:gameHeight*.58,
+        anchorX:.15,
+        anchorY:.58,
         speed:95
     },
 
@@ -716,13 +696,10 @@ const teamPlayers=[
         id:"teammate2",
         el:document.getElementById("teammate2"),
         role:"wing",
-
-        x:gameWidth*.88,
-        y:gameHeight*.30,
-
-        anchorX:.88,
-        anchorY:.30,
-
+        x:gameWidth*.85,
+        y:gameHeight*.58,
+        anchorX:.85,
+        anchorY:.58,
         speed:95
     },
 
@@ -730,13 +707,10 @@ const teamPlayers=[
         id:"teammate3",
         el:document.getElementById("teammate3"),
         role:"defender",
-
         x:gameWidth*.50,
-        y:gameHeight*.70,
-
+        y:gameHeight*.75,
         anchorX:.50,
-        anchorY:.70,
-
+        anchorY:.75,
         speed:90
     },
 
@@ -745,13 +719,10 @@ const teamPlayers=[
         el:document.getElementById("teammate4"),
         role:"guard",
         isGuard:true,
-
         x:gameWidth*.50,
         y:gameHeight*.94,
-
         anchorX:.50,
         anchorY:.94,
-
         speed:75
     }
 
@@ -768,13 +739,10 @@ const opponents=[
         id:"opponent1",
         el:document.getElementById("opponent1"),
         role:"forward",
-
         x:gameWidth*.50,
         y:gameHeight*.38,
-
         anchorX:.50,
         anchorY:.38,
-
         speed:85
     },
 
@@ -782,13 +750,10 @@ const opponents=[
         id:"opponent2",
         el:document.getElementById("opponent2"),
         role:"wing",
-
         x:gameWidth*.15,
         y:gameHeight*.42,
-
         anchorX:.15,
         anchorY:.42,
-
         speed:88
     },
 
@@ -796,13 +761,10 @@ const opponents=[
         id:"opponent3",
         el:document.getElementById("opponent3"),
         role:"wing",
-
         x:gameWidth*.85,
         y:gameHeight*.42,
-
         anchorX:.85,
         anchorY:.42,
-
         speed:88
     },
 
@@ -811,13 +773,10 @@ const opponents=[
         el:document.getElementById("opponent4"),
         role:"guard",
         isGuard:true,
-
         x:gameWidth*.50,
         y:gameHeight*.06,
-
         anchorX:.50,
         anchorY:.06,
-
         speed:70
     },
 
@@ -825,13 +784,10 @@ const opponents=[
         id:"opponent5",
         el:document.getElementById("opponent5"),
         role:"defender",
-
         x:gameWidth*.50,
         y:gameHeight*.25,
-
         anchorX:.50,
         anchorY:.25,
-
         speed:82
     }
 
@@ -1111,7 +1067,14 @@ function getNearestBlueToBall(){
 
 
 /* =================================================
-   لمس الكرة
+   v3.10
+   هل اللاعب يلمس الكرة فعليًا؟
+   
+   مهم جدًا:
+   هذه الدالة لا تنظر إلى مسافة اللاعب
+   من جسم اللاعب المنافس.
+   
+   تنظر فقط إلى المسافة بين اللاعب والكرة.
 ================================================= */
 
 function isPlayerTouchingBall(p){
@@ -1133,7 +1096,7 @@ function isPlayerTouchingBall(p){
 
 
 /* =================================================
-   اتجاه اللاعب
+   اتجاه اللاعب الحقيقي
 ================================================= */
 
 function getPlayerDirection(p,fallbackAngle){
@@ -1404,41 +1367,29 @@ function getRoleBounds(p){
 
         }
 
-        /*
-           v3.11
-           المهاجم يبقى في نصف ملعب الخصم
-           إلا عندما يكون هو صاحب الكرة.
-        */
+        if(p.role==="defender"){
+
+            return{
+                minY:gameHeight*.30,
+                maxY:gameHeight*.92
+            };
+
+        }
 
         if(p.role==="forward"){
 
             return{
-                minY:gameHeight*.18,
-                maxY:gameHeight*.49
+                minY:gameHeight*.30,
+                maxY:gameHeight*.92
             };
 
         }
-
-        /*
-           v3.11
-           الجناحان يبقيان على الطرفين
-           وفي نصف ملعب الخصم.
-        */
 
         if(p.role==="wing"){
 
             return{
-                minY:gameHeight*.15,
-                maxY:gameHeight*.49
-            };
-
-        }
-
-        if(p.role==="defender"){
-
-            return{
-                minY:gameHeight*.48,
-                maxY:gameHeight*.92
+                minY:gameHeight*.25,
+                maxY:gameHeight*.90
             };
 
         }
@@ -1754,9 +1705,6 @@ function chooseBluePressPlayer(){
         if(p.role==="defender")
             d-=10;
 
-        if(p.role==="wing")
-            d-=5;
-
         if(d<bestScore){
 
             bestScore=d;
@@ -1809,25 +1757,17 @@ function getTeamAITarget(p){
             return{x:p.x,y:p.y};
 
 
-        /*
-           v3.11
-           عندما تكون الكرة مع لاعب أزرق،
-           يعود الفريق إلى توزيع هجومي واضح.
-        */
-
         if(p.role==="defender"){
 
             return{
                 x:
                     gameWidth*.50+
-                    (ballX-gameWidth*.50)*.15,
+                    (ballX-gameWidth*.50)*.20,
 
                 y:
-                    clamp(
-                        gameHeight*.70+
-                        (ballY-gameHeight*.50)*.10,
-                        gameHeight*.55,
-                        gameHeight*.82
+                    Math.min(
+                        gameHeight*.88,
+                        ballY+90
                     )
             };
 
@@ -1836,43 +1776,14 @@ function getTeamAITarget(p){
 
         if(p.role==="wing"){
 
-            /*
-               الجناح يبقى على خطه الجانبي
-               وفي نصف ملعب الخصم.
-            */
-
             return{
                 x:p.anchorX*gameWidth,
 
                 y:
                     clamp(
-                        gameHeight*.30+
-                        (ballY-gameHeight*.32)*.08,
-                        gameHeight*.20,
-                        gameHeight*.44
-                    )
-            };
-
-        }
-
-
-        /*
-           المهاجم المركزي
-        */
-
-        if(p.role==="forward"){
-
-            return{
-                x:
-                    gameWidth*.50+
-                    (ballX-gameWidth*.50)*.12,
-
-                y:
-                    clamp(
-                        gameHeight*.32+
-                        (ballY-gameHeight*.32)*.08,
-                        gameHeight*.20,
-                        gameHeight*.44
+                        ballY-40,
+                        gameHeight*.30,
+                        gameHeight*.62
                     )
             };
 
@@ -1880,8 +1791,11 @@ function getTeamAITarget(p){
 
 
         return{
-            x:p.anchorX*gameWidth,
-            y:p.anchorY*gameHeight
+            x:
+                gameWidth*.50+
+                (ballX-gameWidth*.50)*.20,
+
+            y:gameHeight*.82
         };
 
     }
@@ -1903,7 +1817,7 @@ function getTeamAITarget(p){
                     gameWidth*.50+
                     (ballX-gameWidth*.50)*.35,
 
-                y:gameHeight*.70
+                y:gameHeight*.75
             };
 
         }
@@ -1911,23 +1825,36 @@ function getTeamAITarget(p){
 
         if(p.role==="forward"){
 
-            /*
-               المهاجم يبقى متقدمًا،
-               لكنه يستطيع التحرك قليلًا حسب الكرة.
-            */
+            if(ballZone==="redHalf"){
+
+                return{
+                    x:
+                        gameWidth*.50+
+                        (ballX-gameWidth*.50)*.20,
+
+                    y:gameHeight*.55
+                };
+
+            }
+
+            if(ballZone==="mid"){
+
+                return{
+                    x:
+                        gameWidth*.50+
+                        (ballX-gameWidth*.50)*.20,
+
+                    y:gameHeight*.62
+                };
+
+            }
 
             return{
                 x:
                     gameWidth*.50+
                     (ballX-gameWidth*.50)*.15,
 
-                y:
-                    clamp(
-                        gameHeight*.34+
-                        (ballY-gameHeight*.50)*.08,
-                        gameHeight*.22,
-                        gameHeight*.47
-                    )
+                y:gameHeight*.75
             };
 
         }
@@ -1935,26 +1862,38 @@ function getTeamAITarget(p){
 
         if(p.role==="wing"){
 
-            /*
-               حتى أثناء دفاع الفريق،
-               الجناح يبقى قريبًا من خطه
-               بدل التجمع في المنتصف.
-            */
+            const side=
+                p.anchorX<.5?-1:1;
+
+            const ballSide=
+                ballX<gameWidth/2?-1:1;
+
+            if(side===ballSide){
+
+                return{
+                    x:
+                        clamp(
+                            ballX+side*70,
+                            45,
+                            gameWidth-45
+                        ),
+
+                    y:
+                        clamp(
+                            ballY-50,
+                            gameHeight*.52,
+                            gameHeight*.70
+                        )
+                };
+
+            }
 
             return{
                 x:p.anchorX*gameWidth,
-
-                y:
-                    clamp(
-                        gameHeight*.34+
-                        (ballY-gameHeight*.50)*.05,
-                        gameHeight*.20,
-                        gameHeight*.48
-                    )
+                y:gameHeight*.58
             };
 
         }
-
 
         return{
             x:p.anchorX*gameWidth,
@@ -1968,6 +1907,11 @@ function getTeamAITarget(p){
 
         const nearest=getNearestBlueToBall();
 
+        /*
+           لا يوجد شرط مسافة هنا.
+           أقرب لاعب أزرق غير الحارس يذهب للكرة.
+        */
+
         if(nearest.player===p){
 
             return{
@@ -1979,11 +1923,6 @@ function getTeamAITarget(p){
 
     }
 
-
-    /*
-       الوضع الافتراضي:
-       العودة إلى الخانة الأصلية.
-    */
 
     return{
         x:p.anchorX*gameWidth,
@@ -2008,10 +1947,6 @@ function updateTeamAI(dt){
 
         const p=teamPlayers[i];
 
-        /*
-           اللاعب الذي يتحكم به المستخدم لا يتحرك بواسطة AI.
-        */
-
         if(i===activePlayerIndex)
             continue;
 
@@ -2029,12 +1964,6 @@ function updateTeamAI(dt){
         );
 
     }
-
-    /*
-       إبقاء التشكيل الأزرق متباعدًا.
-    */
-
-    separateBluePlayers();
 
 }
 
@@ -2400,6 +2329,12 @@ function getRedFormationTarget(p,index){
     }
 
 
+    /*
+       v3.10
+       الكرة الحرة:
+       أقرب لاعب أحمر يذهب إليها مباشرة.
+    */
+
     if(!ballOwner){
 
         const nearest=getNearestRedToBall();
@@ -2445,7 +2380,14 @@ function flashTackle(el){
 
 
 /* =================================================
+   v3.10
    افتكاك الأحمر
+   
+   مهم:
+   لا يوجد أي فحص لمسافة الأحمر من جسم اللاعب الأزرق.
+   
+   اللاعب الأحمر يستطيع أخذ الكرة فقط إذا
+   كانت المسافة بينه وبين الكرة نفسها <= 32px.
 ================================================= */
 
 function tryRedTackle(){
@@ -2463,6 +2405,12 @@ function tryRedTackle(){
     if(!p||p.isGuard)
         return;
 
+
+    /*
+       أهم تغيير:
+       لا نستخدم مسافة p إلى ballOwner.
+       نستخدم مسافة p إلى الكرة.
+    */
 
     if(!isPlayerTouchingBall(p)){
 
@@ -2515,7 +2463,12 @@ function tryRedTackle(){
 
 
 /* =================================================
+   v3.10
    افتكاك الأزرق
+   
+   نفس المنطق:
+   لمس جسم الخصم وحده لا يكفي.
+   يجب لمس الكرة نفسها.
 ================================================= */
 
 function tryBlueTackle(){
@@ -2533,6 +2486,12 @@ function tryBlueTackle(){
     if(!p||p.isGuard)
         return;
 
+
+    /*
+       أهم تغيير:
+       لا نستخدم مسافة p إلى ballOwner.
+       نستخدم مسافة p إلى الكرة.
+    */
 
     if(!isPlayerTouchingBall(p)){
 
@@ -2583,7 +2542,7 @@ function tryBlueTackle(){
 
 
 /* =================================================
-   أفضل تمريرة حمراء
+   اختيار أفضل تمريرة حمراء
 ================================================= */
 
 function findBestRedPasser(p){
@@ -2679,7 +2638,7 @@ function findBestRedPasser(p){
 
 
 /* =================================================
-   أفضل تمريرة زرقاء
+   اختيار أفضل تمريرة زرقاء
 ================================================= */
 
 function findBestBluePasser(p){
@@ -2894,12 +2853,10 @@ function bluePass(p,q){
     const speed=5.2;
 
     ballVX=
-        Math.cos(aimAngle)*
-        speed;
+        Math.cos(aimAngle)*speed;
 
     ballVY=
-        Math.sin(aimAngle)*
-        speed;
+        Math.sin(aimAngle)*speed;
 
     ballMoving=true;
 
@@ -2957,6 +2914,10 @@ function updateRedWithBall(p,dt){
         gameHeight-p.y;
 
 
+    /*
+       التسديد
+    */
+
     const shootRange=
         nearestBlueD<80
         ?RED_SHOOT_DISTANCE*.70
@@ -2984,6 +2945,10 @@ function updateRedWithBall(p,dt){
 
     }
 
+
+    /*
+       التمرير
+    */
 
     if(redPassCooldown<=0){
 
@@ -3026,6 +2991,10 @@ function updateRedWithBall(p,dt){
     if(redDecisionCooldown>0)
         return;
 
+
+    /*
+       المراوغة
+    */
 
     let targetY=
         Math.min(
@@ -3135,6 +3104,12 @@ function updateRedWithBall(p,dt){
 
 function updateOpponentAI(dt){
 
+    /*
+       لا ننقص redPassCooldown هنا.
+       updateRedWithBall هو المسؤول عنه.
+    */
+
+
     if(
         ballOwner&&
         isTeamPlayer(ballOwner)
@@ -3173,6 +3148,11 @@ function updateOpponentAI(dt){
             );
 
 
+        /*
+           الكرة حرة:
+           أقرب لاعب أحمر يلاحقها مباشرة.
+        */
+
         if(
             !ballOwner&&
             !p.isGuard
@@ -3207,6 +3187,11 @@ function updateOpponentAI(dt){
             dt
         );
 
+
+        /*
+           v3.10
+           محاولة الافتكاك أصبحت تعتمد على لمس الكرة.
+        */
 
         if(
             ballOwner&&
@@ -3717,60 +3702,21 @@ function resetAfterGoal(){
     ball.style.opacity="1";
 
 
-    /*
-       ==========================================
-       v3.11
-       توزيع الأزرق الجديد
-       ==========================================
-    */
-
-    /*
-       المهاجم المركزي
-    */
-
     teamPlayers[0].x=gameWidth*.50;
-    teamPlayers[0].y=gameHeight*.32;
+    teamPlayers[0].y=gameHeight*.62;
 
+    teamPlayers[1].x=gameWidth*.15;
+    teamPlayers[1].y=gameHeight*.58;
 
-    /*
-       الجناح الأيسر
-       قريب من خط التماس
-       داخل نصف ملعب الخصم
-    */
-
-    teamPlayers[1].x=gameWidth*.12;
-    teamPlayers[1].y=gameHeight*.30;
-
-
-    /*
-       الجناح الأيمن
-       قريب من خط التماس
-       داخل نصف ملعب الخصم
-    */
-
-    teamPlayers[2].x=gameWidth*.88;
-    teamPlayers[2].y=gameHeight*.30;
-
-
-    /*
-       المدافع
-    */
+    teamPlayers[2].x=gameWidth*.85;
+    teamPlayers[2].y=gameHeight*.58;
 
     teamPlayers[3].x=gameWidth*.50;
-    teamPlayers[3].y=gameHeight*.70;
-
-
-    /*
-       الحارس
-    */
+    teamPlayers[3].y=gameHeight*.75;
 
     teamPlayers[4].x=gameWidth*.50;
     teamPlayers[4].y=gameHeight*.94;
 
-
-    /*
-       الفريق الأحمر يبقى كما هو
-    */
 
     opponents[0].x=gameWidth*.50;
     opponents[0].y=gameHeight*.38;
@@ -4739,27 +4685,6 @@ for(let i=0;i<opponents.length;i++){
 
 
 updateScore();
-
-
-/*
-   v3.11
-   البداية بالتشكيل الجديد للأزرق.
-*/
-
-teamPlayers[0].x=gameWidth*.50;
-teamPlayers[0].y=gameHeight*.32;
-
-teamPlayers[1].x=gameWidth*.12;
-teamPlayers[1].y=gameHeight*.30;
-
-teamPlayers[2].x=gameWidth*.88;
-teamPlayers[2].y=gameHeight*.30;
-
-teamPlayers[3].x=gameWidth*.50;
-teamPlayers[3].y=gameHeight*.70;
-
-teamPlayers[4].x=gameWidth*.50;
-teamPlayers[4].y=gameHeight*.94;
 
 
 ballOwner=teamPlayers[0];
