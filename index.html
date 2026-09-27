@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<title>كرة القدم ⚽️ v3</title>
+<title>كرة القدم ⚽️ v3.1</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#16803c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:none;overscroll-behavior:none}
@@ -23,8 +23,6 @@ body{display:flex;justify-content:center;align-items:center}
 #score{position:absolute;top:82px;left:50%;transform:translateX(-50%);color:#fff;font-size:24px;font-weight:bold;background:rgba(0,0,0,.35);padding:5px 18px;border-radius:20px;z-index:35;text-shadow:0 2px 4px #000}
 #goalMessage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.7);color:#fff;font-size:42px;font-weight:900;text-shadow:0 4px 10px rgba(0,0,0,.8);background:rgba(0,0,0,.45);padding:15px 28px;border-radius:25px;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
 #goalMessage.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-
-/* اللاعبون يستخدمون transform لتحسين الأداء */
 .playerUnit{position:absolute;width:38px;height:38px;left:0;top:0;will-change:transform;border-radius:50%;border:4px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.35);z-index:10;display:flex;justify-content:center;align-items:center;font-size:23px;touch-action:none;transition:box-shadow .15s}
 .playerUnit.blue{background:#1769ff}.playerUnit.red{background:#e53935}
 .playerUnit.controlled{box-shadow:0 0 0 3px rgba(255,215,0,.45),0 4px 10px rgba(0,0,0,.35)}
@@ -32,7 +30,6 @@ body{display:flex;justify-content:center;align-items:center}
 @keyframes tackleFlash{0%{box-shadow:0 0 0 0 rgba(255,80,80,.9)}100%{box-shadow:0 0 0 22px rgba(255,80,80,0)}}
 .controlArrow{position:absolute;left:50%;top:-19px;transform:translateX(-50%);color:#ffd400;font-size:15px;font-weight:900;line-height:1;text-shadow:0 2px 3px #000;opacity:0;pointer-events:none}
 .playerUnit.controlled .controlArrow{opacity:1}
-
 #ball{position:absolute;width:22px;height:22px;left:0;top:0;will-change:transform;border-radius:50%;background:#fff;border:2px solid #222;box-shadow:0 3px 7px rgba(0,0,0,.35);z-index:9;display:flex;justify-content:center;align-items:center;font-size:14px;pointer-events:none}
 #aim{position:absolute;width:78px;height:4px;left:0;top:0;will-change:transform;background:#ffd400;border-radius:5px;z-index:8;pointer-events:none;box-shadow:0 0 6px rgba(255,215,0,.8)}
 #aim::after{content:"";position:absolute;right:-2px;top:50%;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:14px solid #ffd400;transform:translateY(-50%)}
@@ -112,7 +109,7 @@ let gameHeight=game.clientHeight;
 ================================================= */
 const FRICTION=0.985;
 const MAX_POWER=100;
-const POWER_SPEED=90;           // نسبة/ثانية
+const POWER_SPEED=90;
 const KICK_CHARGE_DISTANCE=35;
 const PLAYER_RADIUS=19;
 const BALL_RADIUS=11;
@@ -120,7 +117,7 @@ const BALL_PICKUP_BLUE=32;
 const BALL_PICKUP_RED=30;
 const GOAL_WIDTH=190;
 const POST_WIDTH=12;
-const COLLISION_MIN_DIST=36;    // أقل مسافة بين لاعبين
+const COLLISION_MIN_DIST=36;
 const SIDE_WALL_RADIUS=15;
 
 const MANUAL_SWITCH_MIN_DIST=55;
@@ -141,13 +138,19 @@ const teamPlayers=[
 
 /* =================================================
    الفريق الأحمر (يهاجم للأسفل)
+   ← توزيع مبدئي أفضل: مدافع خلف، جناحين يمين/يسار، مهاجم وبيلدر في الوسط
 ================================================= */
 const opponents=[
-    {id:"opponent1",el:document.getElementById("opponent1"),role:"forward",x:gameWidth*.50,y:gameHeight*.20,anchorX:.50,anchorY:.20,speed:85},
-    {id:"opponent2",el:document.getElementById("opponent2"),role:"wing",x:gameWidth*.18,y:gameHeight*.38,anchorX:.18,anchorY:.38,speed:88},
-    {id:"opponent3",el:document.getElementById("opponent3"),role:"wing",x:gameWidth*.82,y:gameHeight*.38,anchorX:.82,anchorY:.38,speed:88},
-    {id:"opponent4",el:document.getElementById("opponent4"),role:"defense",defensive:true,x:gameWidth*.50,y:gameHeight*.16,anchorX:.50,anchorY:.16,speed:70},
-    {id:"opponent5",el:document.getElementById("opponent5"),role:"builder",x:gameWidth*.70,y:gameHeight*.28,anchorX:.70,anchorY:.28,speed:80}
+    {id:"opponent1",el:document.getElementById("opponent1"),role:"forward",
+     x:gameWidth*.50,y:gameHeight*.18,anchorX:.50,anchorY:.18,speed:85},
+    {id:"opponent2",el:document.getElementById("opponent2"),role:"wing",
+     x:gameWidth*.15,y:gameHeight*.32,anchorX:.15,anchorY:.32,speed:88},
+    {id:"opponent3",el:document.getElementById("opponent3"),role:"wing",
+     x:gameWidth*.85,y:gameHeight*.32,anchorX:.85,anchorY:.32,speed:88},
+    {id:"opponent4",el:document.getElementById("opponent4"),role:"defense",defensive:true,
+     x:gameWidth*.50,y:gameHeight*.12,anchorX:.50,anchorY:.12,speed:70},
+    {id:"opponent5",el:document.getElementById("opponent5"),role:"builder",
+     x:gameWidth*.50,y:gameHeight*.30,anchorX:.50,anchorY:.30,speed:80}
 ];
 
 /* =================================================
@@ -198,6 +201,7 @@ const RED_SHOOT_DISTANCE=235;
 const RED_PASS_DISTANCE=270;
 const RED_DRIBBLE_DISTANCE=120;
 const RED_NEAR_BALL_DIST=210;
+const RED_MIN_SEPARATION=52;   // ← منع تكدس الأحمر
 
 /* =================================================
    أدوات عامة
@@ -253,7 +257,6 @@ function showHint(text,duration=900){
 ================================================= */
 function autoSelectClosestPlayer(){
     if(goalScored)return;
-
     if(ballOwner&&isTeamPlayer(ballOwner)){
         const index=teamPlayers.indexOf(ballOwner);
         if(index!==-1&&index!==activePlayerIndex){
@@ -262,10 +265,8 @@ function autoSelectClosestPlayer(){
         }
         return;
     }
-
     const now=Date.now();
     if(now-lastAutoSwitchTime<AUTO_SWITCH_COOLDOWN)return;
-
     let closestIndex=-1,closestDistance=Infinity;
     for(let i=0;i<teamPlayers.length;i++){
         const p=teamPlayers[i];
@@ -273,7 +274,6 @@ function autoSelectClosestPlayer(){
         if(d<closestDistance){closestDistance=d;closestIndex=i}
     }
     if(closestIndex===-1)return;
-
     const active=getActivePlayer();
     const activeDistance=distanceBetween(active.x,active.y,ballX,ballY);
     if(closestIndex!==activePlayerIndex&&closestDistance<activeDistance-20){
@@ -294,7 +294,7 @@ function placeBallWithOwner(){
 }
 
 /* =================================================
-   الرسم (باستخدام transform)
+   الرسم
 ================================================= */
 function drawPlayer(p){
     p.el.style.transform=`translate3d(${p.x-19}px,${p.y-19}px,0)`;
@@ -330,14 +330,14 @@ function getRoleBounds(p){
         if(p.role==="wing")return{minY:gameHeight*.24,maxY:gameHeight*.78};
         return{minY:55,maxY:gameHeight*.62};
     }
-    if(p.defensive)return{minY:gameHeight*.10,maxY:gameHeight*.24};
-    if(p.role==="builder")return{minY:gameHeight*.28,maxY:gameHeight*.60};
-    if(p.role==="wing")return{minY:gameHeight*.22,maxY:gameHeight*.76};
-    return{minY:gameHeight*.12,maxY:gameHeight*.40};
+    if(p.defensive)return{minY:gameHeight*.08,maxY:gameHeight*.22};
+    if(p.role==="builder")return{minY:gameHeight*.24,maxY:gameHeight*.55};
+    if(p.role==="wing")return{minY:gameHeight*.20,maxY:gameHeight*.72};
+    return{minY:gameHeight*.10,maxY:gameHeight*.38};
 }
 
 /* =================================================
-   حركة AI (deltaTime-aware)
+   حركة AI
 ================================================= */
 function moveAITo(p,targetX,targetY,speed,dt){
     let dx=targetX-p.x,dy=targetY-p.y;
@@ -352,7 +352,7 @@ function moveAITo(p,targetX,targetY,speed,dt){
 }
 
 /* =================================================
-   تصادم بسيط بين اللاعبين
+   تصادم بسيط بين كل اللاعبين
 ================================================= */
 function resolveCollisions(){
     const all=teamPlayers.concat(opponents);
@@ -374,6 +374,36 @@ function resolveCollisions(){
 }
 
 /* =================================================
+   منع تكدس لاعبي الأحمر فوق بعضهم
+================================================= */
+function separateRedPlayers(){
+    for(let i=0;i<opponents.length;i++){
+        for(let j=i+1;j<opponents.length;j++){
+            const a=opponents[i];
+            const b=opponents[j];
+            const dx=b.x-a.x;
+            const dy=b.y-a.y;
+            const dist=Math.sqrt(dx*dx+dy*dy);
+            if(dist<RED_MIN_SEPARATION&&dist>0.001){
+                const push=(RED_MIN_SEPARATION-dist)*0.5;
+                const nx=dx/dist;
+                const ny=dy/dist;
+                a.x-=nx*push;
+                a.y-=ny*push;
+                b.x+=nx*push;
+                b.y+=ny*push;
+                a.x=clamp(a.x,PLAYER_RADIUS,gameWidth-PLAYER_RADIUS);
+                b.x=clamp(b.x,PLAYER_RADIUS,gameWidth-PLAYER_RADIUS);
+                const ba=getRoleBounds(a);
+                const bb=getRoleBounds(b);
+                a.y=clamp(a.y,ba.minY,ba.maxY);
+                b.y=clamp(b.y,bb.minY,bb.maxY);
+            }
+        }
+    }
+}
+
+/* =================================================
    ذكاء الفريق الأزرق
 ================================================= */
 function getTeamAITarget(p){
@@ -387,7 +417,6 @@ function getTeamAITarget(p){
         }
         return{x:ballX,y:Math.min(gameHeight*.58,ballY+25)};
     }
-
     if(!ballOwner){
         if(p.role==="defense")return{x:p.anchorX*gameWidth,y:clamp(ballY+85,gameHeight*.60,gameHeight*.74)};
         if(p.role==="wing"){
@@ -396,7 +425,6 @@ function getTeamAITarget(p){
         }
         return{x:ballX,y:Math.min(ballY+20,gameHeight*.60)};
     }
-
     if(isTeamPlayer(ballOwner)){
         if(p.role==="defense"){
             if(p.defensiveAnchor)return{x:gameWidth*.70+(ballX-gameWidth*.70)*.12,y:gameHeight*.82};
@@ -431,7 +459,7 @@ function updateTeamAI(dt){
 }
 
 /* =================================================
-   تمركز الأحمر
+   اختيار الضاغط من الأحمر
 ================================================= */
 function chooseRedPressPlayer(){
     if(!ballOwner||!isTeamPlayer(ballOwner)){
@@ -441,7 +469,7 @@ function chooseRedPressPlayer(){
     let best=-1,bestScore=Infinity;
     for(let i=0;i<opponents.length;i++){
         const p=opponents[i];
-        if(p.defensive)continue;
+        if(p.defensive)continue;   // المدافع الأصيل لا يضغط
         let d=distanceBetween(p.x,p.y,ballX,ballY);
         if(p.role==="wing")d+=25;
         if(p.role==="forward")d-=15;
@@ -451,50 +479,98 @@ function chooseRedPressPlayer(){
     redPressIndex=best;
 }
 
+/* =================================================
+   تمركز الأحمر - النسخة المُصلَحة (v3.1)
+================================================= */
 function getRedFormationTarget(p,index){
+    /* ================================
+       الحالة 1: الكرة مع الأحمر (هجوم)
+    ================================ */
     if(ballOwner&&opponents.indexOf(ballOwner)!==-1){
         if(p===ballOwner)return{x:p.x,y:p.y};
+
         if(p.role==="defense"){
-            if(p.defensive)return{x:gameWidth*.50+(ballX-gameWidth*.50)*.10,y:gameHeight*.17};
-            return{x:gameWidth*.70+(ballX-gameWidth*.70)*.18,y:clamp(ballY-55,gameHeight*.28,gameHeight*.52)};
+            if(p.defensive){
+                return{x:gameWidth*.50+(ballX-gameWidth*.50)*.10,y:gameHeight*.15};
+            }
+            return{x:clamp(gameWidth*.30+(ballX-gameWidth*.30)*.15,45,gameWidth-45),
+                   y:clamp(ballY-45,gameHeight*.26,gameHeight*.44)};
         }
         if(p.role==="wing"){
+            // كل جناح يبقى في جهته المحددة (anchorX)
             return{
-                x:clamp(p.anchorX*gameWidth+(ballX-p.anchorX*gameWidth)*.12,40,gameWidth-40),
-                y:clamp(ballY-35,gameHeight*.24,gameHeight*.58)
+                x:p.anchorX*gameWidth,
+                y:clamp(p.y+2,gameHeight*.28,gameHeight*.56)
             };
         }
-        return{x:clamp(ballX+(gameWidth/2-ballX)*.25,55,gameWidth-55),y:Math.max(gameHeight*.13,ballY-80)};
+        return{x:gameWidth*.50+(ballX-gameWidth*.50)*.30,y:gameHeight*.16};
     }
 
+    /* ================================
+       الحالة 2: الكرة مع الأزرق (دفاع)
+       ← هنا الإصلاح الرئيسي للتكدس
+    ================================ */
     if(ballOwner&&isTeamPlayer(ballOwner)){
         const isPresser=index===redPressIndex;
-        if(isPresser)return{x:ballX,y:ballY};
 
-        if(p.role==="defense"){
-            if(p.defensive)return{x:gameWidth*.50+(ballX-gameWidth*.50)*.12,y:gameHeight*.17};
-            return{x:clamp(gameWidth*.70+(ballX-gameWidth*.70)*.12,55,gameWidth-55),y:clamp(ballY-25,gameHeight*.25,gameHeight*.46)};
+        // 🔴 الضاغط: يذهب مباشرة للكرة
+        if(isPresser){
+            return{x:ballX,y:ballY};
         }
-        if(p.role==="wing"){
-            const side=p.anchorX<.5?-1:1;
+
+        // 🔴 المدافعون: توزيع واضح
+        if(p.role==="defense"){
+            if(p.defensive){
+                // المدافع الأصيل (opponent4): قريب من مرمى الأزرق، يتحرك أفقياً فقط
+                return{
+                    x:gameWidth*.50+(ballX-gameWidth*.50)*.15,
+                    y:gameHeight*.15
+                };
+            }
+            // مدافع آخر: يبقى في الجهة المقابلة للكرة
+            const oppositeSide=(ballX<gameWidth/2)?1:-1;
             return{
-                x:clamp(p.anchorX*gameWidth+side*35,45,gameWidth-45),
-                y:clamp(p.anchorY*gameHeight+(ballY-p.anchorY*gameHeight)*.18,gameHeight*.28,gameHeight*.62)
+                x:clamp(gameWidth*.50+oppositeSide*gameWidth*.24,45,gameWidth-45),
+                y:gameHeight*.30
             };
         }
-        return{x:clamp(gameWidth*.50+(ballX-gameWidth*.50)*.18,55,gameWidth-55),y:gameHeight*.22};
+
+        // 🔴 الأجنحة: كل واحد في جهته، مع فرق Y واضح
+        if(p.role==="wing"){
+            const side=p.anchorX<.5?-1:1;
+            const ballSide=ballX<gameWidth/2?-1:1;
+            const isBallSide=(side===ballSide);
+            return{
+                x:clamp(p.anchorX*gameWidth+(isBallSide?side*22:0),45,gameWidth-45),
+                y:isBallSide?gameHeight*.44:gameHeight*.30
+            };
+        }
+
+        // 🔴 البيلدر: يبقى في الوسط كصانع ألعاب دفاعي
+        return{
+            x:gameWidth*.50+(ballX-gameWidth*.50)*.40,
+            y:gameHeight*.24
+        };
     }
 
+    /* ================================
+       الحالة 3: الكرة حرة
+    ================================ */
     if(!ballOwner){
         const nearest=getNearestRedToBall();
-        if(nearest.player===p&&nearest.distance<RED_NEAR_BALL_DIST)return{x:ballX,y:ballY};
+        if(nearest.player===p&&nearest.distance<RED_NEAR_BALL_DIST){
+            return{x:ballX,y:ballY};
+        }
     }
 
+    /* ================================
+       الحالة 4: افتراضي - ارجع للمركز
+    ================================ */
     return{x:p.anchorX*gameWidth,y:p.anchorY*gameHeight};
 }
 
 /* =================================================
-   خطف الكرة من الأزرق (مع مؤثر بصري)
+   خطف الكرة
 ================================================= */
 function flashTackle(el){
     el.classList.remove("tackleFlash");
@@ -540,13 +616,11 @@ function findBestRedPasser(p){
         if(q===p)continue;
         const dist=distanceBetween(p.x,p.y,q.x,q.y);
         if(dist<45||dist>RED_PASS_DISTANCE)continue;
-
         const forward=q.y-p.y;
         let score=forward*1.4-dist*.35;
         if(q.role==="forward")score+=35;
         if(q.role==="wing")score+=15;
         if(!redCanPassTo(p,q))score-=100;
-
         if(score>bestScore){bestScore=score;best=q}
     }
     return best;
@@ -588,7 +662,6 @@ function updateRedWithBall(p,dt){
         redShoot(p);
         return;
     }
-
     if(redPassCooldown<=0){
         const q=findBestRedPasser(p);
         if(q){
@@ -654,6 +727,9 @@ function updateOpponentAI(dt){
         }
     }
 
+    // ✅ منع تكدس الأحمر فوق بعضهم
+    separateRedPlayers();
+
     if(ballOwner&&opponents.indexOf(ballOwner)!==-1)placeBallWithOwner();
 }
 
@@ -697,7 +773,7 @@ function tryManualPlayerSwitch(){
 }
 
 /* =================================================
-   حركة اللاعب (deltaTime-aware)
+   حركة اللاعب المُتحكَّم به
 ================================================= */
 function movePlayer(dx,dy,dt){
     const length=Math.sqrt(dx*dx+dy*dy);
@@ -711,11 +787,10 @@ function movePlayer(dx,dy,dt){
 }
 
 /* =================================================
-   التقاط الكرة (مع معالجة أفضل)
+   التقاط الكرة
 ================================================= */
 function tryPickupBall(){
     if(ballOwner)return;
-
     let closest=null,closestDistance=Infinity;
 
     for(let i=0;i<teamPlayers.length;i++){
@@ -811,11 +886,14 @@ function resetAfterGoal(){
     teamPlayers[2].x=gameWidth*.80;teamPlayers[2].y=gameHeight*.55;
     teamPlayers[3].x=gameWidth*.30;teamPlayers[3].y=gameHeight*.70;
     teamPlayers[4].x=gameWidth*.70;teamPlayers[4].y=gameHeight*.82;
-    opponents[0].x=gameWidth*.50;opponents[0].y=gameHeight*.20;
-    opponents[1].x=gameWidth*.20;opponents[1].y=gameHeight*.38;
-    opponents[2].x=gameWidth*.80;opponents[2].y=gameHeight*.38;
-    opponents[3].x=gameWidth*.50;opponents[3].y=gameHeight*.17;
-    opponents[4].x=gameWidth*.70;opponents[4].y=gameHeight*.30;
+
+    // ← إعادة الأحمر للتوزيع الجديد المُفصَّل
+    opponents[0].x=gameWidth*.50;opponents[0].y=gameHeight*.18;
+    opponents[1].x=gameWidth*.15;opponents[1].y=gameHeight*.32;
+    opponents[2].x=gameWidth*.85;opponents[2].y=gameHeight*.32;
+    opponents[3].x=gameWidth*.50;opponents[3].y=gameHeight*.12;
+    opponents[4].x=gameWidth*.50;opponents[4].y=gameHeight*.30;
+
     activePlayerIndex=0;
     lastManualSwitchTime=0;
     lastAutoSwitchTime=0;
@@ -831,7 +909,7 @@ function resetAfterGoal(){
 }
 
 /* =================================================
-   تحديث الكرة (dt-aware)
+   تحديث الكرة
 ================================================= */
 function updateBall(dt){
     if(ballOwner){
@@ -841,14 +919,12 @@ function updateBall(dt){
     }
     if(!ballMoving)return;
 
-    // استخدام خطوات فرعية لتجنب "القفز" عبر القوائم عند السرعات العالية
     const steps=Math.max(1,Math.ceil(Math.max(Math.abs(ballVX),Math.abs(ballVY))*dt/6));
     const subDt=dt/steps;
     for(let s=0;s<steps;s++){
         ballX+=ballVX*subDt*60;
         ballY+=ballVY*subDt*60;
         handleGoalPosts();
-
         const goal=checkGoal();
         if(goal){scoreGoal(goal);return}
 
@@ -862,27 +938,34 @@ function updateBall(dt){
         if(ballY>gameHeight-BALL_RADIUS&&outsideGoal){ballY=gameHeight-BALL_RADIUS;ballVY=-Math.abs(ballVY)}
     }
 
-    // friction مطبّق على أساس الزمن (نطبع نفس معدل 60fps)
     const frictionFactor=Math.pow(FRICTION,dt*60);
     ballVX*=frictionFactor;
     ballVY*=frictionFactor;
 
     const speed=Math.sqrt(ballVX*ballVX+ballVY*ballVY);
-    if(speed<0.15){
-        ballVX=0;ballVY=0;ballMoving=false;
-    }
+    if(speed<0.15){ballVX=0;ballVY=0;ballMoving=false}
 }
 
 /* =================================================
-   حلقة اللعبة (deltaTime)
+   شحن القوة
+================================================= */
+function updatePowerCharging(dt){
+    if(!charging)return;
+    power=Math.min(MAX_POWER,power+POWER_SPEED*dt);
+    powerBar.style.width=power+"%";
+}
+
+/* =================================================
+   حلقة اللعبة
 ================================================= */
 let lastTime=0;
 function update(now){
     if(!lastTime)lastTime=now;
     let dt=(now-lastTime)/1000;
     lastTime=now;
-    // حد أقصى لمنع القفزات الكبيرة عند العودة للتبويب
     if(dt>0.05)dt=0.05;
+
+    updatePowerCharging(dt);
 
     if(!goalScored){
         updatePlayersAI(dt);
@@ -1042,16 +1125,6 @@ kickControl.addEventListener("pointercancel",()=>{
 });
 
 /* =================================================
-   شحن القوة (deltaTime داخل حلقة اللعبة)
-================================================= */
-let powerChargeAccumulator=0;
-function updatePowerCharging(dt){
-    if(!charging)return;
-    power=Math.min(MAX_POWER,power+POWER_SPEED*dt);
-    powerBar.style.width=power+"%";
-}
-
-/* =================================================
    منع التكبير
 ================================================= */
 let lastTouchEnd=0;
@@ -1069,9 +1142,7 @@ game.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
 /* =================================================
    إعادة الحساب عند العودة من التبويب
 ================================================= */
-document.addEventListener("visibilitychange",()=>{
-    lastTime=0;
-});
+document.addEventListener("visibilitychange",()=>{lastTime=0});
 
 /* =================================================
    تغيير الحجم
@@ -1087,30 +1158,6 @@ window.addEventListener("resize",()=>{
     }
     if(ballOwner)placeBallWithOwner();
 });
-
-/* =================================================
-   دمج شحن القوة في حلقة اللعبة الرئيسية
-================================================= */
-const originalUpdate=update;
-update=function(now){
-    if(!lastTime)lastTime=now;
-    let dt=(now-lastTime)/1000;
-    lastTime=now;
-    if(dt>0.05)dt=0.05;
-
-    updatePowerCharging(dt);
-
-    if(!goalScored){
-        updatePlayersAI(dt);
-        autoSelectClosestPlayer();
-        movePlayer(moveX,moveY,dt);
-        resolveCollisions();
-        updateBall(dt);
-        tryPickupBall();
-    }
-    draw();
-    requestAnimationFrame(update);
-};
 
 /* =================================================
    البداية
