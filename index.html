@@ -12,7 +12,7 @@ user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
 
-<title>كرة القدم ⚽️ v3.10</title>
+<title>كرة القدم ⚽️ v3.11</title>
 
 <style>
 
@@ -162,20 +162,69 @@ body{
     bottom:0
 }
 
-#score{
+
+/* =================================================
+   النتيجة + الوقت
+================================================= */
+
+#scoreBoard{
     position:absolute;
-    top:82px;
+    top:18px;
     left:50%;
     transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    z-index:35;
+}
+
+#score{
+    position:relative;
+    top:auto;
+    left:auto;
+    transform:none;
     color:#fff;
     font-size:24px;
     font-weight:bold;
     background:rgba(0,0,0,.35);
     padding:5px 18px;
     border-radius:20px;
-    z-index:35;
-    text-shadow:0 2px 4px #000
+    text-shadow:0 2px 4px #000;
+    white-space:nowrap
 }
+
+#matchTime{
+    color:#fff;
+    min-width:72px;
+    text-align:center;
+    font-size:21px;
+    font-weight:800;
+    background:rgba(0,0,0,.40);
+    padding:6px 10px;
+    border-radius:20px;
+    text-shadow:0 2px 4px #000;
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap
+}
+
+#matchTime.warning{
+    background:rgba(180,0,0,.70);
+    animation:timeWarning .7s infinite alternate
+}
+
+@keyframes timeWarning{
+    from{
+        transform:scale(1)
+    }
+    to{
+        transform:scale(1.08)
+    }
+}
+
+
+/* =================================================
+   رسالة الهدف
+================================================= */
 
 #goalMessage{
     position:absolute;
@@ -192,13 +241,79 @@ body{
     z-index:100;
     opacity:0;
     pointer-events:none;
-    transition:opacity .2s,transform .2s
+    transition:opacity .2s,transform .2s;
+    white-space:nowrap
 }
 
 #goalMessage.show{
     opacity:1;
     transform:translate(-50%,-50%) scale(1)
 }
+
+
+/* =================================================
+   رسالة نهاية المباراة
+================================================= */
+
+#matchEnd{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%) scale(.75);
+    width:min(90%,380px);
+    color:#fff;
+    text-align:center;
+    background:rgba(0,0,0,.78);
+    border:3px solid rgba(255,255,255,.8);
+    border-radius:25px;
+    padding:25px 20px;
+    z-index:200;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s,transform .25s;
+    box-shadow:0 8px 30px rgba(0,0,0,.5)
+}
+
+#matchEnd.show{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1)
+}
+
+#matchEndTitle{
+    font-size:34px;
+    font-weight:900;
+    margin-bottom:12px;
+    text-shadow:0 3px 8px #000
+}
+
+#matchEndScore{
+    font-size:38px;
+    font-weight:900;
+    margin-bottom:18px;
+    text-shadow:0 3px 8px #000
+}
+
+#newMatchButton{
+    border:none;
+    outline:none;
+    color:#fff;
+    background:#1769ff;
+    font-size:19px;
+    font-weight:bold;
+    padding:12px 28px;
+    border-radius:18px;
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
+    touch-action:manipulation
+}
+
+#newMatchButton:active{
+    transform:scale(.95)
+}
+
+
+/* =================================================
+   اللاعبين
+================================================= */
 
 .playerUnit{
     position:absolute;
@@ -267,6 +382,11 @@ body{
     opacity:1
 }
 
+
+/* =================================================
+   الكرة
+================================================= */
+
 #ball{
     position:absolute;
     width:22px;
@@ -313,9 +433,14 @@ body{
     transform:translateY(-50%)
 }
 
+
+/* =================================================
+   قوة الركلة
+================================================= */
+
 #powerBox{
     position:absolute;
-    top:18px;
+    top:62px;
     left:50%;
     transform:translateX(-50%);
     width:190px;
@@ -337,7 +462,7 @@ body{
 
 #powerText{
     position:absolute;
-    top:42px;
+    top:86px;
     left:50%;
     transform:translateX(-50%);
     color:#fff;
@@ -346,6 +471,11 @@ body{
     z-index:30;
     white-space:nowrap
 }
+
+
+/* =================================================
+   Joystick
+================================================= */
 
 #movePad{
     position:absolute;
@@ -411,6 +541,11 @@ body{
     transform:translateY(-50%)
 }
 
+
+/* =================================================
+   زر الركل
+================================================= */
+
 #kickControl{
     position:absolute;
     right:22px;
@@ -457,9 +592,14 @@ body{
     transition:opacity .1s
 }
 
+
+/* =================================================
+   المعلومات
+================================================= */
+
 #info{
     position:absolute;
-    top:72px;
+    top:112px;
     left:50%;
     transform:translateX(-50%);
     color:#fff;
@@ -485,7 +625,8 @@ body{
     z-index:50;
     opacity:0;
     pointer-events:none;
-    transition:opacity .3s
+    transition:opacity .3s;
+    white-space:nowrap
 }
 
 #hint.show{
@@ -516,11 +657,49 @@ body{
     <div class="goalCrossbar"></div>
 </div>
 
-<div id="score">0 - 0</div>
+
+<!-- =================================================
+     النتيجة والوقت
+================================================= -->
+
+<div id="scoreBoard">
+
+    <div id="score">
+        0 - 0
+    </div>
+
+    <div id="matchTime">
+        03:00
+    </div>
+
+</div>
+
 
 <div id="goalMessage">
     GOAL! ⚽️🎉
 </div>
+
+
+<!-- =================================================
+     نهاية المباراة
+================================================= -->
+
+<div id="matchEnd">
+
+    <div id="matchEndTitle">
+        انتهت المباراة 🏁
+    </div>
+
+    <div id="matchEndScore">
+        0 - 0
+    </div>
+
+    <button id="newMatchButton">
+        مباراة جديدة 🔄
+    </button>
+
+</div>
+
 
 <!-- الفريق الأزرق -->
 
@@ -544,6 +723,7 @@ body{
     <div class="controlArrow">▼</div>🧍
 </div>
 
+
 <!-- الفريق الأحمر -->
 
 <div id="opponent1" class="playerUnit red">🧍</div>
@@ -552,8 +732,11 @@ body{
 <div id="opponent4" class="playerUnit red">🧍</div>
 <div id="opponent5" class="playerUnit red">🧍</div>
 
+
 <div id="ball">⚽</div>
+
 <div id="aim"></div>
+
 
 <div id="powerBox">
     <div id="power"></div>
@@ -562,6 +745,7 @@ body{
 <div id="powerText">
     قوة الركلة
 </div>
+
 
 <div id="movePad">
 
@@ -574,12 +758,14 @@ body{
 
 </div>
 
+
 <div id="kickControl">
 
     <div id="kickButton">👟</div>
     <div id="kickDot"></div>
 
 </div>
+
 
 <div id="info">
     حرّك إصبعك للتحكم • الحركة والركل معًا
@@ -588,6 +774,7 @@ body{
 <div id="hint"></div>
 
 </div>
+
 
 <script>
 
@@ -612,8 +799,25 @@ const movePad=document.getElementById("movePad");
 const joystickCenter=document.getElementById("joystickCenter");
 
 const scoreElement=document.getElementById("score");
-const goalMessage=document.getElementById("goalMessage");
-const hintElement=document.getElementById("hint");
+
+const matchTimeElement=
+    document.getElementById("matchTime");
+
+const matchEndElement=
+    document.getElementById("matchEnd");
+
+const matchEndScoreElement=
+    document.getElementById("matchEndScore");
+
+const newMatchButton=
+    document.getElementById("newMatchButton");
+
+const goalMessage=
+    document.getElementById("goalMessage");
+
+const hintElement=
+    document.getElementById("hint");
+
 
 let gameWidth=game.clientWidth;
 let gameHeight=game.clientHeight;
@@ -630,25 +834,37 @@ const POWER_SPEED=90;
 
 const KICK_CHARGE_DISTANCE=35;
 
+
+/* =================================================
+   وقت المباراة
+================================================= */
+
+/*
+   مدة المباراة:
+   3 دقائق = 180 ثانية
+*/
+
+const MATCH_DURATION=180;
+
+let matchTimeRemaining=MATCH_DURATION;
+
+let matchRunning=true;
+
+let matchEnded=false;
+
+let matchTimerAccumulator=0;
+
+
+/* =================================================
+   اللاعب والكرة
+================================================= */
+
 const PLAYER_RADIUS=19;
 const BALL_RADIUS=11;
 
-/*
-   المسافة العادية لالتقاط الكرة الحرة
-*/
 const BALL_PICKUP_BLUE=32;
 const BALL_PICKUP_RED=30;
 
-/*
-   v3.10
-   الافتكاك لا يعتمد على لمس جسم اللاعب.
-   يجب لمس الكرة نفسها.
-   
-   نصف قطر اللاعب 19
-   نصف قطر الكرة 11
-   المجموع = 30
-   أضفنا هامشًا صغيرًا 2px.
-*/
 const BALL_STEAL_TOUCH_DISTANCE=32;
 
 const GOAL_WIDTH=190;
@@ -782,6 +998,7 @@ const opponents=[
 
     {
         id:"opponent5",
+        el:document.getElementById("opponent5"),
         el:document.getElementById("opponent5"),
         role:"defender",
         x:gameWidth*.50,
@@ -925,9 +1142,7 @@ function isOpponent(p){
 
 
 function clamp(v,a,b){
-
     return v<a?a:v>b?b:v;
-
 }
 
 
@@ -1067,14 +1282,7 @@ function getNearestBlueToBall(){
 
 
 /* =================================================
-   v3.10
-   هل اللاعب يلمس الكرة فعليًا؟
-   
-   مهم جدًا:
-   هذه الدالة لا تنظر إلى مسافة اللاعب
-   من جسم اللاعب المنافس.
-   
-   تنظر فقط إلى المسافة بين اللاعب والكرة.
+   لمس الكرة
 ================================================= */
 
 function isPlayerTouchingBall(p){
@@ -1096,7 +1304,7 @@ function isPlayerTouchingBall(p){
 
 
 /* =================================================
-   اتجاه اللاعب الحقيقي
+   اتجاه اللاعب
 ================================================= */
 
 function getPlayerDirection(p,fallbackAngle){
@@ -1159,12 +1367,198 @@ function showHint(text,duration=900){
 
 
 /* =================================================
+   المؤقت
+================================================= */
+
+function formatMatchTime(seconds){
+
+    const total=
+        Math.max(
+            0,
+            Math.ceil(seconds)
+        );
+
+    const minutes=
+        Math.floor(total/60);
+
+    const secs=
+        total%60;
+
+    return(
+        String(minutes).padStart(2,"0")+
+        ":"+
+        String(secs).padStart(2,"0")
+    );
+
+}
+
+
+function updateMatchTimerDisplay(){
+
+    matchTimeElement.textContent=
+        formatMatchTime(
+            matchTimeRemaining
+        );
+
+
+    if(matchTimeRemaining<=10&&matchTimeRemaining>0){
+
+        matchTimeElement.classList.add("warning");
+
+    }else{
+
+        matchTimeElement.classList.remove("warning");
+
+    }
+
+}
+
+
+/* =================================================
+   إنهاء المباراة
+================================================= */
+
+function endMatch(){
+
+    if(matchEnded)
+        return;
+
+
+    matchEnded=true;
+    matchRunning=false;
+
+    matchTimeRemaining=0;
+
+    updateMatchTimerDisplay();
+
+
+    /*
+       إيقاف الكرة
+    */
+
+    ballMoving=false;
+
+    ballVX=0;
+    ballVY=0;
+
+    ballOwner=null;
+
+
+    /*
+       إيقاف الشحن
+    */
+
+    charging=false;
+
+    power=0;
+
+    powerBar.style.width="0%";
+
+    kickTouching=false;
+    moveTouching=false;
+
+    movePointerId=null;
+    kickPointerId=null;
+
+    moveX=0;
+    moveY=0;
+
+    kickDirectionDistance=0;
+
+
+    joystickCenter.style.transform=
+        "translate(-50%,-50%)";
+
+    kickDot.style.opacity="0";
+
+    kickButton.style.transform=
+        "scale(1)";
+
+
+    /*
+       إخفاء سهم التصويب
+    */
+
+    aim.style.opacity="0";
+
+
+    /*
+       عرض النتيجة النهائية
+    */
+
+    matchEndScoreElement.textContent=
+        `${topScore} - ${bottomScore}`;
+
+
+    clearTimeout(goalTimer);
+
+    goalMessage.classList.remove("show");
+
+
+    matchEndElement.classList.add("show");
+
+}
+
+
+/* =================================================
+   تحديث وقت المباراة
+================================================= */
+
+function updateMatchTimer(dt){
+
+    if(!matchRunning||matchEnded||goalScored)
+        return;
+
+
+    matchTimeAccumulator+=dt;
+
+
+    /*
+       نخصم الوقت الحقيقي.
+       لا نعتمد على عدد إطارات الرسم.
+    */
+
+    if(matchTimeAccumulator>=1){
+
+        const wholeSeconds=
+            Math.floor(
+                matchTimeAccumulator
+            );
+
+        matchTimeRemaining-=
+            wholeSeconds;
+
+        matchTimeAccumulator-=
+            wholeSeconds;
+
+
+        if(matchTimeRemaining<=0){
+
+            matchTimeRemaining=0;
+
+            updateMatchTimerDisplay();
+
+            endMatch();
+
+            return;
+
+        }
+
+
+        updateMatchTimerDisplay();
+
+    }
+
+}
+
+
+/* =================================================
    اختيار اللاعب الأزرق
 ================================================= */
 
 function autoSelectClosestPlayer(){
 
-    if(goalScored)
+    if(goalScored||matchEnded)
         return;
 
     if(ballOwner&&isTeamPlayer(ballOwner)){
@@ -1284,6 +1678,7 @@ function drawBallAndAim(){
     aim.style.transform=
         `translate3d(${ballX}px,${ballY}px,0) rotate(${aimAngle}rad)`;
 
+
     if(ballMoving){
 
         aim.style.opacity="0.25";
@@ -1291,7 +1686,11 @@ function drawBallAndAim(){
     }else{
 
         aim.style.opacity=
-            (ballOwner&&isTeamPlayer(ballOwner))
+            (
+                ballOwner&&
+                isTeamPlayer(ballOwner)&&
+                !matchEnded
+            )
             ?"1"
             :"0";
 
@@ -1310,7 +1709,7 @@ function draw(){
 
         p.el.classList.toggle(
             "controlled",
-            i===activePlayerIndex
+            i===activePlayerIndex&&!matchEnded
         );
 
     }
@@ -1907,11 +2306,6 @@ function getTeamAITarget(p){
 
         const nearest=getNearestBlueToBall();
 
-        /*
-           لا يوجد شرط مسافة هنا.
-           أقرب لاعب أزرق غير الحارس يذهب للكرة.
-        */
-
         if(nearest.player===p){
 
             return{
@@ -1942,7 +2336,7 @@ function updateTeamAI(dt){
 
     for(let i=0;i<teamPlayers.length;i++){
 
-        if(goalScored)
+        if(goalScored||matchEnded)
             return;
 
         const p=teamPlayers[i];
@@ -2329,12 +2723,6 @@ function getRedFormationTarget(p,index){
     }
 
 
-    /*
-       v3.10
-       الكرة الحرة:
-       أقرب لاعب أحمر يذهب إليها مباشرة.
-    */
-
     if(!ballOwner){
 
         const nearest=getNearestRedToBall();
@@ -2380,14 +2768,7 @@ function flashTackle(el){
 
 
 /* =================================================
-   v3.10
    افتكاك الأحمر
-   
-   مهم:
-   لا يوجد أي فحص لمسافة الأحمر من جسم اللاعب الأزرق.
-   
-   اللاعب الأحمر يستطيع أخذ الكرة فقط إذا
-   كانت المسافة بينه وبين الكرة نفسها <= 32px.
 ================================================= */
 
 function tryRedTackle(){
@@ -2405,12 +2786,6 @@ function tryRedTackle(){
     if(!p||p.isGuard)
         return;
 
-
-    /*
-       أهم تغيير:
-       لا نستخدم مسافة p إلى ballOwner.
-       نستخدم مسافة p إلى الكرة.
-    */
 
     if(!isPlayerTouchingBall(p)){
 
@@ -2463,12 +2838,7 @@ function tryRedTackle(){
 
 
 /* =================================================
-   v3.10
    افتكاك الأزرق
-   
-   نفس المنطق:
-   لمس جسم الخصم وحده لا يكفي.
-   يجب لمس الكرة نفسها.
 ================================================= */
 
 function tryBlueTackle(){
@@ -2486,12 +2856,6 @@ function tryBlueTackle(){
     if(!p||p.isGuard)
         return;
 
-
-    /*
-       أهم تغيير:
-       لا نستخدم مسافة p إلى ballOwner.
-       نستخدم مسافة p إلى الكرة.
-    */
 
     if(!isPlayerTouchingBall(p)){
 
@@ -2542,7 +2906,7 @@ function tryBlueTackle(){
 
 
 /* =================================================
-   اختيار أفضل تمريرة حمراء
+   أفضل تمريرة حمراء
 ================================================= */
 
 function findBestRedPasser(p){
@@ -2638,7 +3002,7 @@ function findBestRedPasser(p){
 
 
 /* =================================================
-   اختيار أفضل تمريرة زرقاء
+   أفضل تمريرة زرقاء
 ================================================= */
 
 function findBestBluePasser(p){
@@ -2853,10 +3217,12 @@ function bluePass(p,q){
     const speed=5.2;
 
     ballVX=
-        Math.cos(aimAngle)*speed;
+        Math.cos(aimAngle)*
+        speed;
 
     ballVY=
-        Math.sin(aimAngle)*speed;
+        Math.sin(aimAngle)*
+        speed;
 
     ballMoving=true;
 
@@ -2914,10 +3280,6 @@ function updateRedWithBall(p,dt){
         gameHeight-p.y;
 
 
-    /*
-       التسديد
-    */
-
     const shootRange=
         nearestBlueD<80
         ?RED_SHOOT_DISTANCE*.70
@@ -2945,10 +3307,6 @@ function updateRedWithBall(p,dt){
 
     }
 
-
-    /*
-       التمرير
-    */
 
     if(redPassCooldown<=0){
 
@@ -2991,10 +3349,6 @@ function updateRedWithBall(p,dt){
     if(redDecisionCooldown>0)
         return;
 
-
-    /*
-       المراوغة
-    */
 
     let targetY=
         Math.min(
@@ -3104,12 +3458,6 @@ function updateRedWithBall(p,dt){
 
 function updateOpponentAI(dt){
 
-    /*
-       لا ننقص redPassCooldown هنا.
-       updateRedWithBall هو المسؤول عنه.
-    */
-
-
     if(
         ballOwner&&
         isTeamPlayer(ballOwner)
@@ -3128,7 +3476,7 @@ function updateOpponentAI(dt){
 
         const p=opponents[i];
 
-        if(goalScored)
+        if(goalScored||matchEnded)
             return;
 
 
@@ -3147,11 +3495,6 @@ function updateOpponentAI(dt){
                 i
             );
 
-
-        /*
-           الكرة حرة:
-           أقرب لاعب أحمر يلاحقها مباشرة.
-        */
 
         if(
             !ballOwner&&
@@ -3187,11 +3530,6 @@ function updateOpponentAI(dt){
             dt
         );
 
-
-        /*
-           v3.10
-           محاولة الافتكاك أصبحت تعتمد على لمس الكرة.
-        */
 
         if(
             ballOwner&&
@@ -3241,7 +3579,7 @@ function updatePlayersAI(dt){
 
 function tryManualPlayerSwitch(){
 
-    if(goalScored)
+    if(goalScored||matchEnded)
         return false;
 
 
@@ -3346,6 +3684,10 @@ function tryManualPlayerSwitch(){
 
 function movePlayer(dx,dy,dt){
 
+    if(matchEnded)
+        return;
+
+
     const length=
         Math.sqrt(
             dx*dx+
@@ -3394,7 +3736,7 @@ function movePlayer(dx,dy,dt){
 
 function tryPickupBall(){
 
-    if(ballOwner)
+    if(ballOwner||matchEnded)
         return;
 
 
@@ -3647,7 +3989,7 @@ function updateScore(){
 
 function scoreGoal(side){
 
-    if(goalScored)
+    if(goalScored||matchEnded)
         return;
 
 
@@ -3693,7 +4035,15 @@ function scoreGoal(side){
 }
 
 
+/* =================================================
+   إعادة اللعب بعد الهدف
+================================================= */
+
 function resetAfterGoal(){
+
+    if(matchEnded)
+        return;
+
 
     goalScored=false;
 
@@ -3972,7 +4322,7 @@ function updateBall(dt){
 
 function updatePowerCharging(dt){
 
-    if(!charging)
+    if(!charging||matchEnded)
         return;
 
 
@@ -4014,10 +4364,32 @@ function update(now){
         dt=.05;
 
 
-    updatePowerCharging(dt);
+    /*
+       تحديث مؤقت المباراة
+    */
+
+    if(!matchEnded){
+
+        updateMatchTimer(dt);
+
+    }
 
 
-    if(!goalScored){
+    /*
+       إذا انتهت المباراة لا نكمل تحديث اللعب
+    */
+
+    if(!matchEnded){
+
+        updatePowerCharging(dt);
+
+    }
+
+
+    if(
+        !goalScored&&
+        !matchEnded
+    ){
 
         updatePlayersAI(dt);
 
@@ -4064,6 +4436,10 @@ function updateMoveJoystick(
     clientX,
     clientY
 ){
+
+    if(matchEnded)
+        return;
+
 
     const rect=
         movePad.getBoundingClientRect();
@@ -4141,6 +4517,9 @@ movePad.addEventListener(
     "pointerdown",
     e=>{
 
+        if(matchEnded)
+            return;
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -4169,6 +4548,7 @@ movePad.addEventListener(
     e=>{
 
         if(
+            matchEnded||
             !moveTouching||
             e.pointerId!==movePointerId
         )
@@ -4187,7 +4567,10 @@ movePad.addEventListener(
 
 function stopMoveJoystick(e){
 
-    if(e.pointerId!==movePointerId)
+    if(
+        movePointerId!==null&&
+        e.pointerId!==movePointerId
+    )
         return;
 
 
@@ -4245,6 +4628,10 @@ function updateKickDirection(
     clientX,
     clientY
 ){
+
+    if(matchEnded)
+        return;
+
 
     const rect=
         kickControl.getBoundingClientRect();
@@ -4323,6 +4710,10 @@ function updateKickDirection(
 
 function checkKickCharging(){
 
+    if(matchEnded)
+        return;
+
+
     if(charging)
         return;
 
@@ -4340,6 +4731,7 @@ function checkKickCharging(){
 function startCharging(){
 
     if(
+        matchEnded||
         ballOwner!==getActivePlayer()||
         charging
     )
@@ -4357,6 +4749,10 @@ function startCharging(){
 
 
 function kick(){
+
+    if(matchEnded)
+        return;
+
 
     if(!charging)
         return;
@@ -4420,6 +4816,9 @@ kickControl.addEventListener(
     "pointerdown",
     e=>{
 
+        if(matchEnded)
+            return;
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -4468,6 +4867,7 @@ kickControl.addEventListener(
     e=>{
 
         if(
+            matchEnded||
             !kickTouching||
             e.pointerId!==kickPointerId
         )
@@ -4493,32 +4893,39 @@ kickControl.addEventListener(
     "pointerup",
     e=>{
 
-        if(e.pointerId!==kickPointerId)
+        if(
+            kickPointerId!==null&&
+            e.pointerId!==kickPointerId
+        )
             return;
 
 
         e.preventDefault();
 
 
-        updateKickDirection(
-            e.clientX,
-            e.clientY
-        );
+        if(!matchEnded){
+
+            updateKickDirection(
+                e.clientX,
+                e.clientY
+            );
 
 
-        if(
-            charging&&
-            ballOwner===getActivePlayer()
-        ){
+            if(
+                charging&&
+                ballOwner===getActivePlayer()
+            ){
 
-            kick();
+                kick();
 
-        }else{
+            }else{
 
-            charging=false;
-            power=0;
+                charging=false;
+                power=0;
 
-            powerBar.style.width="0%";
+                powerBar.style.width="0%";
+
+            }
 
         }
 
@@ -4559,6 +4966,207 @@ kickControl.addEventListener(
 
     }
 );
+
+
+/* =================================================
+   زر مباراة جديدة
+================================================= */
+
+newMatchButton.addEventListener(
+    "pointerdown",
+    e=>{
+
+        e.preventDefault();
+        e.stopPropagation();
+
+    }
+);
+
+
+newMatchButton.addEventListener(
+    "click",
+    e=>{
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        startNewMatch();
+
+    }
+);
+
+
+/* =================================================
+   بدء مباراة جديدة
+================================================= */
+
+function startNewMatch(){
+
+    clearTimeout(goalTimer);
+
+
+    /*
+       النتيجة
+    */
+
+    topScore=0;
+    bottomScore=0;
+
+    updateScore();
+
+
+    /*
+       الوقت
+    */
+
+    matchTimeRemaining=MATCH_DURATION;
+
+    matchRunning=true;
+
+    matchEnded=false;
+
+    matchTimeAccumulator=0;
+
+    updateMatchTimerDisplay();
+
+
+    /*
+       إخفاء شاشة النهاية
+    */
+
+    matchEndElement.classList.remove("show");
+
+    goalMessage.classList.remove("show");
+
+
+    /*
+       إعادة حالة اللعبة
+    */
+
+    goalScored=false;
+
+    activePlayerIndex=0;
+
+    lastManualSwitchTime=0;
+    lastAutoSwitchTime=0;
+
+    manualSwitchArmed=true;
+
+
+    redPressIndex=-1;
+    bluePressIndex=-1;
+
+    redTackleIndex=-1;
+    redTackleFrames=0;
+
+    blueTackleIndex=-1;
+    blueTackleFrames=0;
+
+    redDecisionCooldown=0;
+    redPassCooldown=0;
+
+    redLastDribbleSide=1;
+    redDribbleCommitFrames=0;
+
+
+    for(let i=0;i<opponents.length;i++){
+
+        redLastMoveX[i]=0;
+        redLastMoveY[i]=1;
+
+    }
+
+
+    /*
+       مراكز الفريق الأزرق
+    */
+
+    teamPlayers[0].x=gameWidth*.50;
+    teamPlayers[0].y=gameHeight*.62;
+
+    teamPlayers[1].x=gameWidth*.15;
+    teamPlayers[1].y=gameHeight*.58;
+
+    teamPlayers[2].x=gameWidth*.85;
+    teamPlayers[2].y=gameHeight*.58;
+
+    teamPlayers[3].x=gameWidth*.50;
+    teamPlayers[3].y=gameHeight*.75;
+
+    teamPlayers[4].x=gameWidth*.50;
+    teamPlayers[4].y=gameHeight*.94;
+
+
+    /*
+       مراكز الفريق الأحمر
+    */
+
+    opponents[0].x=gameWidth*.50;
+    opponents[0].y=gameHeight*.38;
+
+    opponents[1].x=gameWidth*.15;
+    opponents[1].y=gameHeight*.42;
+
+    opponents[2].x=gameWidth*.85;
+    opponents[2].y=gameHeight*.42;
+
+    opponents[3].x=gameWidth*.50;
+    opponents[3].y=gameHeight*.06;
+
+    opponents[4].x=gameWidth*.50;
+    opponents[4].y=gameHeight*.25;
+
+
+    /*
+       الكرة
+    */
+
+    ballOwner=teamPlayers[0];
+
+    ballMoving=false;
+
+    ballVX=0;
+    ballVY=0;
+
+    charging=false;
+
+    power=0;
+
+    powerBar.style.width="0%";
+
+    kickTouching=false;
+    moveTouching=false;
+
+    movePointerId=null;
+    kickPointerId=null;
+
+    moveX=0;
+    moveY=0;
+
+    kickDirectionDistance=0;
+
+    joystickCenter.style.transform=
+        "translate(-50%,-50%)";
+
+    kickDot.style.opacity="0";
+
+    kickButton.style.transform=
+        "scale(1)";
+
+
+    aimAngle=-Math.PI/2;
+
+    ball.style.opacity="1";
+
+    placeBallWithOwner();
+
+    updateScore();
+
+    updateMatchTimerDisplay();
+
+    draw();
+
+}
 
 
 /* =================================================
@@ -4622,7 +5230,14 @@ game.addEventListener(
 document.addEventListener(
     "visibilitychange",
     ()=>{
+
+        /*
+           لا نسمح للقفزة الزمنية عند العودة
+           من الخلفية أن تحسب عدة دقائق دفعة واحدة.
+        */
+
         lastTime=0;
+
     }
 );
 
@@ -4685,6 +5300,8 @@ for(let i=0;i<opponents.length;i++){
 
 
 updateScore();
+
+updateMatchTimerDisplay();
 
 
 ballOwner=teamPlayers[0];
