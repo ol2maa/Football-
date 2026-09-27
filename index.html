@@ -12,7 +12,7 @@ user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
 
-<title>كرة القدم ⚽️ v3.9</title>
+<title>كرة القدم ⚽️ v3.10</title>
 
 <style>
 
@@ -593,6 +593,7 @@ body{
 
 'use strict';
 
+
 /* =================================================
    عناصر الواجهة
 ================================================= */
@@ -632,8 +633,23 @@ const KICK_CHARGE_DISTANCE=35;
 const PLAYER_RADIUS=19;
 const BALL_RADIUS=11;
 
+/*
+   المسافة العادية لالتقاط الكرة الحرة
+*/
 const BALL_PICKUP_BLUE=32;
 const BALL_PICKUP_RED=30;
+
+/*
+   v3.10
+   الافتكاك لا يعتمد على لمس جسم اللاعب.
+   يجب لمس الكرة نفسها.
+   
+   نصف قطر اللاعب 19
+   نصف قطر الكرة 11
+   المجموع = 30
+   أضفنا هامشًا صغيرًا 2px.
+*/
+const BALL_STEAL_TOUCH_DISTANCE=32;
 
 const GOAL_WIDTH=190;
 const POST_WIDTH=12;
@@ -650,7 +666,6 @@ const AUTO_SWITCH_COOLDOWN=300;
 
 /* =================================================
    الفريق الأزرق
-   يهاجم للأعلى
 ================================================= */
 
 const teamPlayers=[
@@ -716,7 +731,6 @@ const teamPlayers=[
 
 /* =================================================
    الفريق الأحمر
-   يهاجم للأسفل
 ================================================= */
 
 const opponents=[
@@ -851,10 +865,6 @@ let redPassCooldown=0;
 let redLastDribbleSide=1;
 let redDribbleCommitFrames=0;
 
-/*
-   v3.9
-   آخر اتجاه لحركة كل لاعب أحمر
-*/
 let redLastMoveX=[];
 let redLastMoveY=[];
 
@@ -996,12 +1006,13 @@ function getNearestRedToBall(){
         if(p.isGuard)
             continue;
 
-        const d=distanceBetween(
-            p.x,
-            p.y,
-            ballX,
-            ballY
-        );
+        const d=
+            distanceBetween(
+                p.x,
+                p.y,
+                ballX,
+                ballY
+            );
 
         if(d<bd){
 
@@ -1031,12 +1042,13 @@ function getNearestBlueToBall(){
         if(p.isGuard)
             continue;
 
-        const d=distanceBetween(
-            p.x,
-            p.y,
-            ballX,
-            ballY
-        );
+        const d=
+            distanceBetween(
+                p.x,
+                p.y,
+                ballX,
+                ballY
+            );
 
         if(d<bd){
 
@@ -1055,7 +1067,35 @@ function getNearestBlueToBall(){
 
 
 /* =================================================
-   v3.9
+   v3.10
+   هل اللاعب يلمس الكرة فعليًا؟
+   
+   مهم جدًا:
+   هذه الدالة لا تنظر إلى مسافة اللاعب
+   من جسم اللاعب المنافس.
+   
+   تنظر فقط إلى المسافة بين اللاعب والكرة.
+================================================= */
+
+function isPlayerTouchingBall(p){
+
+    if(!p)
+        return false;
+
+    const d=
+        distanceBetween(
+            p.x,
+            p.y,
+            ballX,
+            ballY
+        );
+
+    return d<=BALL_STEAL_TOUCH_DISTANCE;
+
+}
+
+
+/* =================================================
    اتجاه اللاعب الحقيقي
 ================================================= */
 
@@ -1093,58 +1133,6 @@ function getPlayerDirection(p,fallbackAngle){
         y:Math.sin(fallbackAngle)
     };
 
-}
-
-
-/* =================================================
-   v3.9
-   هل المدافع أمام حامل الكرة؟
-================================================= */
-
-function isOpponentInFrontOfOwner(owner,chaser){
-
-    if(!owner||!chaser)
-        return false;
-
-    let ownerAngle=aimAngle;
-
-    if(isOpponent(owner)){
-
-        const index=opponents.indexOf(owner);
-
-        if(index>=0){
-
-            const dx=redLastMoveX[index]||0;
-            const dy=redLastMoveY[index]||0;
-
-            const len=Math.sqrt(dx*dx+dy*dy);
-
-            if(len>0.01)
-                ownerAngle=Math.atan2(dy,dx);
-
-        }
-
-    }
-
-    const ownerDirX=Math.cos(ownerAngle);
-    const ownerDirY=Math.sin(ownerAngle);
-
-    const dx=chaser.x-owner.x;
-    const dy=chaser.y-owner.y;
-
-    const dist=Math.sqrt(dx*dx+dy*dy);
-
-    if(dist<0.001)
-        return true;
-
-    const chaserDirX=dx/dist;
-    const chaserDirY=dy/dist;
-
-    const dot=
-        ownerDirX*chaserDirX+
-        ownerDirY*chaserDirY;
-
-    return dot>-0.10;
 }
 
 
@@ -1208,12 +1196,13 @@ function autoSelectClosestPlayer(){
         if(p.isGuard)
             continue;
 
-        const d=distanceBetween(
-            p.x,
-            p.y,
-            ballX,
-            ballY
-        );
+        const d=
+            distanceBetween(
+                p.x,
+                p.y,
+                ballX,
+                ballY
+            );
 
         if(d<closestDistance){
 
@@ -1516,10 +1505,6 @@ function moveAITo(p,targetX,targetY,speed,dt){
             bounds.minY,
             bounds.maxY
         );
-
-    /*
-       تسجيل اتجاه الحركة للاعب الأحمر
-    */
 
     if(isOpponent(p)){
 
@@ -1922,10 +1907,12 @@ function getTeamAITarget(p){
 
         const nearest=getNearestBlueToBall();
 
-        if(
-            nearest.player===p&&
-            nearest.distance<BLUE_NEAR_BALL_DIST
-        ){
+        /*
+           لا يوجد شرط مسافة هنا.
+           أقرب لاعب أزرق غير الحارس يذهب للكرة.
+        */
+
+        if(nearest.player===p){
 
             return{
                 x:ballX,
@@ -2018,11 +2005,6 @@ function chooseRedPressPlayer(){
         if(p.role==="defender")
             d-=10;
 
-        /*
-           الجناح القريب من جهة الكرة
-           يحصل على أفضلية بسيطة
-        */
-
         if(p.role==="wing"){
 
             const side=
@@ -2051,15 +2033,10 @@ function chooseRedPressPlayer(){
 
 
 /* =================================================
-   v3.9
-   أهداف أكثر واقعية للفريق الأحمر
+   أهداف الفريق الأحمر
 ================================================= */
 
 function getRedFormationTarget(p,index){
-
-    /*
-       الحارس
-    */
 
     if(p.isGuard){
 
@@ -2091,19 +2068,11 @@ function getRedFormationTarget(p,index){
         ballZone="blueHalf";
 
 
-    /*
-       الأحمر لديه الكرة
-    */
-
     if(ballOwner&&isOpponent(ballOwner)){
 
         if(p===ballOwner)
             return{x:p.x,y:p.y};
 
-
-        /*
-           المدافع يبقى خلف الهجمة
-        */
 
         if(p.role==="defender"){
 
@@ -2124,10 +2093,6 @@ function getRedFormationTarget(p,index){
 
         }
 
-
-        /*
-           الجناحان يفتحان الملعب
-        */
 
         if(p.role==="wing"){
 
@@ -2161,10 +2126,6 @@ function getRedFormationTarget(p,index){
         }
 
 
-        /*
-           المهاجم يتحرك أمام حامل الكرة
-        */
-
         if(p.role==="forward"){
 
             return{
@@ -2193,19 +2154,11 @@ function getRedFormationTarget(p,index){
     }
 
 
-    /*
-       الأزرق لديه الكرة
-    */
-
     if(ballOwner&&isTeamPlayer(ballOwner)){
 
         const isPresser=
             index===redPressIndex;
 
-
-        /*
-           لاعب واحد فقط يضغط
-        */
 
         if(isPresser){
 
@@ -2216,10 +2169,6 @@ function getRedFormationTarget(p,index){
 
         }
 
-
-        /*
-           المدافع يغلق العمق
-        */
 
         if(p.role==="defender"){
 
@@ -2271,11 +2220,6 @@ function getRedFormationTarget(p,index){
         }
 
 
-        /*
-           المهاجم الأحمر يتحرك أمام الكرة
-           ويجهز نفسه للهجمة المرتدة
-        */
-
         if(p.role==="forward"){
 
             if(ballZone==="redHalf"){
@@ -2325,11 +2269,6 @@ function getRedFormationTarget(p,index){
 
         }
 
-
-        /*
-           الجناح القريب من الكرة يتحرك نحوها
-           والآخر يحافظ على اتساع الملعب
-        */
 
         if(p.role==="wing"){
 
@@ -2391,17 +2330,16 @@ function getRedFormationTarget(p,index){
 
 
     /*
-       الكرة حرة
+       v3.10
+       الكرة الحرة:
+       أقرب لاعب أحمر يذهب إليها مباشرة.
     */
 
     if(!ballOwner){
 
         const nearest=getNearestRedToBall();
 
-        if(
-            nearest.player===p&&
-            nearest.distance<RED_NEAR_BALL_DIST
-        ){
+        if(nearest.player===p){
 
             return{
                 x:ballX,
@@ -2412,10 +2350,6 @@ function getRedFormationTarget(p,index){
 
     }
 
-
-    /*
-       العودة للتشكيل
-    */
 
     return{
         x:p.anchorX*gameWidth,
@@ -2446,7 +2380,14 @@ function flashTackle(el){
 
 
 /* =================================================
+   v3.10
    افتكاك الأحمر
+   
+   مهم:
+   لا يوجد أي فحص لمسافة الأحمر من جسم اللاعب الأزرق.
+   
+   اللاعب الأحمر يستطيع أخذ الكرة فقط إذا
+   كانت المسافة بينه وبين الكرة نفسها <= 32px.
 ================================================= */
 
 function tryRedTackle(){
@@ -2465,7 +2406,13 @@ function tryRedTackle(){
         return;
 
 
-    if(!isOpponentInFrontOfOwner(ballOwner,p)){
+    /*
+       أهم تغيير:
+       لا نستخدم مسافة p إلى ballOwner.
+       نستخدم مسافة p إلى الكرة.
+    */
+
+    if(!isPlayerTouchingBall(p)){
 
         redTackleFrames=0;
         redTackleIndex=-1;
@@ -2475,58 +2422,40 @@ function tryRedTackle(){
     }
 
 
-    const d=
-        distanceBetween(
-            p.x,
-            p.y,
-            ballOwner.x,
-            ballOwner.y
-        );
+    if(redTackleIndex!==redPressIndex)
+        redTackleFrames=0;
+
+    redTackleIndex=redPressIndex;
+
+    redTackleFrames++;
 
 
-    if(d<RED_TACKLE_DISTANCE){
+    if(redTackleFrames>=RED_TACKLE_FRAMES){
 
-        if(redTackleIndex!==redPressIndex)
-            redTackleFrames=0;
+        const prevOwner=ballOwner;
 
-        redTackleIndex=redPressIndex;
+        ballOwner=p;
 
-        redTackleFrames++;
+        ballMoving=false;
 
-
-        if(redTackleFrames>=RED_TACKLE_FRAMES){
-
-            const prevOwner=ballOwner;
-
-            ballOwner=p;
-
-            ballMoving=false;
-
-            ballVX=0;
-            ballVY=0;
-
-            redTackleFrames=0;
-            redTackleIndex=-1;
-
-            redDecisionCooldown=20;
-
-            aimAngle=Math.PI/2;
-
-            placeBallWithOwner();
-
-            flashTackle(p.el);
-
-            if(prevOwner&&prevOwner.el)
-                flashTackle(prevOwner.el);
-
-            showHint("⚡ خطف الكرة!");
-
-        }
-
-    }else{
+        ballVX=0;
+        ballVY=0;
 
         redTackleFrames=0;
         redTackleIndex=-1;
+
+        redDecisionCooldown=20;
+
+        aimAngle=Math.PI/2;
+
+        placeBallWithOwner();
+
+        flashTackle(p.el);
+
+        if(prevOwner&&prevOwner.el)
+            flashTackle(prevOwner.el);
+
+        showHint("⚡ خطف الكرة!");
 
     }
 
@@ -2534,7 +2463,12 @@ function tryRedTackle(){
 
 
 /* =================================================
+   v3.10
    افتكاك الأزرق
+   
+   نفس المنطق:
+   لمس جسم الخصم وحده لا يكفي.
+   يجب لمس الكرة نفسها.
 ================================================= */
 
 function tryBlueTackle(){
@@ -2553,7 +2487,13 @@ function tryBlueTackle(){
         return;
 
 
-    if(!isOpponentInFrontOfOwner(ballOwner,p)){
+    /*
+       أهم تغيير:
+       لا نستخدم مسافة p إلى ballOwner.
+       نستخدم مسافة p إلى الكرة.
+    */
+
+    if(!isPlayerTouchingBall(p)){
 
         blueTackleFrames=0;
         blueTackleIndex=-1;
@@ -2563,56 +2503,38 @@ function tryBlueTackle(){
     }
 
 
-    const d=
-        distanceBetween(
-            p.x,
-            p.y,
-            ballOwner.x,
-            ballOwner.y
-        );
+    if(blueTackleIndex!==bluePressIndex)
+        blueTackleFrames=0;
+
+    blueTackleIndex=bluePressIndex;
+
+    blueTackleFrames++;
 
 
-    if(d<BLUE_TACKLE_DISTANCE){
+    if(blueTackleFrames>=BLUE_TACKLE_FRAMES){
 
-        if(blueTackleIndex!==bluePressIndex)
-            blueTackleFrames=0;
+        const prevOwner=ballOwner;
 
-        blueTackleIndex=bluePressIndex;
+        ballOwner=p;
 
-        blueTackleFrames++;
+        ballMoving=false;
 
-
-        if(blueTackleFrames>=BLUE_TACKLE_FRAMES){
-
-            const prevOwner=ballOwner;
-
-            ballOwner=p;
-
-            ballMoving=false;
-
-            ballVX=0;
-            ballVY=0;
-
-            blueTackleFrames=0;
-            blueTackleIndex=-1;
-
-            aimAngle=-Math.PI/2;
-
-            placeBallWithOwner();
-
-            flashTackle(p.el);
-
-            if(prevOwner&&prevOwner.el)
-                flashTackle(prevOwner.el);
-
-            showHint("⚡ خطف الكرة!");
-
-        }
-
-    }else{
+        ballVX=0;
+        ballVY=0;
 
         blueTackleFrames=0;
         blueTackleIndex=-1;
+
+        aimAngle=-Math.PI/2;
+
+        placeBallWithOwner();
+
+        flashTackle(p.el);
+
+        if(prevOwner&&prevOwner.el)
+            flashTackle(prevOwner.el);
+
+        showHint("⚡ خطف الكرة!");
 
     }
 
@@ -2650,10 +2572,6 @@ function findBestRedPasser(p){
             continue;
 
 
-        /*
-           التقدم للأمام مهم
-        */
-
         const forward=q.y-p.y;
 
         let score=
@@ -2671,17 +2589,9 @@ function findBestRedPasser(p){
             score+=5;
 
 
-        /*
-           خط التمرير
-        */
-
         if(!redCanPassTo(p,q))
             score-=100;
 
-
-        /*
-           المساحة حول اللاعب المستقبل
-        */
 
         let nearestBlueToQ=Infinity;
 
@@ -2708,11 +2618,6 @@ function findBestRedPasser(p){
         else if(nearestBlueToQ<55)
             score-=45;
 
-
-        /*
-           اللاعب الذي يبعد عن حامل الكرة
-           بدرجة مناسبة يحصل على أفضلية
-        */
 
         if(dist>100&&dist<230)
             score+=18;
@@ -2980,10 +2885,6 @@ function updateRedWithBall(p,dt){
         redDribbleCommitFrames--;
 
 
-    /*
-       أقرب لاعب أزرق
-    */
-
     let nearestBlue=null;
     let nearestBlueD=Infinity;
 
@@ -3070,13 +2971,6 @@ function updateRedWithBall(p,dt){
                 )>95;
 
 
-            /*
-               v3.9
-               إذا كان اللاعب محاصرًا
-               أو هناك زميل في مساحة جيدة
-               يمرر بدل الاحتفاظ بالكرة
-            */
-
             if(
                 betterPosition||
                 isPressed||
@@ -3113,11 +3007,6 @@ function updateRedWithBall(p,dt){
         gameWidth/2;
 
 
-    /*
-       إذا اقترب مدافع أزرق
-       يختار جهة واحدة ويستمر فيها
-    */
-
     if(nearestBlue&&nearestBlueD<105){
 
         if(redDribbleCommitFrames<=0){
@@ -3149,11 +3038,6 @@ function updateRedWithBall(p,dt){
 
     }
 
-
-    /*
-       إذا كان أمامه مساحة،
-       لا يذهب مباشرة إلى المركز دائمًا
-    */
 
     if(
         nearestBlue&&
@@ -3191,10 +3075,6 @@ function updateRedWithBall(p,dt){
         );
 
 
-    /*
-       تحديث اتجاه اللاعب
-    */
-
     aimAngle=
         Math.atan2(
             targetY-p.y,
@@ -3224,8 +3104,10 @@ function updateRedWithBall(p,dt){
 
 function updateOpponentAI(dt){
 
-    if(redPassCooldown>0)
-        redPassCooldown--;
+    /*
+       لا ننقص redPassCooldown هنا.
+       updateRedWithBall هو المسؤول عنه.
+    */
 
 
     if(
@@ -3250,10 +3132,6 @@ function updateOpponentAI(dt){
             return;
 
 
-        /*
-           حامل الكرة
-        */
-
         if(ballOwner===p){
 
             updateRedWithBall(p,dt);
@@ -3263,10 +3141,6 @@ function updateOpponentAI(dt){
         }
 
 
-        /*
-           باقي اللاعبين
-        */
-
         let target=
             getRedFormationTarget(
                 p,
@@ -3275,7 +3149,8 @@ function updateOpponentAI(dt){
 
 
         /*
-           الكرة حرة
+           الكرة حرة:
+           أقرب لاعب أحمر يلاحقها مباشرة.
         */
 
         if(
@@ -3286,10 +3161,7 @@ function updateOpponentAI(dt){
             const nearest=
                 getNearestRedToBall();
 
-            if(
-                nearest.player===p&&
-                nearest.distance<RED_NEAR_BALL_DIST
-            ){
+            if(nearest.player===p){
 
                 target={
                     x:ballX,
@@ -3300,10 +3172,6 @@ function updateOpponentAI(dt){
 
         }
 
-
-        /*
-           لاعب الضغط يتحرك أسرع قليلًا
-        */
 
         let speed=p.speed;
 
@@ -3321,7 +3189,8 @@ function updateOpponentAI(dt){
 
 
         /*
-           محاولة افتكاك
+           v3.10
+           محاولة الافتكاك أصبحت تعتمد على لمس الكرة.
         */
 
         if(
@@ -3338,16 +3207,8 @@ function updateOpponentAI(dt){
     }
 
 
-    /*
-       فصل اللاعبين
-    */
-
     separateRedPlayers();
 
-
-    /*
-       إبقاء الكرة مع حاملها
-    */
 
     if(
         ballOwner&&
@@ -3528,7 +3389,7 @@ function movePlayer(dx,dy,dt){
 
 
 /* =================================================
-   التقاط الكرة
+   التقاط الكرة الحرة
 ================================================= */
 
 function tryPickupBall(){
@@ -3841,10 +3702,6 @@ function resetAfterGoal(){
     ball.style.opacity="1";
 
 
-    /*
-       الأزرق
-    */
-
     teamPlayers[0].x=gameWidth*.50;
     teamPlayers[0].y=gameHeight*.62;
 
@@ -3860,10 +3717,6 @@ function resetAfterGoal(){
     teamPlayers[4].x=gameWidth*.50;
     teamPlayers[4].y=gameHeight*.94;
 
-
-    /*
-       الأحمر
-    */
 
     opponents[0].x=gameWidth*.50;
     opponents[0].y=gameHeight*.38;
