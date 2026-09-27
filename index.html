@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<title>كرة القدم ⚽️ v3.1</title>
+<title>كرة القدم ⚽️ v3.2</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#16803c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:none;overscroll-behavior:none}
@@ -138,7 +138,6 @@ const teamPlayers=[
 
 /* =================================================
    الفريق الأحمر (يهاجم للأسفل)
-   ← توزيع مبدئي أفضل: مدافع خلف، جناحين يمين/يسار، مهاجم وبيلدر في الوسط
 ================================================= */
 const opponents=[
     {id:"opponent1",el:document.getElementById("opponent1"),role:"forward",
@@ -192,6 +191,10 @@ let redTackleFrames=0;
 let redDecisionCooldown=0;
 let redPassCooldown=0;
 
+// ✅ جديد: تثبيت اتجاه المراوغة لمنع التذبذب
+let redLastDribbleSide=1;
+let redDribbleCommitFrames=0;
+
 /* =================================================
    ثوابت ذكاء الأحمر
 ================================================= */
@@ -201,7 +204,7 @@ const RED_SHOOT_DISTANCE=235;
 const RED_PASS_DISTANCE=270;
 const RED_DRIBBLE_DISTANCE=120;
 const RED_NEAR_BALL_DIST=210;
-const RED_MIN_SEPARATION=52;   // ← منع تكدس الأحمر
+const RED_MIN_SEPARATION=52;
 
 /* =================================================
    أدوات عامة
@@ -222,12 +225,14 @@ function pointToSegmentDistance(px,py,x1,y1,x2,y2){
     t=clamp(t,0,1);
     return distanceBetween(px,py,x1+t*dx,y1+t*dy);
 }
+
+// ✅ إصلاح: تخفيف الصرامة من 34 إلى 26
 function redCanPassTo(from,to){
     if(!to)return false;
     for(let i=0;i<teamPlayers.length;i++){
         const blue=teamPlayers[i];
         const d=pointToSegmentDistance(blue.x,blue.y,from.x,from.y,to.x,to.y);
-        if(d<34)return false;
+        if(d<26)return false;
     }
     return true;
 }
@@ -320,6 +325,7 @@ function draw(){
 
 /* =================================================
    حدود المراكز
+   ✅ إصلاح: صاحب الكرة الأحمر يتحرك بحرية
 ================================================= */
 function getRoleBounds(p){
     if(isTeamPlayer(p)){
@@ -330,8 +336,14 @@ function getRoleBounds(p){
         if(p.role==="wing")return{minY:gameHeight*.24,maxY:gameHeight*.78};
         return{minY:55,maxY:gameHeight*.62};
     }
+
+    // ✅ صاحب الكرة الأحمر يتحرك بحرية كاملة
+    if(p===ballOwner&&opponents.indexOf(p)!==-1){
+        return{minY:30,maxY:gameHeight-40};
+    }
+
     if(p.defensive)return{minY:gameHeight*.08,maxY:gameHeight*.22};
-    if(p.role==="builder")return{minY:gameHeight*.24,maxY:gameHeight*.55};
+    if(p.role==="builder")return{minY:gameHeight*.24,maxY:gameHeight*.68};
     if(p.role==="wing")return{minY:gameHeight*.20,maxY:gameHeight*.72};
     return{minY:gameHeight*.10,maxY:gameHeight*.38};
 }
@@ -352,7 +364,7 @@ function moveAITo(p,targetX,targetY,speed,dt){
 }
 
 /* =================================================
-   تصادم بسيط بين كل اللاعبين
+   تصادم بين كل اللاعبين
 ================================================= */
 function resolveCollisions(){
     const all=teamPlayers.concat(opponents);
@@ -374,7 +386,7 @@ function resolveCollisions(){
 }
 
 /* =================================================
-   منع تكدس لاعبي الأحمر فوق بعضهم
+   منع تكدس الأحمر
 ================================================= */
 function separateRedPlayers(){
     for(let i=0;i<opponents.length;i++){
@@ -459,7 +471,7 @@ function updateTeamAI(dt){
 }
 
 /* =================================================
-   اختيار الضاغط من الأحمر
+   اختيار الضاغط
 ================================================= */
 function chooseRedPressPlayer(){
     if(!ballOwner||!isTeamPlayer(ballOwner)){
@@ -469,7 +481,7 @@ function chooseRedPressPlayer(){
     let best=-1,bestScore=Infinity;
     for(let i=0;i<opponents.length;i++){
         const p=opponents[i];
-        if(p.defensive)continue;   // المدافع الأصيل لا يضغط
+        if(p.defensive)continue;
         let d=distanceBetween(p.x,p.y,ballX,ballY);
         if(p.role==="wing")d+=25;
         if(p.role==="forward")d-=15;
@@ -480,62 +492,33 @@ function chooseRedPressPlayer(){
 }
 
 /* =================================================
-   تمركز الأحمر - النسخة المُصلَحة (v3.1)
+   تمركز الأحمر (مع إصلاح التكدس)
 ================================================= */
 function getRedFormationTarget(p,index){
-    /* ================================
-       الحالة 1: الكرة مع الأحمر (هجوم)
-    ================================ */
     if(ballOwner&&opponents.indexOf(ballOwner)!==-1){
         if(p===ballOwner)return{x:p.x,y:p.y};
-
         if(p.role==="defense"){
-            if(p.defensive){
-                return{x:gameWidth*.50+(ballX-gameWidth*.50)*.10,y:gameHeight*.15};
-            }
+            if(p.defensive)return{x:gameWidth*.50+(ballX-gameWidth*.50)*.10,y:gameHeight*.15};
             return{x:clamp(gameWidth*.30+(ballX-gameWidth*.30)*.15,45,gameWidth-45),
                    y:clamp(ballY-45,gameHeight*.26,gameHeight*.44)};
         }
         if(p.role==="wing"){
-            // كل جناح يبقى في جهته المحددة (anchorX)
-            return{
-                x:p.anchorX*gameWidth,
-                y:clamp(p.y+2,gameHeight*.28,gameHeight*.56)
-            };
+            return{x:p.anchorX*gameWidth,y:clamp(p.y+2,gameHeight*.28,gameHeight*.56)};
         }
         return{x:gameWidth*.50+(ballX-gameWidth*.50)*.30,y:gameHeight*.16};
     }
 
-    /* ================================
-       الحالة 2: الكرة مع الأزرق (دفاع)
-       ← هنا الإصلاح الرئيسي للتكدس
-    ================================ */
     if(ballOwner&&isTeamPlayer(ballOwner)){
         const isPresser=index===redPressIndex;
+        if(isPresser)return{x:ballX,y:ballY};
 
-        // 🔴 الضاغط: يذهب مباشرة للكرة
-        if(isPresser){
-            return{x:ballX,y:ballY};
-        }
-
-        // 🔴 المدافعون: توزيع واضح
         if(p.role==="defense"){
             if(p.defensive){
-                // المدافع الأصيل (opponent4): قريب من مرمى الأزرق، يتحرك أفقياً فقط
-                return{
-                    x:gameWidth*.50+(ballX-gameWidth*.50)*.15,
-                    y:gameHeight*.15
-                };
+                return{x:gameWidth*.50+(ballX-gameWidth*.50)*.15,y:gameHeight*.15};
             }
-            // مدافع آخر: يبقى في الجهة المقابلة للكرة
             const oppositeSide=(ballX<gameWidth/2)?1:-1;
-            return{
-                x:clamp(gameWidth*.50+oppositeSide*gameWidth*.24,45,gameWidth-45),
-                y:gameHeight*.30
-            };
+            return{x:clamp(gameWidth*.50+oppositeSide*gameWidth*.24,45,gameWidth-45),y:gameHeight*.30};
         }
-
-        // 🔴 الأجنحة: كل واحد في جهته، مع فرق Y واضح
         if(p.role==="wing"){
             const side=p.anchorX<.5?-1:1;
             const ballSide=ballX<gameWidth/2?-1:1;
@@ -545,17 +528,9 @@ function getRedFormationTarget(p,index){
                 y:isBallSide?gameHeight*.44:gameHeight*.30
             };
         }
-
-        // 🔴 البيلدر: يبقى في الوسط كصانع ألعاب دفاعي
-        return{
-            x:gameWidth*.50+(ballX-gameWidth*.50)*.40,
-            y:gameHeight*.24
-        };
+        return{x:gameWidth*.50+(ballX-gameWidth*.50)*.40,y:gameHeight*.24};
     }
 
-    /* ================================
-       الحالة 3: الكرة حرة
-    ================================ */
     if(!ballOwner){
         const nearest=getNearestRedToBall();
         if(nearest.player===p&&nearest.distance<RED_NEAR_BALL_DIST){
@@ -563,9 +538,6 @@ function getRedFormationTarget(p,index){
         }
     }
 
-    /* ================================
-       الحالة 4: افتراضي - ارجع للمركز
-    ================================ */
     return{x:p.anchorX*gameWidth,y:p.anchorY*gameHeight};
 }
 
@@ -593,7 +565,7 @@ function tryRedTackle(){
             ballOwner=p;
             ballMoving=false;ballVX=0;ballVY=0;
             redTackleFrames=0;redTackleIndex=-1;
-            redDecisionCooldown=25;
+            redDecisionCooldown=20;
             aimAngle=Math.PI/2;
             placeBallWithOwner();
             flashTackle(p.el);
@@ -607,7 +579,7 @@ function tryRedTackle(){
 }
 
 /* =================================================
-   اختيار تمريرة حمراء
+   ✅ اختيار تمريرة حمراء (محسّن)
 ================================================= */
 function findBestRedPasser(p){
     let best=null,bestScore=-Infinity;
@@ -615,19 +587,34 @@ function findBestRedPasser(p){
         const q=opponents[i];
         if(q===p)continue;
         const dist=distanceBetween(p.x,p.y,q.x,q.y);
-        if(dist<45||dist>RED_PASS_DISTANCE)continue;
+        // ✅ توسيع النطاق
+        if(dist<40||dist>RED_PASS_DISTANCE*1.3)continue;
+
         const forward=q.y-p.y;
         let score=forward*1.4-dist*.35;
-        if(q.role==="forward")score+=35;
-        if(q.role==="wing")score+=15;
-        if(!redCanPassTo(p,q))score-=100;
+        if(q.role==="forward")score+=40;
+        if(q.role==="wing")score+=20;
+
+        // عقوبة إذا فيه أزرق على الخط
+        if(!redCanPassTo(p,q))score-=80;
+
+        // ✅ مكافأة للزميل الحر (بعيد عن أي أزرق)
+        let nearestBlueToQ=Infinity;
+        for(let j=0;j<teamPlayers.length;j++){
+            const b=teamPlayers[j];
+            const d=distanceBetween(q.x,q.y,b.x,b.y);
+            if(d<nearestBlueToQ)nearestBlueToQ=d;
+        }
+        if(nearestBlueToQ>90)score+=30;
+        else if(nearestBlueToQ<50)score-=40;
+
         if(score>bestScore){bestScore=score;best=q}
     }
     return best;
 }
 
 /* =================================================
-   الأحمر يسدد / يمرر / يقود
+   تسديد وتمرير
 ================================================= */
 function redShoot(p){
     const goalX=gameWidth/2+(p.x-gameWidth/2)*.35;
@@ -650,47 +637,91 @@ function redPass(p,q){
     redPassCooldown=70;
     redDecisionCooldown=45;
 }
+
+/* =================================================
+   ✅ الأحمر مع الكرة - النسخة المُصلَحة بالكامل (v3.2)
+================================================= */
 function updateRedWithBall(p,dt){
     if(ballOwner!==p)return;
-    if(redDecisionCooldown>0){redDecisionCooldown--;return}
 
-    const goalDistance=gameHeight-p.y;
+    // decrement cooldowns
+    if(redDecisionCooldown>0)redDecisionCooldown--;
+    if(redPassCooldown>0)redPassCooldown--;
+    if(redDribbleCommitFrames>0)redDribbleCommitFrames--;
+
     const goalX=gameWidth/2;
-    const goalOpen=redCanPassTo(p,{x:goalX,y:gameHeight});
+    const goalY=gameHeight+30;
+    const goalDistance=gameHeight-p.y;
 
-    if(goalDistance<RED_SHOOT_DISTANCE&&goalOpen){
-        redShoot(p);
-        return;
+    // المسافة لأقرب لاعب أزرق
+    let nearestBlue=null,nearestBlueD=Infinity;
+    for(let i=0;i<teamPlayers.length;i++){
+        const b=teamPlayers[i];
+        const d=distanceBetween(p.x,p.y,b.x,b.y);
+        if(d<nearestBlueD){nearestBlueD=d;nearestBlue=b}
     }
+
+    // ============================================
+    // 1) التسديد: أولوية قصوى (مع تسامح)
+    // ============================================
+    const shootRange=nearestBlueD<80?RED_SHOOT_DISTANCE*0.7:RED_SHOOT_DISTANCE;
+    if(goalDistance<shootRange){
+        // سدد حتى لو فيه لاعب على الخط لو قريب جداً
+        if(redCanPassTo(p,{x:goalX,y:goalY})||goalDistance<140){
+            redShoot(p);
+            return;
+        }
+    }
+
+    // ============================================
+    // 2) التمرير: نبحث عن أفضل زميل
+    // ============================================
     if(redPassCooldown<=0){
         const q=findBestRedPasser(p);
         if(q){
+            const isPressed=nearestBlueD<70;
             const betterPosition=q.y>p.y+20||q.role==="forward";
-            if(betterPosition||goalDistance>RED_SHOOT_DISTANCE){
+            if(betterPosition||isPressed||goalDistance>RED_SHOOT_DISTANCE){
                 redPass(p,q);
                 return;
             }
         }
     }
 
-    let targetX=goalX;
-    let targetY=Math.min(gameHeight-55,p.y+RED_DRIBBLE_DISTANCE);
-    let nearestBlue=null,nearestD=Infinity;
+    // ============================================
+    // 3) القيادة (Dribble): نتقدم للأمام دائماً
+    // ✅ إصلاح: القيادة تحدث حتى لو redDecisionCooldown > 0
+    // ============================================
+    if(redDecisionCooldown>0)return;
 
-    for(let i=0;i<teamPlayers.length;i++){
-        const b=teamPlayers[i];
-        const d=distanceBetween(p.x,p.y,b.x,b.y);
-        if(d<nearestD){nearestD=d;nearestBlue=b}
+    let targetY=Math.min(gameHeight-60,p.y+RED_DRIBBLE_DISTANCE);
+    let targetX=goalX;
+
+    // ✅ تجنب الأزرق القريب مع تثبيت الجهة لمنع التذبذب
+    if(nearestBlue&&nearestBlueD<95){
+        if(redDribbleCommitFrames<=0){
+            redLastDribbleSide=(p.x-nearestBlue.x)>=0?1:-1;
+            redDribbleCommitFrames=25;
+        }
+        targetX=p.x+redLastDribbleSide*90;
+        // ✅ ضمان التقدم للأمام حتى لو منحرف
+        targetY=Math.min(gameHeight-60,p.y+RED_DRIBBLE_DISTANCE*0.7);
+    }else{
+        redDribbleCommitFrames=0;
     }
-    if(nearestBlue&&nearestD<95){
-        const side=p.x<gameWidth/2?-1:1;
-        targetX+=side*80;
+
+    // ✅ ضمان أن الهدف للأمام دائماً
+    if(targetY<=p.y+5){
+        targetY=p.y+30;
     }
-    targetX=clamp(targetX,40,gameWidth-40);
+
+    targetX=clamp(targetX,50,gameWidth-50);
+    targetY=clamp(targetY,p.y+10,gameHeight-50);
+
     aimAngle=Math.atan2(targetY-p.y,targetX-p.x);
-    moveAITo(p,targetX,targetY,p.speed*0.82,dt);
+    moveAITo(p,targetX,targetY,p.speed*0.85,dt);
     placeBallWithOwner();
-    redDecisionCooldown=5;
+    redDecisionCooldown=6;
 }
 
 /* =================================================
@@ -727,7 +758,6 @@ function updateOpponentAI(dt){
         }
     }
 
-    // ✅ منع تكدس الأحمر فوق بعضهم
     separateRedPlayers();
 
     if(ballOwner&&opponents.indexOf(ballOwner)!==-1)placeBallWithOwner();
@@ -815,6 +845,9 @@ function tryPickupBall(){
         lastAutoSwitchTime=Date.now();
         placeBallWithOwner();
     }else{
+        // ✅ إعادة تعيين حالة المراوغة عند تغيير صاحب الكرة
+        redDribbleCommitFrames=0;
+        redDecisionCooldown=15;
         aimAngle=Math.atan2(gameHeight-closest.y,gameWidth/2-closest.x);
         placeBallWithOwner();
     }
@@ -887,7 +920,6 @@ function resetAfterGoal(){
     teamPlayers[3].x=gameWidth*.30;teamPlayers[3].y=gameHeight*.70;
     teamPlayers[4].x=gameWidth*.70;teamPlayers[4].y=gameHeight*.82;
 
-    // ← إعادة الأحمر للتوزيع الجديد المُفصَّل
     opponents[0].x=gameWidth*.50;opponents[0].y=gameHeight*.18;
     opponents[1].x=gameWidth*.15;opponents[1].y=gameHeight*.32;
     opponents[2].x=gameWidth*.85;opponents[2].y=gameHeight*.32;
@@ -900,6 +932,7 @@ function resetAfterGoal(){
     manualSwitchArmed=true;
     redPressIndex=-1;redTackleIndex=-1;redTackleFrames=0;
     redDecisionCooldown=0;redPassCooldown=0;
+    redLastDribbleSide=1;redDribbleCommitFrames=0;
     ballOwner=teamPlayers[0];
     ballMoving=false;ballVX=0;ballVY=0;
     charging=false;power=0;powerBar.style.width="0%";
