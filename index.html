@@ -813,12 +813,59 @@ const goalMessage=
 
 const hintElement=
     document.getElementById("hint");
+const centerLine=
+    document.querySelector(".center-line");
 
+const centerCircle=
+    document.querySelector(".center-circle");
+
+const topGoal=
+    document.getElementById("topGoal");
+
+const bottomGoal=
+    document.getElementById("bottomGoal");
+function draw(){
+
+    for(let i=0;i<teamPlayers.length;i++){
+
+        const p=teamPlayers[i];
+
+        drawPlayer(p);
+
+        p.el.classList.toggle(
+            "controlled",
+            i===activePlayerIndex&&!matchEnded
+        );
+
+    }
+
+    for(let i=0;i<opponents.length;i++)
+        drawPlayer(opponents[i]);
+
+    drawBallAndAim();
+    centerLine.style.top =
+    `${worldHeight/2-cameraY}px`;
+
+
+    centerLine.style.top=
+        `${worldHeight/2-cameraY}px`;
+
+    centerCircle.style.top=
+        `${worldHeight/2-cameraY}px`;
+
+    topGoal.style.transform=
+        `translateX(-50%) translateY(${-cameraY}px)`;
+
+    bottomGoal.style.transform=
+        `translateX(-50%) translateY(${worldHeight-48-cameraY}px)`;
+
+}
 
 let gameWidth=game.clientWidth;
 let gameHeight=game.clientHeight;
+
 let worldWidth=gameWidth;
-let worldHeight=gameHeight;
+let worldHeight=gameHeight*2;
 
 let cameraX=0;
 let cameraY=0;
@@ -1702,7 +1749,11 @@ function placeBallWithOwner(){
 function drawPlayer(p){
 
     p.el.style.transform=
-        `translate3d(${p.x-19}px,${p.y-19}px,0)`;
+        `translate3d(
+            ${p.x-19}px,
+            ${p.y-cameraY-19}px,
+            0
+        )`;
 
 }
 
@@ -1710,10 +1761,18 @@ function drawPlayer(p){
 function drawBallAndAim(){
 
     ball.style.transform=
-        `translate3d(${ballX-11}px,${ballY-11}px,0)`;
+        `translate3d(
+            ${ballX-11}px,
+            ${ballY-cameraY-11}px,
+            0
+        )`;
 
     aim.style.transform=
-        `translate3d(${ballX}px,${ballY}px,0) rotate(${aimAngle}rad)`;
+        `translate3d(
+            ${ballX}px,
+            ${ballY-cameraY}px,
+            0
+        ) rotate(${aimAngle}rad)`;
 
     if(ballMoving){
 
