@@ -1151,6 +1151,24 @@ let aimY = 0;
 
 let kickPointerId = null;
 
+/* =================================================
+   متغيرات التحكم والركل
+================================================= */
+
+let aiming = false;
+let chargePower = 0;
+
+let aimX = worldWidth / 2;
+let aimY = 0;
+
+/* أسماء موحدة للعناصر */
+
+const ballElement = ball;
+const aimArrow = aim;
+
+const powerTextElement = powerText;
+const powerBoxElement = powerBox;
+
 
 /* =================================================
    الفريق الأزرق
@@ -1843,31 +1861,37 @@ function updateCamera(){
 function updateControlledPlayer(dt){
 
     const p =
-        teamPlayers[
-            activePlayerIndex
-        ];
-
+        teamPlayers[activePlayerIndex];
 
     if(!p)
         return;
 
 
-    p.moveX =
-        joystickX;
+    p.controlled = true;
 
-    p.moveY =
-        joystickY;
+
+    /*
+       Joystick يتحكم دائمًا
+       في اللاعب الحالي
+    */
+
+    const dx = joystickX;
+    const dy = joystickY;
+
+
+    p.moveX = dx;
+    p.moveY = dy;
 
 
     if(
-        Math.abs(joystickX)>0.01 ||
-        Math.abs(joystickY)>0.01
+        Math.abs(dx) > 0.01 ||
+        Math.abs(dy) > 0.01
     ){
 
         movePlayer(
             p,
-            joystickX,
-            joystickY,
+            dx,
+            dy,
             dt
         );
 
@@ -3783,21 +3807,13 @@ game.addEventListener(
 
 function switchPlayer(){
 
-    const current =
-        teamPlayers[
-            activePlayerIndex
-        ];
-
-
-    let bestIndex=-1;
-
-    let bestDistance=
-        Infinity;
+    let bestIndex = -1;
+    let bestDistance = Infinity;
 
 
     for(
-        let i=0;
-        i<teamPlayers.length;
+        let i = 0;
+        i < teamPlayers.length;
         i++
     ){
 
@@ -3813,8 +3829,8 @@ function switchPlayer(){
 
         const d =
             Math.hypot(
-                p.x-ballX,
-                p.y-ballY
+                p.x - ballX,
+                p.y - ballY
             );
 
 
@@ -3822,45 +3838,43 @@ function switchPlayer(){
             d < bestDistance
         ){
 
-            bestDistance=d;
-
-            bestIndex=i;
+            bestDistance = d;
+            bestIndex = i;
 
         }
 
     }
 
 
-    if(
-        bestIndex >= 0 &&
-        bestDistance <=
-        MANUAL_SWITCH_MIN_DISTANCE
-    ){
+    /*
+       نسمح بالتبديل للاعب الأقرب
+       حتى لو كانت الكرة أبعد منه.
+    */
 
-        activePlayerIndex=
+    if(bestIndex >= 0){
+
+        activePlayerIndex =
             bestIndex;
 
 
-        /*
-           إذا كان اللاعب الجديد بعيداً
-           قليلاً، تسمح له اللعبة بالحركة
-           في كامل الملعب لأنه أصبح متحكماً به.
-        */
-
         for(
-            let i=0;
-            i<teamPlayers.length;
+            let i = 0;
+            i < teamPlayers.length;
             i++
         ){
 
             teamPlayers[i].controlled =
                 i === activePlayerIndex;
 
+            teamPlayers[i].moveX = 0;
+            teamPlayers[i].moveY = 0;
+
         }
 
 
         /*
-           إذا كانت الكرة قريبة منه يأخذها.
+           إعادة تهيئة اتجاه التصويب
+           مع اللاعب الجديد
         */
 
         const p =
@@ -3869,22 +3883,24 @@ function switchPlayer(){
             ];
 
 
-        if(
-            !ballOwner &&
-            distance(
-                p,
-                {
-                    x:ballX,
-                    y:ballY
-                }
-            ) < 38
-        ){
+        aimX =
+            p.x;
 
-            ballOwner=p;
+        aimY =
+            p.y - 120;
 
-            ballVX=0;
-            ballVY=0;
 
+        aiming = false;
+        chargePower = 0;
+
+
+        powerBar.style.width =
+            "0%";
+
+
+        if(powerText){
+            powerText.textContent =
+                "قوة الركلة";
         }
 
     }
