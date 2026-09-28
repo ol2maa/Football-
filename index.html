@@ -137,9 +137,7 @@ html,body{
 
 
 /* =========================================================
-   المرمى
-   منظور علوي:
-   خط عرضي فقط
+   المرمى - منظور علوي
 ========================================================= */
 
 .goalLine{
@@ -150,12 +148,11 @@ html,body{
 
     width:190px;
 
-    height:4px;
+    height:8px;
 
     background:white;
 
-    transform:
-        translateX(-50%);
+    transform:translateX(-50%);
 
     z-index:5;
 
@@ -4131,97 +4128,98 @@ function updateBall(
 
 
     /*
-       الجدار الأيمن
-    */
+   ========================================================
+   المرمى العلوي
+   ========================================================
+
+   لا يحتسب الهدف عند لمس الخط.
+
+   يجب أن تتجاوز الكرة الخط بالكامل
+   وتختفي من الشاشة أولاً.
+
+   الكرة نصف قطرها 11px،
+   لذلك لا نحتسب الهدف إلا عندما:
+
+   ballY < -BALL_RADIUS
+*/
+
+if(
+    ballY <
+    -BALL_RADIUS
+){
 
     if(
-        ballX >
-        worldWidth -
-        BALL_RADIUS
+        Math.abs(
+            ballX -
+            worldWidth / 2
+        ) <
+        GOAL_WIDTH / 2
     ){
 
-        ballX =
-            worldWidth -
-            BALL_RADIUS;
+        scoreBlue();
 
-        ballVX =
-            -Math.abs(
-                ballVX
+        return;
+
+    }
+
+    else{
+
+        ballY =
+            -BALL_RADIUS;
+
+        ballVY =
+            Math.abs(
+                ballVY
             ) * 0.8;
 
     }
 
+}
 
-    /*
-       المرمى العلوي
-    */
+
+/*
+   ========================================================
+   المرمى السفلي
+   ========================================================
+
+   نفس الفكرة:
+
+   يجب أن تتجاوز الكرة الخط بالكامل
+   وتخرج من الشاشة.
+
+   ballY > worldHeight + BALL_RADIUS
+*/
+
+if(
+    ballY >
+    worldHeight +
+    BALL_RADIUS
+){
 
     if(
-        ballY <
-        BALL_RADIUS
+        Math.abs(
+            ballX -
+            worldWidth / 2
+        ) <
+        GOAL_WIDTH / 2
     ){
 
-        if(
-            Math.abs(
-                ballX -
-                worldWidth / 2
-            ) <
-            GOAL_WIDTH / 2
-        ){
+        scoreRed();
 
-            scoreBlue();
-
-        }
-
-        else{
-
-            ballY =
-                BALL_RADIUS;
-
-            ballVY =
-                Math.abs(
-                    ballVY
-                ) * 0.8;
-
-        }
+        return;
 
     }
 
+    else{
 
-    /*
-       المرمى السفلي
-    */
+        ballY =
+            worldHeight +
+            BALL_RADIUS;
 
-    if(
-        ballY >
-        worldHeight -
-        BALL_RADIUS
-    ){
-
-        if(
-            Math.abs(
-                ballX -
-                worldWidth / 2
-            ) <
-            GOAL_WIDTH / 2
-        ){
-
-            scoreRed();
-
-        }
-
-        else{
-
-            ballY =
-                worldHeight -
-                BALL_RADIUS;
-
-            ballVY =
-                -Math.abs(
-                    ballVY
-                ) * 0.8;
-
-        }
+        ballVY =
+            -Math.abs(
+                ballVY
+            ) * 0.8;
 
     }
 
