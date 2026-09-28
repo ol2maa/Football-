@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.2</title>
+<title>كرة القدم ⚽️ v4.3</title>
 
 <style>
 
@@ -103,62 +103,71 @@ html,body{
 
 .centerCircle{
     position:absolute;
+
     width:170px;
     height:170px;
+
     border:4px solid white;
+
     border-radius:50%;
+
     left:50%;
     top:50%;
-    transform:translate(-50%,-50%);
+
+    transform:
+        translate(-50%,-50%);
 }
 
 .centerDot{
     position:absolute;
+
     width:10px;
     height:10px;
+
     background:white;
+
     border-radius:50%;
+
     left:50%;
     top:50%;
-    transform:translate(-50%,-50%);
+
+    transform:
+        translate(-50%,-50%);
 }
 
-.goalBox{
+
+/* =========================================================
+   المرمى
+   منظور علوي:
+   خط عرضي فقط
+========================================================= */
+
+.goalLine{
+
     position:absolute;
+
     left:50%;
-    width:300px;
-    height:150px;
-    border:4px solid white;
-    transform:translateX(-50%);
-}
 
-.topBox{
-    top:0;
-    border-top:none;
-}
-
-.bottomBox{
-    bottom:0;
-    border-bottom:none;
-}
-
-.goal{
-    position:absolute;
-    left:50%;
     width:190px;
-    height:35px;
-    border:4px solid white;
-    transform:translateX(-50%);
+
+    height:4px;
+
+    background:white;
+
+    transform:
+        translateX(-50%);
+
+    z-index:5;
+
+    pointer-events:none;
 }
 
 .topGoal{
     top:0;
-    border-top:none;
 }
 
 .bottomGoal{
     bottom:0;
-    border-bottom:none;
 }
 
 
@@ -167,6 +176,7 @@ html,body{
 ========================================================= */
 
 .playerUnit{
+
     position:absolute;
 
     left:0;
@@ -178,10 +188,12 @@ html,body{
     border-radius:50%;
 
     display:flex;
+
     align-items:center;
     justify-content:center;
 
     font-size:24px;
+
     line-height:1;
 
     z-index:20;
@@ -190,15 +202,23 @@ html,body{
 }
 
 .playerUnit.blue{
+
     background:#1677ff;
+
     border:3px solid #fff;
-    box-shadow:0 2px 5px #0008;
+
+    box-shadow:
+        0 2px 5px #0008;
 }
 
 .playerUnit.red{
+
     background:#e52d38;
+
     border:3px solid #fff;
-    box-shadow:0 2px 5px #0008;
+
+    box-shadow:
+        0 2px 5px #0008;
 }
 
 
@@ -207,21 +227,25 @@ html,body{
 ========================================================= */
 
 .controlArrow{
+
     position:absolute;
 
     left:50%;
     top:-21px;
 
-    transform:translateX(-50%);
+    transform:
+        translateX(-50%);
 
     color:#ffd400;
 
     font-size:16px;
+
     font-weight:900;
 
     line-height:1;
 
-    text-shadow:0 2px 3px #000;
+    text-shadow:
+        0 2px 3px #000;
 
     pointer-events:none;
 
@@ -233,10 +257,12 @@ html,body{
 .playerUnit.controlled{
 
     box-shadow:
-        0 0 0 3px #ffd400,
-        0 0 12px #ffd400,
-        0 2px 5px #0008;
 
+        0 0 0 3px #ffd400,
+
+        0 0 12px #ffd400,
+
+        0 2px 5px #0008;
 }
 
 
@@ -263,6 +289,7 @@ html,body{
     z-index:25;
 
     display:flex;
+
     align-items:center;
     justify-content:center;
 
@@ -284,11 +311,13 @@ html,body{
     top:0;
 
     width:5px;
+
     height:70px;
 
     background:#ffd400;
 
-    transform-origin:50% 100%;
+    transform-origin:
+        50% 100%;
 
     z-index:15;
 
@@ -296,7 +325,8 @@ html,body{
 
     border-radius:4px;
 
-    box-shadow:0 0 6px #000;
+    box-shadow:
+        0 0 6px #000;
 
     pointer-events:none;
 }
@@ -310,11 +340,17 @@ html,body{
     left:50%;
     top:-10px;
 
-    transform:translateX(-50%);
+    transform:
+        translateX(-50%);
 
-    border-left:9px solid transparent;
-    border-right:9px solid transparent;
-    border-bottom:16px solid #ffd400;
+    border-left:
+        9px solid transparent;
+
+    border-right:
+        9px solid transparent;
+
+    border-bottom:
+        16px solid #ffd400;
 }
 
 
@@ -326,11 +362,16 @@ html,body{
 
     position:fixed;
 
-    top:calc(env(safe-area-inset-top) + 8px);
+    top:
+        calc(
+            env(safe-area-inset-top) +
+            8px
+        );
 
     left:50%;
 
-    transform:translateX(-50%);
+    transform:
+        translateX(-50%);
 
     z-index:100;
 
@@ -365,6 +406,86 @@ html,body{
 
 
 /* =========================================================
+   احتفال الهدف
+========================================================= */
+
+#goalCelebration{
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:450;
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+    pointer-events:none;
+}
+
+#goalCelebrationText{
+
+    padding:
+        20px 35px;
+
+    border-radius:25px;
+
+    background:#000c;
+
+    color:white;
+
+    font-size:48px;
+
+    font-weight:900;
+
+    text-align:center;
+
+    text-shadow:
+        0 3px 8px #000;
+
+    transform:
+        scale(0.7);
+
+    animation:
+        goalPop
+        0.35s
+        ease-out
+        forwards;
+}
+
+@keyframes goalPop{
+
+    0%{
+
+        transform:
+            scale(0.7);
+
+        opacity:0;
+    }
+
+    70%{
+
+        transform:
+            scale(1.15);
+
+        opacity:1;
+    }
+
+    100%{
+
+        transform:
+            scale(1);
+
+        opacity:1;
+    }
+
+}
+
+
+/* =========================================================
    القوة
 ========================================================= */
 
@@ -376,9 +497,11 @@ html,body{
 
     bottom:145px;
 
-    transform:translateX(-50%);
+    transform:
+        translateX(-50%);
 
     width:150px;
+
     height:13px;
 
     border:2px solid white;
@@ -446,7 +569,8 @@ html,body{
 
     border-radius:50%;
 
-    transform:translate(-50%,-50%);
+    transform:
+        translate(-50%,-50%);
 
     background:#ffffff66;
 
@@ -490,7 +614,8 @@ html,body{
 
     touch-action:none;
 
-    box-shadow:0 3px 8px #0008;
+    box-shadow:
+        0 3px 8px #0008;
 }
 
 #kickDot{
@@ -570,85 +695,156 @@ html,body{
 
 <div id="field">
 
+
+    <!-- =====================================================
+         خطوط الملعب
+    ====================================================== -->
+
     <div class="line centerLine"></div>
 
     <div class="centerCircle"></div>
 
     <div class="centerDot"></div>
 
-    <div class="goalBox topBox"></div>
 
-    <div class="goalBox bottomBox"></div>
+    <!-- =====================================================
+         المرمى
+    ====================================================== -->
 
-    <div class="goal topGoal"></div>
+    <div class="goalLine topGoal"></div>
 
-    <div class="goal bottomGoal"></div>
+    <div class="goalLine bottomGoal"></div>
 
 
-    <!-- الفريق الأزرق -->
+    <!-- =====================================================
+         الفريق الأزرق
+    ====================================================== -->
 
-    <div id="player" class="playerUnit blue">
-        <div class="controlArrow">▼</div>
+    <div id="player"
+         class="playerUnit blue">
+
+        <div class="controlArrow">
+            ▼
+        </div>
+
         🧍
-    </div>
 
-    <div id="teammate1" class="playerUnit blue">
-        <div class="controlArrow">▼</div>
-        🧍
-    </div>
-
-    <div id="teammate2" class="playerUnit blue">
-        <div class="controlArrow">▼</div>
-        🧍
-    </div>
-
-    <div id="teammate3" class="playerUnit blue">
-        <div class="controlArrow">▼</div>
-        🧍
-    </div>
-
-    <div id="teammate4" class="playerUnit blue">
-        <div class="controlArrow">▼</div>
-        🧍
     </div>
 
 
-    <!-- الفريق الأحمر -->
+    <div id="teammate1"
+         class="playerUnit blue">
 
-    <div id="opponent1" class="playerUnit red">
-        🧍
-    </div>
+        <div class="controlArrow">
+            ▼
+        </div>
 
-    <div id="opponent2" class="playerUnit red">
         🧍
-    </div>
 
-    <div id="opponent3" class="playerUnit red">
-        🧍
-    </div>
-
-    <div id="opponent4" class="playerUnit red">
-        🧍
-    </div>
-
-    <div id="opponent5" class="playerUnit red">
-        🧍
     </div>
 
 
-    <!-- الكرة -->
+    <div id="teammate2"
+         class="playerUnit blue">
 
-    <div id="ball">⚽</div>
+        <div class="controlArrow">
+            ▼
+        </div>
+
+        🧍
+
+    </div>
 
 
-    <!-- سهم التصويب -->
+    <div id="teammate3"
+         class="playerUnit blue">
+
+        <div class="controlArrow">
+            ▼
+        </div>
+
+        🧍
+
+    </div>
+
+
+    <div id="teammate4"
+         class="playerUnit blue">
+
+        <div class="controlArrow">
+            ▼
+        </div>
+
+        🧍
+
+    </div>
+
+
+    <!-- =====================================================
+         الفريق الأحمر
+    ====================================================== -->
+
+    <div id="opponent1"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <div id="opponent2"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <div id="opponent3"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <div id="opponent4"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <div id="opponent5"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <!-- =====================================================
+         الكرة
+    ====================================================== -->
+
+    <div id="ball">
+        ⚽
+    </div>
+
+
+    <!-- =====================================================
+         سهم التصويب
+    ====================================================== -->
 
     <div id="aimArrow"></div>
 
 </div>
 
 
-<!-- لوحة النتيجة -->
+<!-- =========================================================
+     لوحة النتيجة
+========================================================= -->
 
 <div id="scoreBoard">
 
@@ -673,7 +869,24 @@ html,body{
 </div>
 
 
-<!-- القوة -->
+<!-- =========================================================
+     احتفال الهدف
+========================================================= -->
+
+<div id="goalCelebration">
+
+    <div id="goalCelebrationText">
+
+        🎉 هدف!
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     القوة
+========================================================= -->
 
 <div id="powerBox">
 
@@ -682,7 +895,9 @@ html,body{
 </div>
 
 
-<!-- الجويستك -->
+<!-- =========================================================
+     الجويستك
+========================================================= -->
 
 <div id="movePad">
 
@@ -691,7 +906,9 @@ html,body{
 </div>
 
 
-<!-- زر الركل -->
+<!-- =========================================================
+     زر الركل
+========================================================= -->
 
 <div id="kickControl">
 
@@ -700,7 +917,9 @@ html,body{
 </div>
 
 
-<!-- نهاية المباراة -->
+<!-- =========================================================
+     نهاية المباراة
+========================================================= -->
 
 <div id="matchEnd">
 
@@ -775,45 +994,63 @@ const finalScore =
 const newMatch =
     document.getElementById("newMatch");
 
+const goalCelebration =
+    document.getElementById("goalCelebration");
+
 
 /* =========================================================
    CONSTANTS
 ========================================================= */
 
-const CAMERA_SMOOTH = 0.055;
+const CAMERA_SMOOTH =
+    0.055;
 
-const MATCH_DURATION = 180;
+const MATCH_DURATION =
+    180;
 
-const PLAYER_RADIUS = 19;
+const PLAYER_RADIUS =
+    19;
 
-const BALL_RADIUS = 11;
+const BALL_RADIUS =
+    11;
 
-const FRICTION = 0.985;
+const FRICTION =
+    0.985;
 
-const MAX_POWER = 100;
+const MAX_POWER =
+    100;
 
-const POWER_SPEED = 90;
+const POWER_SPEED =
+    90;
 
-const GOAL_WIDTH = 190;
+const GOAL_WIDTH =
+    190;
 
-const JOYSTICK_MAX_DISTANCE = 48;
+const JOYSTICK_MAX_DISTANCE =
+    48;
 
-const PLAYER_PICKUP_DISTANCE = 30;
+const PLAYER_PICKUP_DISTANCE =
+    30;
 
-const TACKLE_DISTANCE = 40;
+const TACKLE_DISTANCE =
+    40;
 
 
 /* =========================================================
    CAMERA / SWITCH
 ========================================================= */
 
-const AUTO_SWITCH_COOLDOWN = 350;
+const AUTO_SWITCH_COOLDOWN =
+    350;
 
-const MANUAL_SWITCH_COOLDOWN = 500;
+const MANUAL_SWITCH_COOLDOWN =
+    500;
 
-let lastAutoSwitchTime = 0;
+let lastAutoSwitchTime =
+    0;
 
-let lastManualSwitchTime = 0;
+let lastManualSwitchTime =
+    0;
 
 
 /* =========================================================
@@ -832,9 +1069,11 @@ let worldWidth =
 let worldHeight =
     viewHeight * 2;
 
-let cameraX = 0;
+let cameraX =
+    0;
 
-let cameraY = 0;
+let cameraY =
+    0;
 
 
 /* =========================================================
@@ -847,20 +1086,25 @@ let ballX =
 let ballY =
     worldHeight / 2;
 
-let ballVX = 0;
+let ballVX =
+    0;
 
-let ballVY = 0;
+let ballVY =
+    0;
 
-let ballOwner = null;
+let ballOwner =
+    null;
 
 
 /* =========================================================
    SCORE
 ========================================================= */
 
-let blueScore = 0;
+let blueScore =
+    0;
 
-let redScore = 0;
+let redScore =
+    0;
 
 
 /* =========================================================
@@ -870,36 +1114,56 @@ let redScore = 0;
 let matchTimeRemaining =
     MATCH_DURATION;
 
-let matchRunning = true;
+let matchRunning =
+    true;
 
-let matchEnded = false;
+let matchEnded =
+    false;
 
 let lastTimestamp =
     performance.now();
 
 
 /* =========================================================
+   GOAL CELEBRATION
+========================================================= */
+
+let goalCelebrationActive =
+    false;
+
+let goalResetTimer =
+    null;
+
+
+/* =========================================================
    JOYSTICK
 ========================================================= */
 
-let joystickActive = false;
+let joystickActive =
+    false;
 
-let joystickPointerId = null;
+let joystickPointerId =
+    null;
 
-let joystickX = 0;
+let joystickX =
+    0;
 
-let joystickY = 0;
+let joystickY =
+    0;
 
 
 /* =========================================================
    KICK
 ========================================================= */
 
-let chargingActive = false;
+let chargingActive =
+    false;
 
-let chargePower = 0;
+let chargePower =
+    0;
 
-let kickPointerId = null;
+let kickPointerId =
+    null;
 
 
 /* =========================================================
@@ -912,29 +1176,33 @@ let aimAngle =
 let aimX =
     worldWidth / 2;
 
-let aimY = 0;
+let aimY =
+    0;
 
 
 /*
-   جديد:
-   نقطة بداية سحب زر الركل.
-   الاتجاه يحسب من حركة الإصبع،
-   وليس من موقع الإصبع بالنسبة للكرة.
+   نقطة بداية سحب التسديد
 */
 
-let kickStartX = 0;
-let kickStartY = 0;
+let kickStartX =
+    0;
 
-let kickDragDistance = 0;
+let kickStartY =
+    0;
+
+let kickDragDistance =
+    0;
 
 
 /* =========================================================
    PLAYER SWITCH
 ========================================================= */
 
-let activePlayerIndex = 0;
+let activePlayerIndex =
+    0;
 
-let lastTapTime = 0;
+let lastTapTime =
+    0;
 
 
 /* =========================================================
@@ -952,6 +1220,7 @@ function createPlayer(
 
     const el =
         document.getElementById(id);
+
 
     return {
 
@@ -979,7 +1248,8 @@ function createPlayer(
 
         moveY:0,
 
-        direction:-Math.PI / 2,
+        direction:
+            -Math.PI / 2,
 
         vx:0,
 
@@ -996,9 +1266,11 @@ function createPlayer(
    TEAMS
 ========================================================= */
 
-let teamPlayers = [];
+let teamPlayers =
+    [];
 
-let opponents = [];
+let opponents =
+    [];
 
 
 function createTeams(){
@@ -1117,7 +1389,10 @@ function clamp(
 
     return Math.max(
         min,
-        Math.min(max,value)
+        Math.min(
+            max,
+            value
+        )
     );
 
 }
@@ -1127,7 +1402,10 @@ function clamp(
    DISTANCE
 ========================================================= */
 
-function distanceBetween(a,b){
+function distanceBetween(
+    a,
+    b
+){
 
     return Math.hypot(
         a.x - b.x,
@@ -1158,24 +1436,42 @@ function getRoleBounds(p){
         PLAYER_RADIUS;
 
 
+    /*
+       اللاعب المتحكم
+       يستطيع كامل الملعب
+    */
+
     if(
         p.team === "blue" &&
-        p === teamPlayers[activePlayerIndex]
+        p ===
+        teamPlayers[
+            activePlayerIndex
+        ]
     ){
 
         return {
+
             minX,
             maxX,
             minY,
             maxY
+
         };
 
     }
 
 
-    if(p.team === "blue"){
+    /* =====================================================
+       الأزرق
+    ====================================================== */
 
-        if(p.role === "guard"){
+    if(
+        p.team === "blue"
+    ){
+
+        if(
+            p.role === "guard"
+        ){
 
             minY =
                 worldHeight * 0.85;
@@ -1186,7 +1482,9 @@ function getRoleBounds(p){
 
         }
 
-        else if(p.role === "defender"){
+        else if(
+            p.role === "defender"
+        ){
 
             minY =
                 worldHeight * 0.65;
@@ -1196,7 +1494,9 @@ function getRoleBounds(p){
 
         }
 
-        else if(p.role === "wing"){
+        else if(
+            p.role === "wing"
+        ){
 
             minY =
                 worldHeight * 0.40;
@@ -1206,7 +1506,9 @@ function getRoleBounds(p){
 
         }
 
-        else if(p.role === "forward"){
+        else if(
+            p.role === "forward"
+        ){
 
             minY =
                 worldHeight * 0.30;
@@ -1219,9 +1521,17 @@ function getRoleBounds(p){
     }
 
 
-    if(p.team === "red"){
+    /* =====================================================
+       الأحمر
+    ====================================================== */
 
-        if(p.role === "guard"){
+    if(
+        p.team === "red"
+    ){
+
+        if(
+            p.role === "guard"
+        ){
 
             minY =
                 PLAYER_RADIUS;
@@ -1231,7 +1541,9 @@ function getRoleBounds(p){
 
         }
 
-        else if(p.role === "defender"){
+        else if(
+            p.role === "defender"
+        ){
 
             minY =
                 worldHeight * 0.10;
@@ -1241,7 +1553,9 @@ function getRoleBounds(p){
 
         }
 
-        else if(p.role === "wing"){
+        else if(
+            p.role === "wing"
+        ){
 
             minY =
                 worldHeight * 0.30;
@@ -1251,7 +1565,9 @@ function getRoleBounds(p){
 
         }
 
-        else if(p.role === "forward"){
+        else if(
+            p.role === "forward"
+        ){
 
             minY =
                 worldHeight * 0.35;
@@ -1265,10 +1581,12 @@ function getRoleBounds(p){
 
 
     return {
+
         minX,
         maxX,
         minY,
         maxY
+
     };
 
 }
@@ -1286,14 +1604,21 @@ function movePlayer(
 ){
 
     const length =
-        Math.hypot(dx,dy);
+        Math.hypot(
+            dx,
+            dy
+        );
 
 
-    if(length > 1){
+    if(
+        length > 1
+    ){
 
-        dx /= length;
+        dx /=
+            length;
 
-        dy /= length;
+        dy /=
+            length;
 
     }
 
@@ -1302,6 +1627,7 @@ function movePlayer(
         dx *
         p.speed *
         dt;
+
 
     p.y +=
         dy *
@@ -1320,6 +1646,7 @@ function movePlayer(
             bounds.maxX
         );
 
+
     p.y =
         clamp(
             p.y,
@@ -1334,7 +1661,10 @@ function movePlayer(
     ){
 
         p.direction =
-            Math.atan2(dy,dx);
+            Math.atan2(
+                dy,
+                dx
+            );
 
     }
 
@@ -1345,16 +1675,22 @@ function movePlayer(
    CONTROLLED PLAYER
 ========================================================= */
 
-function updateControlledPlayer(dt){
+function updateControlledPlayer(
+    dt
+){
 
     const p =
-        teamPlayers[activePlayerIndex];
+        teamPlayers[
+            activePlayerIndex
+        ];
+
 
     if(!p)
         return;
 
 
-    p.controlled = true;
+    p.controlled =
+        true;
 
 
     const dx =
@@ -1364,9 +1700,11 @@ function updateControlledPlayer(dt){
         joystickY;
 
 
-    p.moveX = dx;
+    p.moveX =
+        dx;
 
-    p.moveY = dy;
+    p.moveY =
+        dy;
 
 
     if(
@@ -1390,7 +1728,9 @@ function updateControlledPlayer(dt){
    BLUE AI
 ========================================================= */
 
-function updateBlueAI(dt){
+function updateBlueAI(
+    dt
+){
 
     for(
         let i = 0;
@@ -1398,16 +1738,27 @@ function updateBlueAI(dt){
         i++
     ){
 
-        if(i === activePlayerIndex)
+        if(
+            i ===
+            activePlayerIndex
+        ){
+
             continue;
+
+        }
 
 
         const p =
             teamPlayers[i];
 
 
-        if(ballOwner === p)
+        if(
+            ballOwner === p
+        ){
+
             continue;
+
+        }
 
 
         let targetX =
@@ -1426,14 +1777,26 @@ function updateBlueAI(dt){
 
         const redHasBall =
             ballOwner &&
-            ballOwner.team === "red";
+            ballOwner.team ===
+                "red";
 
 
-        if(redHasBall){
+        /* =================================================
+           دفاع
+        ================================================== */
 
-            if(p.role === "defender"){
+        if(
+            redHasBall
+        ){
 
-                if(distToBall < 260){
+            if(
+                p.role ===
+                "defender"
+            ){
+
+                if(
+                    distToBall < 260
+                ){
 
                     targetX =
                         ballX;
@@ -1445,19 +1808,28 @@ function updateBlueAI(dt){
 
             }
 
-            else if(p.role === "wing"){
+            else if(
+                p.role ===
+                "wing"
+            ){
 
                 targetX =
                     p.anchorX;
 
                 targetY =
-                    worldHeight * 0.55;
+                    worldHeight *
+                    0.55;
 
             }
 
-            else if(p.role === "forward"){
+            else if(
+                p.role ===
+                "forward"
+            ){
 
-                if(distToBall < 220){
+                if(
+                    distToBall < 220
+                ){
 
                     targetX =
                         ballX;
@@ -1473,13 +1845,17 @@ function updateBlueAI(dt){
                         worldWidth / 2;
 
                     targetY =
-                        worldHeight * 0.30;
+                        worldHeight *
+                        0.30;
 
                 }
 
             }
 
-            else if(p.role === "guard"){
+            else if(
+                p.role ===
+                "guard"
+            ){
 
                 targetX =
                     clamp(
@@ -1489,45 +1865,66 @@ function updateBlueAI(dt){
                     );
 
                 targetY =
-                    worldHeight * 0.94;
+                    worldHeight *
+                    0.94;
 
             }
 
         }
 
+
+        /* =================================================
+           هجوم
+        ================================================== */
+
         else{
 
-            if(p.role === "wing"){
+            if(
+                p.role ===
+                "wing"
+            ){
 
                 targetX =
                     p.anchorX;
 
                 targetY =
-                    worldHeight * 0.35;
+                    worldHeight *
+                    0.35;
 
             }
 
-            else if(p.role === "forward"){
+            else if(
+                p.role ===
+                "forward"
+            ){
 
                 targetX =
                     worldWidth / 2;
 
                 targetY =
-                    worldHeight * 0.22;
+                    worldHeight *
+                    0.22;
 
             }
 
-            else if(p.role === "defender"){
+            else if(
+                p.role ===
+                "defender"
+            ){
 
                 targetX =
                     worldWidth / 2;
 
                 targetY =
-                    worldHeight * 0.78;
+                    worldHeight *
+                    0.78;
 
             }
 
-            else if(p.role === "guard"){
+            else if(
+                p.role ===
+                "guard"
+            ){
 
                 targetX =
                     clamp(
@@ -1537,7 +1934,8 @@ function updateBlueAI(dt){
                     );
 
                 targetY =
-                    worldHeight * 0.94;
+                    worldHeight *
+                    0.94;
 
             }
 
@@ -1545,16 +1943,23 @@ function updateBlueAI(dt){
 
 
         const dx =
-            targetX - p.x;
+            targetX -
+            p.x;
 
         const dy =
-            targetY - p.y;
+            targetY -
+            p.y;
 
         const d =
-            Math.hypot(dx,dy);
+            Math.hypot(
+                dx,
+                dy
+            );
 
 
-        if(d > 8){
+        if(
+            d > 8
+        ){
 
             movePlayer(
                 p,
@@ -1574,12 +1979,21 @@ function updateBlueAI(dt){
    RED AI
 ========================================================= */
 
-function updateRedAI(dt){
+function updateRedAI(
+    dt
+){
 
-    for(const p of opponents){
+    for(
+        const p of opponents
+    ){
 
-        if(ballOwner === p)
+        if(
+            ballOwner === p
+        ){
+
             continue;
+
+        }
 
 
         const distToBall =
@@ -1589,12 +2003,17 @@ function updateRedAI(dt){
             );
 
 
-        if(distToBall < 70){
+        if(
+            distToBall < 70
+        ){
 
-            if(distToBall > 0){
+            if(
+                distToBall > 0
+            ){
 
                 movePlayer(
                     p,
+
                     (ballX - p.x) /
                         distToBall,
 
@@ -1613,7 +2032,8 @@ function updateRedAI(dt){
 
         const blueHasBall =
             ballOwner &&
-            ballOwner.team === "blue";
+            ballOwner.team ===
+                "blue";
 
 
         let targetX =
@@ -1623,11 +2043,18 @@ function updateRedAI(dt){
             p.anchorY;
 
 
-        if(blueHasBall){
+        if(
+            blueHasBall
+        ){
 
-            if(p.role === "defender"){
+            if(
+                p.role ===
+                "defender"
+            ){
 
-                if(distToBall < 260){
+                if(
+                    distToBall < 260
+                ){
 
                     targetX =
                         ballX;
@@ -1639,19 +2066,28 @@ function updateRedAI(dt){
 
             }
 
-            else if(p.role === "wing"){
+            else if(
+                p.role ===
+                "wing"
+            ){
 
                 targetX =
                     p.anchorX;
 
                 targetY =
-                    worldHeight * 0.45;
+                    worldHeight *
+                    0.45;
 
             }
 
-            else if(p.role === "forward"){
+            else if(
+                p.role ===
+                "forward"
+            ){
 
-                if(distToBall < 220){
+                if(
+                    distToBall < 220
+                ){
 
                     targetX =
                         ballX;
@@ -1667,13 +2103,17 @@ function updateRedAI(dt){
                         worldWidth / 2;
 
                     targetY =
-                        worldHeight * 0.70;
+                        worldHeight *
+                        0.70;
 
                 }
 
             }
 
-            else if(p.role === "guard"){
+            else if(
+                p.role ===
+                "guard"
+            ){
 
                 targetX =
                     clamp(
@@ -1683,7 +2123,8 @@ function updateRedAI(dt){
                     );
 
                 targetY =
-                    worldHeight * 0.06;
+                    worldHeight *
+                    0.06;
 
             }
 
@@ -1691,37 +2132,52 @@ function updateRedAI(dt){
 
         else{
 
-            if(p.role === "wing"){
+            if(
+                p.role ===
+                "wing"
+            ){
 
                 targetX =
                     p.anchorX;
 
                 targetY =
-                    worldHeight * 0.65;
+                    worldHeight *
+                    0.65;
 
             }
 
-            else if(p.role === "forward"){
+            else if(
+                p.role ===
+                "forward"
+            ){
 
                 targetX =
                     worldWidth / 2;
 
                 targetY =
-                    worldHeight * 0.80;
+                    worldHeight *
+                    0.80;
 
             }
 
-            else if(p.role === "defender"){
+            else if(
+                p.role ===
+                "defender"
+            ){
 
                 targetX =
                     worldWidth / 2;
 
                 targetY =
-                    worldHeight * 0.30;
+                    worldHeight *
+                    0.30;
 
             }
 
-            else if(p.role === "guard"){
+            else if(
+                p.role ===
+                "guard"
+            ){
 
                 targetX =
                     clamp(
@@ -1731,7 +2187,8 @@ function updateRedAI(dt){
                     );
 
                 targetY =
-                    worldHeight * 0.06;
+                    worldHeight *
+                    0.06;
 
             }
 
@@ -1739,16 +2196,23 @@ function updateRedAI(dt){
 
 
         const dx =
-            targetX - p.x;
+            targetX -
+            p.x;
 
         const dy =
-            targetY - p.y;
+            targetY -
+            p.y;
 
         const d =
-            Math.hypot(dx,dy);
+            Math.hypot(
+                dx,
+                dy
+            );
 
 
-        if(d > 8){
+        if(
+            d > 8
+        ){
 
             movePlayer(
                 p,
@@ -1768,7 +2232,9 @@ function updateRedAI(dt){
    BALL AI
 ========================================================= */
 
-function updateBallAI(dt){
+function updateBallAI(
+    dt
+){
 
     if(!ballOwner)
         return;
@@ -1780,7 +2246,9 @@ function updateBallAI(dt){
 
     if(
         p ===
-        teamPlayers[activePlayerIndex]
+        teamPlayers[
+            activePlayerIndex
+        ]
     ){
 
         return;
@@ -1804,7 +2272,9 @@ function updateBallAI(dt){
         );
 
 
-    if(distToGoal < 280){
+    if(
+        distToGoal < 280
+    ){
 
         if(
             Math.random() <
@@ -1823,26 +2293,39 @@ function updateBallAI(dt){
 
 
             const d =
-                Math.hypot(dx,dy);
+                Math.hypot(
+                    dx,
+                    dy
+                );
 
 
-            if(d < 1)
+            if(
+                d < 1
+            ){
+
                 return;
 
-
-            dx /= d;
-
-            dy /= d;
+            }
 
 
-            ballOwner = null;
+            dx /=
+                d;
+
+            dy /=
+                d;
+
+
+            ballOwner =
+                null;
 
 
             ballX =
-                p.x + dx * 30;
+                p.x +
+                dx * 30;
 
             ballY =
-                p.y + dy * 30;
+                p.y +
+                dy * 30;
 
 
             ballVX =
@@ -1869,7 +2352,9 @@ function updateBallAI(dt){
         : teamPlayers;
 
 
-    for(const e of enemies){
+    for(
+        const e of enemies
+    ){
 
         const d =
             Math.hypot(
@@ -1878,9 +2363,12 @@ function updateBallAI(dt){
             );
 
 
-        if(d < 65){
+        if(
+            d < 65
+        ){
 
-            nearEnemy = e;
+            nearEnemy =
+                e;
 
             break;
 
@@ -1889,7 +2377,9 @@ function updateBallAI(dt){
     }
 
 
-    if(nearEnemy){
+    if(
+        nearEnemy
+    ){
 
         if(
             Math.random() <
@@ -1906,7 +2396,8 @@ function updateBallAI(dt){
                 : 1;
 
 
-            ballOwner = null;
+            ballOwner =
+                null;
 
 
             ballX =
@@ -1917,7 +2408,8 @@ function updateBallAI(dt){
                 attackDir * 30;
 
 
-            ballVX = 0;
+            ballVX =
+                0;
 
             ballVY =
                 attackDir * 450;
@@ -1938,16 +2430,26 @@ function updateBallAI(dt){
 
 
     const d =
-        Math.hypot(dx,dy);
+        Math.hypot(
+            dx,
+            dy
+        );
 
 
-    if(d < 1)
+    if(
+        d < 1
+    ){
+
         return;
 
+    }
 
-    dx /= d;
 
-    dy /= d;
+    dx /=
+        d;
+
+    dy /=
+        d;
 
 
     movePlayer(
@@ -1964,11 +2466,14 @@ function updateBallAI(dt){
    SET ACTIVE PLAYER
 ========================================================= */
 
-function setActivePlayer(index){
+function setActivePlayer(
+    index
+){
 
     if(
         index < 0 ||
-        index >= teamPlayers.length
+        index >=
+        teamPlayers.length
     ){
 
         return;
@@ -1990,11 +2495,14 @@ function setActivePlayer(index){
     ){
 
         teamPlayers[i].controlled =
-            i === activePlayerIndex;
+            i ===
+            activePlayerIndex;
 
-        teamPlayers[i].moveX = 0;
+        teamPlayers[i].moveX =
+            0;
 
-        teamPlayers[i].moveY = 0;
+        teamPlayers[i].moveY =
+            0;
 
     }
 
@@ -2033,7 +2541,8 @@ function autoSwitchPlayer(){
 
 
     if(
-        now - lastAutoSwitchTime <
+        now -
+        lastAutoSwitchTime <
         AUTO_SWITCH_COOLDOWN
     ){
 
@@ -2044,7 +2553,8 @@ function autoSwitchPlayer(){
 
     if(
         ballOwner &&
-        ballOwner.team === "blue"
+        ballOwner.team ===
+            "blue"
     ){
 
         const index =
@@ -2055,15 +2565,19 @@ function autoSwitchPlayer(){
 
         if(
             index >= 0 &&
-            index !== activePlayerIndex
+            index !==
+                activePlayerIndex
         ){
 
             if(
-                now - lastManualSwitchTime >
+                now -
+                lastManualSwitchTime >
                 MANUAL_SWITCH_COOLDOWN
             ){
 
-                setActivePlayer(index);
+                setActivePlayer(
+                    index
+                );
 
                 lastAutoSwitchTime =
                     now;
@@ -2077,9 +2591,12 @@ function autoSwitchPlayer(){
     }
 
 
-    if(!ballOwner){
+    if(
+        !ballOwner
+    ){
 
-        let bestIndex = -1;
+        let bestIndex =
+            -1;
 
         let bestDistance =
             Infinity;
@@ -2103,7 +2620,8 @@ function autoSwitchPlayer(){
 
 
             if(
-                d < bestDistance
+                d <
+                bestDistance
             ){
 
                 bestDistance =
@@ -2120,7 +2638,8 @@ function autoSwitchPlayer(){
         if(
             bestIndex >= 0 &&
             bestDistance <=
-                PLAYER_PICKUP_DISTANCE + 18 &&
+                PLAYER_PICKUP_DISTANCE +
+                18 &&
             bestIndex !==
                 activePlayerIndex
         ){
@@ -2145,17 +2664,25 @@ function autoSwitchPlayer(){
 
 function tryBallPickup(){
 
-    if(ballOwner)
+    if(
+        ballOwner
+    ){
+
         return;
 
+    }
 
-    let nearest = null;
+
+    let nearest =
+        null;
 
     let bestDistance =
         Infinity;
 
 
-    for(const p of teamPlayers){
+    for(
+        const p of teamPlayers
+    ){
 
         const d =
             Math.hypot(
@@ -2182,7 +2709,9 @@ function tryBallPickup(){
     }
 
 
-    for(const p of opponents){
+    for(
+        const p of opponents
+    ){
 
         const d =
             Math.hypot(
@@ -2209,18 +2738,23 @@ function tryBallPickup(){
     }
 
 
-    if(nearest){
+    if(
+        nearest
+    ){
 
         ballOwner =
             nearest;
 
-        ballVX = 0;
+        ballVX =
+            0;
 
-        ballVY = 0;
+        ballVY =
+            0;
 
 
         if(
-            nearest.team === "blue"
+            nearest.team ===
+            "blue"
         ){
 
             const index =
@@ -2229,7 +2763,9 @@ function tryBallPickup(){
                 );
 
 
-            if(index >= 0){
+            if(
+                index >= 0
+            ){
 
                 setActivePlayer(
                     index
@@ -2250,11 +2786,19 @@ function tryBallPickup(){
 
 function tackle(){
 
-    if(!ballOwner)
+    if(
+        !ballOwner
+    ){
+
         return;
 
+    }
 
-    if(ballOwner.team === "blue"){
+
+    if(
+        ballOwner.team ===
+        "blue"
+    ){
 
         for(
             const e of opponents
@@ -2292,9 +2836,11 @@ function tackle(){
                     ballOwner =
                         e;
 
-                    ballVX = 0;
+                    ballVX =
+                        0;
 
-                    ballVY = 0;
+                    ballVY =
+                        0;
 
                     return;
 
@@ -2345,9 +2891,11 @@ function tackle(){
                     ballOwner =
                         e;
 
-                    ballVX = 0;
+                    ballVX =
+                        0;
 
-                    ballVY = 0;
+                    ballVY =
+                        0;
 
 
                     const index =
@@ -2356,7 +2904,9 @@ function tackle(){
                         );
 
 
-                    if(index >= 0){
+                    if(
+                        index >= 0
+                    ){
 
                         setActivePlayer(
                             index
@@ -2434,7 +2984,9 @@ function separatePlayers(
                 );
 
 
-            if(d === 0){
+            if(
+                d === 0
+            ){
 
                 dx = 1;
 
@@ -2457,12 +3009,16 @@ function separatePlayers(
                     ) / 2;
 
 
-                dx /= d;
+                dx /=
+                    d;
 
-                dy /= d;
+                dy /=
+                    d;
 
 
-                if(!isAFixed){
+                if(
+                    !isAFixed
+                ){
 
                     a.x -=
                         dx * push;
@@ -2473,7 +3029,9 @@ function separatePlayers(
                 }
 
 
-                if(!isBFixed){
+                if(
+                    !isBFixed
+                ){
 
                     b.x +=
                         dx * push;
@@ -2497,6 +3055,10 @@ function separatePlayers(
 ========================================================= */
 
 function updateCamera(){
+
+    /*
+       الكاميرا تلاحق الكرة
+    */
 
     const targetX =
         ballX -
@@ -2564,8 +3126,13 @@ function updateCamera(){
 
 function drawPlayer(p){
 
-    if(!p.el)
+    if(
+        !p.el
+    ){
+
         return;
+
+    }
 
 
     p.el.style.transform =
@@ -2590,7 +3157,9 @@ function drawPlayer(p){
         ];
 
 
-    if(arrow){
+    if(
+        arrow
+    ){
 
         arrow.style.display =
             isControlled
@@ -2600,7 +3169,9 @@ function drawPlayer(p){
     }
 
 
-    if(isControlled){
+    if(
+        isControlled
+    ){
 
         p.el.classList.add(
             "controlled"
@@ -2687,17 +3258,14 @@ function drawAim(){
         `${ballY}px`;
 
 
-    /*
-       aimAngle:
-       0       = يمين
-       PI      = يسار
-       -PI/2   = فوق
-       PI/2    = تحت
-    */
-
     aimArrow.style.transform =
-        `translate(-50%, -100%)
-         rotate(${aimAngle + Math.PI / 2}rad)`;
+        `translate(
+            -50%,
+            -100%
+        )
+        rotate(
+            ${aimAngle + Math.PI / 2}rad
+        )`;
 
 
     aimArrow.style.transformOrigin =
@@ -2707,7 +3275,7 @@ function drawAim(){
 
 
 /* =========================================================
-   DRAW FIELD / CAMERA
+   DRAW FIELD
 ========================================================= */
 
 function drawField(){
@@ -2768,9 +3336,11 @@ function resetJoystick(){
     joystickPointerId =
         null;
 
-    joystickX = 0;
+    joystickX =
+        0;
 
-    joystickY = 0;
+    joystickY =
+        0;
 
 
     joystickCenter.style.transform =
@@ -2806,14 +3376,16 @@ function updateJoystick(
         clientX -
         centerX;
 
-
     let dy =
         clientY -
         centerY;
 
 
     const d =
-        Math.hypot(dx,dy);
+        Math.hypot(
+            dx,
+            dy
+        );
 
 
     if(
@@ -2825,7 +3397,6 @@ function updateJoystick(
             dx /
             d *
             JOYSTICK_MAX_DISTANCE;
-
 
         dy =
             dy /
@@ -2864,15 +3435,19 @@ movePad.addEventListener(
 
         e.preventDefault();
 
+
         joystickActive =
             true;
+
 
         joystickPointerId =
             e.pointerId;
 
+
         movePad.setPointerCapture(
             e.pointerId
         );
+
 
         updateJoystick(
             e.clientX,
@@ -2972,8 +3547,13 @@ function startCharging(){
         ];
 
 
-    if(!p)
+    if(
+        !p
+    ){
+
         return;
+
+    }
 
 
     if(
@@ -2989,12 +3569,9 @@ function startCharging(){
         true;
 
 
-    chargePower = 0;
+    chargePower =
+        0;
 
-
-    /*
-       البداية دائمًا للأعلى
-    */
 
     aimAngle =
         -Math.PI / 2;
@@ -3003,11 +3580,12 @@ function startCharging(){
     aimX =
         worldWidth / 2;
 
+    aimY =
+        0;
 
-    aimY = 0;
 
-
-    kickDragDistance = 0;
+    kickDragDistance =
+        0;
 
 
     powerBox.style.display =
@@ -3028,10 +3606,17 @@ function startCharging(){
    UPDATE CHARGE
 ========================================================= */
 
-function updateCharge(dt){
+function updateCharge(
+    dt
+){
 
-    if(!chargingActive)
+    if(
+        !chargingActive
+    ){
+
         return;
+
+    }
 
 
     chargePower +=
@@ -3062,14 +3647,16 @@ function cancelCharging(){
         false;
 
 
-    chargePower = 0;
+    chargePower =
+        0;
 
 
     kickPointerId =
         null;
 
 
-    kickDragDistance = 0;
+    kickDragDistance =
+        0;
 
 
     powerBox.style.display =
@@ -3095,21 +3682,14 @@ function updateAim(
     clientY
 ){
 
-    if(!chargingActive)
+    if(
+        !chargingActive
+    ){
+
         return;
 
+    }
 
-    /*
-       الاتجاه الآن يحسب من:
-       
-       نقطة بداية الإصبع
-              ↓
-       مكان الإصبع الحالي
-       
-       وليس من:
-       
-       الكرة → مكان الإصبع
-    */
 
     let dx =
         clientX -
@@ -3122,25 +3702,24 @@ function updateAim(
 
 
     const d =
-        Math.hypot(dx,dy);
+        Math.hypot(
+            dx,
+            dy
+        );
 
 
-    if(d < 6)
+    if(
+        d < 6
+    ){
+
         return;
+
+    }
 
 
     kickDragDistance =
         d;
 
-
-    /*
-       atan2:
-       
-       فوق    = -PI/2
-       تحت    =  PI/2
-       يمين   =  0
-       يسار   =  PI
-    */
 
     aimAngle =
         Math.atan2(
@@ -3149,16 +3728,15 @@ function updateAim(
         );
 
 
-    /*
-       نحتفظ بآخر اتجاه أيضًا
-       للرسم فقط
-    */
-
     aimX =
-        Math.cos(aimAngle);
+        Math.cos(
+            aimAngle
+        );
 
     aimY =
-        Math.sin(aimAngle);
+        Math.sin(
+            aimAngle
+        );
 
 }
 
@@ -3172,7 +3750,8 @@ function getDistanceFactor(){
     const goalX =
         worldWidth / 2;
 
-    const goalY = 0;
+    const goalY =
+        0;
 
 
     const distToGoal =
@@ -3216,8 +3795,13 @@ function kickBall(){
         ];
 
 
-    if(!p)
+    if(
+        !p
+    ){
+
         return;
+
+    }
 
 
     if(
@@ -3294,9 +3878,6 @@ function kickBall(){
 
 /* =========================================================
    KICK EVENTS
-   الإصدار الجديد:
-   نستخدم window حتى يستمر السحب
-   حتى بعد خروج الإصبع من زر الركل.
 ========================================================= */
 
 kickControl.addEventListener(
@@ -3305,17 +3886,19 @@ kickControl.addEventListener(
 
         e.preventDefault();
 
-        if(chargingActive)
+
+        if(
+            chargingActive
+        ){
+
             return;
+
+        }
 
 
         kickPointerId =
             e.pointerId;
 
-
-        /*
-           نقطة بداية السحب
-        */
 
         kickStartX =
             e.clientX;
@@ -3335,16 +3918,21 @@ kickControl.addEventListener(
 );
 
 
-/*
-   حركة السحب على مستوى الشاشة كلها
-*/
+/* =========================================================
+   KICK MOVE
+========================================================= */
 
 window.addEventListener(
     "pointermove",
     e => {
 
-        if(!chargingActive)
+        if(
+            !chargingActive
+        ){
+
             return;
+
+        }
 
 
         if(
@@ -3372,9 +3960,9 @@ window.addEventListener(
 );
 
 
-/*
-   رفع الإصبع = تسديد
-*/
+/* =========================================================
+   KICK UP
+========================================================= */
 
 window.addEventListener(
     "pointerup",
@@ -3393,7 +3981,9 @@ window.addEventListener(
         e.preventDefault();
 
 
-        if(chargingActive){
+        if(
+            chargingActive
+        ){
 
             kickBall();
 
@@ -3410,9 +4000,9 @@ window.addEventListener(
 );
 
 
-/*
-   إلغاء السحب
-*/
+/* =========================================================
+   KICK CANCEL
+========================================================= */
 
 window.addEventListener(
     "pointercancel",
@@ -3438,9 +4028,17 @@ window.addEventListener(
    BALL PHYSICS
 ========================================================= */
 
-function updateBall(dt){
+function updateBall(
+    dt
+){
 
-    if(ballOwner){
+    /*
+       الكرة مع لاعب
+    */
+
+    if(
+        ballOwner
+    ){
 
         ballX =
             ballOwner.x;
@@ -3450,15 +4048,21 @@ function updateBall(dt){
             25;
 
 
-        ballVX = 0;
+        ballVX =
+            0;
 
-        ballVY = 0;
+        ballVY =
+            0;
 
 
         return;
 
     }
 
+
+    /*
+       الكرة حرة
+    */
 
     ballX +=
         ballVX *
@@ -3489,7 +4093,8 @@ function updateBall(dt){
         0.15
     ){
 
-        ballVX = 0;
+        ballVX =
+            0;
 
     }
 
@@ -3499,10 +4104,15 @@ function updateBall(dt){
         0.15
     ){
 
-        ballVY = 0;
+        ballVY =
+            0;
 
     }
 
+
+    /*
+       الجدار الأيسر
+    */
 
     if(
         ballX <
@@ -3519,6 +4129,10 @@ function updateBall(dt){
 
     }
 
+
+    /*
+       الجدار الأيمن
+    */
 
     if(
         ballX >
@@ -3537,6 +4151,10 @@ function updateBall(dt){
 
     }
 
+
+    /*
+       المرمى العلوي
+    */
 
     if(
         ballY <
@@ -3569,6 +4187,10 @@ function updateBall(dt){
 
     }
 
+
+    /*
+       المرمى السفلي
+    */
 
     if(
         ballY >
@@ -3618,7 +4240,7 @@ function scoreBlue(){
         blueScore;
 
 
-    resetAfterGoal();
+    showGoalCelebration();
 
 }
 
@@ -3631,7 +4253,93 @@ function scoreRed(){
         redScore;
 
 
-    resetAfterGoal();
+    showGoalCelebration();
+
+}
+
+
+/* =========================================================
+   GOAL CELEBRATION
+========================================================= */
+
+function showGoalCelebration(){
+
+    if(
+        goalCelebrationActive
+    ){
+
+        return;
+
+    }
+
+
+    goalCelebrationActive =
+        true;
+
+
+    /*
+       إيقاف المباراة مؤقتًا
+    */
+
+    matchRunning =
+        false;
+
+
+    cancelCharging();
+
+    resetJoystick();
+
+
+    /*
+       إظهار الاحتفال
+    */
+
+    goalCelebration.style.display =
+        "flex";
+
+
+    /*
+       بعد 1.6 ثانية:
+       العودة للمنتصف
+    */
+
+    if(
+        goalResetTimer
+    ){
+
+        clearTimeout(
+            goalResetTimer
+        );
+
+    }
+
+
+    goalResetTimer =
+        setTimeout(
+            () => {
+
+                goalCelebration.style.display =
+                    "none";
+
+
+                resetAfterGoal();
+
+
+                matchRunning =
+                    true;
+
+
+                goalCelebrationActive =
+                    false;
+
+
+                lastTimestamp =
+                    performance.now();
+
+            },
+
+            1600
+        );
 
 }
 
@@ -3642,23 +4350,23 @@ function scoreRed(){
 
 function resetAfterGoal(){
 
-    ballOwner = null;
+    ballOwner =
+        null;
 
 
-    ballX =
-        worldWidth / 2;
+    ballVX =
+        0;
 
-    ballY =
-        worldHeight / 2;
-
-
-    ballVX = 0;
-
-    ballVY = 0;
+    ballVY =
+        0;
 
 
     cancelCharging();
 
+
+    /*
+       إعادة اللاعبين
+    */
 
     for(
         const p of teamPlayers
@@ -3686,28 +4394,69 @@ function resetAfterGoal(){
     }
 
 
+    /*
+       اللاعب المتحكم
+       يبدأ في المنتصف
+    */
+
     const p =
         teamPlayers[
             activePlayerIndex
         ];
 
 
+    p.x =
+        worldWidth / 2;
+
+    p.y =
+        worldHeight / 2 +
+        25;
+
+
+    /*
+       الكرة في المنتصف
+    */
+
     ballOwner =
         p;
 
 
     ballX =
-        p.x;
-
+        worldWidth / 2;
 
     ballY =
-        p.y -
-        25;
+        worldHeight / 2;
 
+
+    ballVX =
+        0;
+
+    ballVY =
+        0;
+
+
+    /*
+       إعادة اتجاه التصويب
+    */
+
+    aimAngle =
+        -Math.PI / 2;
+
+
+    aimX =
+        worldWidth / 2;
+
+    aimY =
+        0;
+
+
+    /*
+       الكاميرا إلى منتصف الملعب
+    */
 
     cameraX =
         clamp(
-            ballX -
+            worldWidth / 2 -
             viewWidth / 2,
 
             0,
@@ -3722,8 +4471,8 @@ function resetAfterGoal(){
 
     cameraY =
         clamp(
-            ballY -
-            viewHeight / 2,
+            worldHeight / 2 -
+            viewHeight * 0.50,
 
             0,
 
@@ -3733,6 +4482,9 @@ function resetAfterGoal(){
                 viewHeight
             )
         );
+
+
+    draw();
 
 }
 
@@ -3802,8 +4554,13 @@ function switchPlayer(){
     }
 
 
-    if(bestIndex < 0)
+    if(
+        bestIndex < 0
+    ){
+
         return;
+
+    }
 
 
     setActivePlayer(
@@ -3821,9 +4578,11 @@ function switchPlayer(){
                 bestIndex
             ];
 
-        ballVX = 0;
+        ballVX =
+            0;
 
-        ballVY = 0;
+        ballVY =
+            0;
 
     }
 
@@ -3858,15 +4617,14 @@ game.addEventListener(
         }
 
 
-        if(chargingActive)
+        if(
+            chargingActive
+        ){
+
             return;
 
+        }
 
-        /*
-           مهم:
-           منع Safari من اعتبار
-           الضغطتين Zoom.
-        */
 
         e.preventDefault();
 
@@ -3876,7 +4634,8 @@ game.addEventListener(
 
 
         if(
-            now - lastTapTime <
+            now -
+            lastTapTime <
             320
         ){
 
@@ -3893,7 +4652,7 @@ game.addEventListener(
 
 
 /* =========================================================
-   منع التكبير بالضغط المزدوج / Gesture
+   منع التكبير
 ========================================================= */
 
 document.addEventListener(
@@ -3959,7 +4718,9 @@ function formatTime(
     seconds =
         Math.max(
             0,
-            Math.ceil(seconds)
+            Math.ceil(
+                seconds
+            )
         );
 
 
@@ -3974,13 +4735,19 @@ function formatTime(
 
 
     return (
-        String(minutes)
-            .padStart(2,"0") +
 
-        ":" +
+        String(minutes)
+            .padStart(2,"0")
+
+        +
+
+        ":"
+
+        +
 
         String(secs)
             .padStart(2,"0")
+
     );
 
 }
@@ -4088,9 +4855,11 @@ newMatch.addEventListener(
         e.preventDefault();
 
 
-        blueScore = 0;
+        blueScore =
+            0;
 
-        redScore = 0;
+        redScore =
+            0;
 
 
         blueScoreElement.textContent =
@@ -4109,6 +4878,28 @@ newMatch.addEventListener(
 
         matchEnded =
             false;
+
+
+        goalCelebrationActive =
+            false;
+
+
+        if(
+            goalResetTimer
+        ){
+
+            clearTimeout(
+                goalResetTimer
+            );
+
+            goalResetTimer =
+                null;
+
+        }
+
+
+        goalCelebration.style.display =
+            "none";
 
 
         matchEnd.style.display =
@@ -4134,9 +4925,11 @@ newMatch.addEventListener(
             25;
 
 
-        ballVX = 0;
+        ballVX =
+            0;
 
-        ballVY = 0;
+        ballVY =
+            0;
 
 
         cameraX =
@@ -4219,7 +5012,9 @@ function resizeGame(){
    UPDATE GAME
 ========================================================= */
 
-function updateGame(dt){
+function updateGame(
+    dt
+){
 
     if(
         !matchRunning ||
@@ -4231,35 +5026,89 @@ function updateGame(dt){
     }
 
 
-    updateMatchTimer(dt);
+    updateMatchTimer(
+        dt
+    );
 
 
-    updateControlledPlayer(dt);
+    /*
+       اللاعب المتحكم
+    */
+
+    updateControlledPlayer(
+        dt
+    );
 
 
-    updateBlueAI(dt);
+    /*
+       الأزرق
+    */
+
+    updateBlueAI(
+        dt
+    );
 
 
-    updateRedAI(dt);
+    /*
+       الأحمر
+    */
+
+    updateRedAI(
+        dt
+    );
 
 
-    updateBallAI(dt);
+    /*
+       ذكاء صاحب الكرة
+    */
 
+    updateBallAI(
+        dt
+    );
+
+
+    /*
+       الافتكاك
+    */
 
     tackle();
 
 
-    updateCharge(dt);
+    /*
+       شحن التسديد
+    */
+
+    updateCharge(
+        dt
+    );
 
 
-    updateBall(dt);
+    /*
+       فيزياء الكرة
+    */
 
+    updateBall(
+        dt
+    );
+
+
+    /*
+       التقاط الكرة
+    */
 
     tryBallPickup();
 
 
+    /*
+       تبديل التحكم
+    */
+
     autoSwitchPlayer();
 
+
+    /*
+       إبعاد اللاعبين
+    */
 
     separatePlayers(
         teamPlayers,
@@ -4273,8 +5122,16 @@ function updateGame(dt){
     );
 
 
+    /*
+       الكاميرا
+    */
+
     updateCamera();
 
+
+    /*
+       الرسم
+    */
 
     draw();
 
@@ -4285,7 +5142,9 @@ function updateGame(dt){
    GAME LOOP
 ========================================================= */
 
-function gameLoop(now){
+function gameLoop(
+    now
+){
 
     let dt =
         (
@@ -4305,7 +5164,9 @@ function gameLoop(now){
         );
 
 
-    updateGame(dt);
+    updateGame(
+        dt
+    );
 
 
     requestAnimationFrame(
@@ -4327,6 +5188,10 @@ function initializeGame(){
     createTeams();
 
 
+    /*
+       الكرة تبدأ مع اللاعب
+    */
+
     ballOwner =
         teamPlayers[0];
 
@@ -4340,17 +5205,29 @@ function initializeGame(){
         25;
 
 
-    ballVX = 0;
+    ballVX =
+        0;
 
-    ballVY = 0;
+    ballVY =
+        0;
 
+
+    /*
+       اللاعب الأول متحكم
+    */
 
     activePlayerIndex =
         0;
 
 
-    setActivePlayer(0);
+    setActivePlayer(
+        0
+    );
 
+
+    /*
+       الكاميرا
+    */
 
     cameraX =
         clamp(
