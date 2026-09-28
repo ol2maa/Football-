@@ -1,18 +1,29 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width,initial-scale=1.0,
-maximum-scale=1.0,minimum-scale=1.0,
-user-scalable=no,viewport-fit=cover">
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+minimum-scale=1.0,
+user-scalable=no,
+viewport-fit=cover">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable"
+content="yes">
 
-<title>كرة القدم ⚽️ v3.11</title>
+<meta name="apple-mobile-web-app-status-bar-style"
+content="black-translucent">
+
+<meta name="format-detection"
+content="telephone=no">
+
+<title>كرة القدم ⚽️ v3.12</title>
+
 
 <style>
 
@@ -23,10 +34,11 @@ user-scalable=no,viewport-fit=cover">
     -webkit-user-select:none;
     user-select:none;
     -webkit-touch-callout:none;
-    -webkit-tap-highlight-color:transparent
+    -webkit-tap-highlight-color:transparent;
 }
 
-html,body{
+html,
+body{
     width:100%;
     height:100%;
     overflow:hidden;
@@ -35,13 +47,13 @@ html,body{
     -webkit-text-size-adjust:100%;
     text-size-adjust:100%;
     touch-action:none;
-    overscroll-behavior:none
+    overscroll-behavior:none;
 }
 
 body{
     display:flex;
     justify-content:center;
-    align-items:center
+    align-items:center;
 }
 
 #game{
@@ -49,8 +61,8 @@ body{
     width:100%;
     height:100%;
     max-width:700px;
-    max-height:100%;
     overflow:hidden;
+
     background:
     repeating-linear-gradient(
         90deg,
@@ -63,8 +75,12 @@ body{
 
     touch-action:none;
     overscroll-behavior:none;
-    contain:layout style
 }
+
+
+/* =================================================
+   خط المنتصف
+================================================= */
 
 .center-line{
     position:absolute;
@@ -73,7 +89,8 @@ body{
     left:0;
     top:50%;
     background:rgba(255,255,255,.55);
-    pointer-events:none
+    pointer-events:none;
+    z-index:2;
 }
 
 .center-circle{
@@ -85,8 +102,14 @@ body{
     transform:translate(-50%,-50%);
     border:2px solid rgba(255,255,255,.55);
     border-radius:50%;
-    pointer-events:none
+    pointer-events:none;
+    z-index:2;
 }
+
+
+/* =================================================
+   الأهداف
+================================================= */
 
 .goal{
     position:absolute;
@@ -94,17 +117,18 @@ body{
     width:190px;
     height:48px;
     transform:translateX(-50%);
-    z-index:3;
-    pointer-events:none
+    z-index:5;
+    pointer-events:none;
 }
 
 #topGoal{
-    top:0
+    top:0;
 }
 
 #bottomGoal{
-    bottom:0
+    top:calc(100% - 48px);
 }
+
 
 .goalNet{
     position:absolute;
@@ -112,6 +136,7 @@ body{
     width:190px;
     height:48px;
     transform:translateX(-50%);
+
     border-left:2px solid rgba(255,255,255,.65);
     border-right:2px solid rgba(255,255,255,.65);
 
@@ -124,8 +149,9 @@ body{
         transparent 8px
     );
 
-    opacity:.8
+    opacity:.8;
 }
+
 
 .goalPost{
     position:absolute;
@@ -133,17 +159,17 @@ body{
     height:58px;
     background:#fff;
     border-radius:5px;
-    box-shadow:0 2px 5px rgba(0,0,0,.35)
+    box-shadow:0 2px 5px rgba(0,0,0,.35);
 }
 
 .goalPost.left{
     left:0;
-    top:0
+    top:0;
 }
 
 .goalPost.right{
     right:0;
-    top:0
+    top:0;
 }
 
 .goalCrossbar{
@@ -154,17 +180,17 @@ body{
     height:12px;
     background:#fff;
     border-radius:5px;
-    box-shadow:0 2px 5px rgba(0,0,0,.35)
+    box-shadow:0 2px 5px rgba(0,0,0,.35);
 }
 
 #bottomGoal .goalPost{
     top:auto;
-    bottom:0
+    bottom:0;
 }
 
 #bottomGoal .goalCrossbar{
     top:auto;
-    bottom:0
+    bottom:0;
 }
 
 
@@ -180,14 +206,10 @@ body{
     display:flex;
     align-items:center;
     gap:8px;
-    z-index:35;
+    z-index:60;
 }
 
 #score{
-    position:relative;
-    top:auto;
-    left:auto;
-    transform:none;
     color:#fff;
     font-size:24px;
     font-weight:bold;
@@ -195,7 +217,7 @@ body{
     padding:5px 18px;
     border-radius:20px;
     text-shadow:0 2px 4px #000;
-    white-space:nowrap
+    white-space:nowrap;
 }
 
 #matchTime{
@@ -208,22 +230,22 @@ body{
     text-shadow:0 2px 4px #000;
     min-width:76px;
     text-align:center;
-    font-variant-numeric:tabular-nums
+    font-variant-numeric:tabular-nums;
 }
 
 #matchTime.warning{
     background:rgba(180,0,0,.75);
-    animation:timeWarning .6s infinite alternate
+    animation:timeWarning .6s infinite alternate;
 }
 
 @keyframes timeWarning{
 
     from{
-        transform:scale(1)
+        transform:scale(1);
     }
 
     to{
-        transform:scale(1.08)
+        transform:scale(1.08);
     }
 
 }
@@ -248,12 +270,12 @@ body{
     z-index:100;
     opacity:0;
     pointer-events:none;
-    transition:opacity .2s,transform .2s
+    transition:opacity .2s,transform .2s;
 }
 
 #goalMessage.show{
     opacity:1;
-    transform:translate(-50%,-50%) scale(1)
+    transform:translate(-50%,-50%) scale(1);
 }
 
 
@@ -278,25 +300,25 @@ body{
     opacity:0;
     pointer-events:none;
     transition:opacity .25s,transform .25s;
-    box-shadow:0 8px 30px rgba(0,0,0,.45)
+    box-shadow:0 8px 30px rgba(0,0,0,.45);
 }
 
 #matchEnd.show{
     opacity:1;
     transform:translate(-50%,-50%) scale(1);
-    pointer-events:auto
+    pointer-events:auto;
 }
 
 #matchEndTitle{
     font-size:30px;
     font-weight:900;
-    margin-bottom:10px
+    margin-bottom:10px;
 }
 
 #matchEndScore{
     font-size:38px;
     font-weight:900;
-    margin-bottom:18px
+    margin-bottom:18px;
 }
 
 #newMatchButton{
@@ -308,16 +330,16 @@ body{
     font-weight:bold;
     padding:12px 24px;
     border-radius:16px;
-    box-shadow:0 4px 10px rgba(0,0,0,.35)
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
 }
 
 #newMatchButton:active{
-    transform:scale(.94)
+    transform:scale(.94);
 }
 
 
 /* =================================================
-   اللاعب
+   اللاعبون
 ================================================= */
 
 .playerUnit{
@@ -326,65 +348,50 @@ body{
     height:38px;
     left:0;
     top:0;
-    will-change:transform;
+
     border-radius:50%;
     border:4px solid #fff;
-    box-shadow:0 4px 10px rgba(0,0,0,.35);
-    z-index:10;
+
+    box-shadow:
+        0 4px 10px rgba(0,0,0,.35);
+
+    z-index:20;
+
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:23px;
-    touch-action:none;
-    transition:box-shadow .15s
+
+    font-size:22px;
+
+    will-change:transform;
+    pointer-events:none;
 }
 
 .playerUnit.blue{
-    background:#1769ff
+    background:#1769ff;
 }
 
 .playerUnit.red{
-    background:#e53935
+    background:#e53935;
 }
 
 .playerUnit.controlled{
     box-shadow:
-    0 0 0 3px rgba(255,215,0,.45),
-    0 4px 10px rgba(0,0,0,.35)
-}
-
-.playerUnit.tackleFlash{
-    animation:tackleFlash .3s ease-out
-}
-
-@keyframes tackleFlash{
-
-    0%{
-        box-shadow:0 0 0 0 rgba(255,80,80,.9)
-    }
-
-    100%{
-        box-shadow:0 0 0 22px rgba(255,80,80,0)
-    }
-
+        0 0 0 3px rgba(255,215,0,.55),
+        0 4px 10px rgba(0,0,0,.35);
 }
 
 .controlArrow{
     position:absolute;
     left:50%;
-    top:-19px;
+    top:-20px;
     transform:translateX(-50%);
     color:#ffd400;
     font-size:15px;
     font-weight:900;
     line-height:1;
     text-shadow:0 2px 3px #000;
-    opacity:0;
-    pointer-events:none
-}
-
-.playerUnit.controlled .controlArrow{
-    opacity:1
+    pointer-events:none;
 }
 
 
@@ -398,18 +405,30 @@ body{
     height:22px;
     left:0;
     top:0;
-    will-change:transform;
+
     border-radius:50%;
     background:#fff;
     border:2px solid #222;
-    box-shadow:0 3px 7px rgba(0,0,0,.35);
-    z-index:9;
+
+    box-shadow:
+        0 3px 7px rgba(0,0,0,.35);
+
+    z-index:25;
+
     display:flex;
     justify-content:center;
     align-items:center;
+
     font-size:14px;
-    pointer-events:none
+
+    will-change:transform;
+    pointer-events:none;
 }
+
+
+/* =================================================
+   سهم التسديد
+================================================= */
 
 #aim{
     position:absolute;
@@ -417,12 +436,17 @@ body{
     height:4px;
     left:0;
     top:0;
-    will-change:transform;
+
     background:#ffd400;
     border-radius:5px;
-    z-index:8;
+
+    z-index:24;
     pointer-events:none;
-    box-shadow:0 0 6px rgba(255,215,0,.8)
+
+    box-shadow:
+        0 0 6px rgba(255,215,0,.8);
+
+    display:none;
 }
 
 #aim::after{
@@ -430,39 +454,48 @@ body{
     position:absolute;
     right:-2px;
     top:50%;
+
     width:0;
     height:0;
+
     border-top:8px solid transparent;
     border-bottom:8px solid transparent;
     border-left:14px solid #ffd400;
-    transform:translateY(-50%)
+
+    transform:translateY(-50%);
 }
 
 
 /* =================================================
-   القوة
+   قوة الركلة
 ================================================= */
 
 #powerBox{
     position:absolute;
     top:18px;
     left:50%;
+
     transform:translateX(-50%);
+
     width:190px;
     height:18px;
+
     border:2px solid #fff;
     border-radius:20px;
+
     background:rgba(0,0,0,.35);
+
     overflow:hidden;
-    z-index:30
+
+    z-index:70;
 }
 
 #power{
     width:0;
     height:100%;
+
     background:#ffd400;
     border-radius:20px;
-    transition:width .04s linear
 }
 
 #powerText{
@@ -470,11 +503,14 @@ body{
     top:42px;
     left:50%;
     transform:translateX(-50%);
+
     color:#fff;
     font-size:14px;
+
     text-shadow:0 2px 4px #000;
-    z-index:30;
-    white-space:nowrap
+
+    z-index:70;
+    white-space:nowrap;
 }
 
 
@@ -484,33 +520,50 @@ body{
 
 #movePad{
     position:absolute;
+
     left:22px;
     bottom:28px;
+
     width:150px;
     height:150px;
+
     border-radius:50%;
+
     background:rgba(0,0,0,.12);
+
     border:3px solid rgba(255,255,255,.35);
-    box-shadow:0 5px 12px rgba(0,0,0,.25);
-    z-index:40;
-    touch-action:none
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,.25);
+
+    z-index:80;
+
+    touch-action:none;
 }
 
 #joystickCenter{
     position:absolute;
+
     left:50%;
     top:50%;
+
     width:54px;
     height:54px;
+
     transform:translate(-50%,-50%);
+
     border-radius:50%;
+
     background:rgba(0,0,0,.30);
+
     border:3px solid #fff;
-    box-shadow:0 4px 8px rgba(0,0,0,.35);
+
+    box-shadow:
+        0 4px 8px rgba(0,0,0,.35);
+
     pointer-events:none;
-    transition:transform .04s linear;
-    will-change:transform
 }
+
 
 .moveArrow{
     position:absolute;
@@ -519,31 +572,31 @@ body{
     font-weight:bold;
     opacity:.85;
     pointer-events:none;
-    text-shadow:0 2px 4px #000
+    text-shadow:0 2px 4px #000;
 }
 
 #arrowUp{
     left:50%;
     top:10px;
-    transform:translateX(-50%)
+    transform:translateX(-50%);
 }
 
 #arrowDown{
     left:50%;
     bottom:10px;
-    transform:translateX(-50%)
+    transform:translateX(-50%);
 }
 
 #arrowLeft{
     left:10px;
     top:50%;
-    transform:translateY(-50%)
+    transform:translateY(-50%);
 }
 
 #arrowRight{
     right:10px;
     top:50%;
-    transform:translateY(-50%)
+    transform:translateY(-50%);
 }
 
 
@@ -553,491 +606,3382 @@ body{
 
 #kickControl{
     position:absolute;
+
     right:22px;
     bottom:28px;
+
     width:84px;
     height:84px;
+
     border-radius:50%;
+
     background:rgba(255,255,255,.18);
+
     border:5px solid #fff;
-    box-shadow:0 5px 12px rgba(0,0,0,.35);
-    z-index:40;
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,.35);
+
+    z-index:80;
+
     touch-action:none;
+
     display:flex;
     justify-content:center;
-    align-items:center
+    align-items:center;
 }
 
 #kickButton{
     width:68px;
     height:68px;
+
     border-radius:50%;
+
     background:#e53935;
+
     color:#fff;
+
     font-size:34px;
+
     display:flex;
     justify-content:center;
     align-items:center;
+
     pointer-events:none;
-    transition:transform .08s
 }
 
 #kickDot{
     position:absolute;
+
     width:10px;
     height:10px;
+
     border-radius:50%;
+
     background:#fff;
-    box-shadow:0 0 7px rgba(255,255,255,.9);
+
+    box-shadow:
+        0 0 7px rgba(255,255,255,.9);
+
     left:50%;
     top:50%;
+
     transform:translate(-50%,-50%);
+
     pointer-events:none;
+
     opacity:0;
-    transition:opacity .1s
 }
 
 
 /* =================================================
-   معلومات
+   المعلومات
 ================================================= */
 
 #info{
     position:absolute;
-    top:72px;
+
+    top:125px;
     left:50%;
+
     transform:translateX(-50%);
+
     color:#fff;
+
     font-size:12px;
+
     background:rgba(0,0,0,.35);
+
     padding:6px 12px;
+
     border-radius:20px;
-    z-index:30;
+
+    z-index:65;
+
     white-space:nowrap;
-    pointer-events:none
-}
 
-#hint{
-    position:absolute;
-    left:50%;
-    top:56%;
-    transform:translate(-50%,-50%);
-    color:#fff;
-    font-size:16px;
-    background:rgba(0,0,0,.55);
-    padding:8px 16px;
-    border-radius:20px;
-    z-index:50;
-    opacity:0;
     pointer-events:none;
-    transition:opacity .3s
-}
-
-#hint.show{
-    opacity:1
 }
 
 </style>
+
 </head>
+
+
 <body>
+
 
 <div id="game">
 
-<div class="center-line"></div>
-<div class="center-circle"></div>
+
+    <div class="center-line"></div>
+
+    <div class="center-circle"></div>
 
 
-<div class="goal" id="topGoal">
-    <div class="goalNet"></div>
-    <div class="goalPost left"></div>
-    <div class="goalPost right"></div>
-    <div class="goalCrossbar"></div>
-</div>
+    <!-- الهدف العلوي -->
 
+    <div class="goal" id="topGoal">
 
-<div class="goal" id="bottomGoal">
-    <div class="goalNet"></div>
-    <div class="goalPost left"></div>
-    <div class="goalPost right"></div>
-    <div class="goalCrossbar"></div>
-</div>
+        <div class="goalNet"></div>
 
+        <div class="goalPost left"></div>
 
-<!-- النتيجة والوقت -->
+        <div class="goalPost right"></div>
 
-<div id="matchInfo">
+        <div class="goalCrossbar"></div>
 
-    <div id="matchTime">
-        03:00
     </div>
 
-    <div id="score">
-        0 - 0
+
+    <!-- الهدف السفلي -->
+
+    <div class="goal" id="bottomGoal">
+
+        <div class="goalNet"></div>
+
+        <div class="goalPost left"></div>
+
+        <div class="goalPost right"></div>
+
+        <div class="goalCrossbar"></div>
+
     </div>
 
-</div>
 
+    <!-- اللاعبين الأزرق -->
 
-<!-- رسالة الهدف -->
+    <div id="player"
+         class="playerUnit blue">
 
-<div id="goalMessage">
-    GOAL! ⚽️🎉
-</div>
+        <div class="controlArrow">▼</div>
 
+        🧍
 
-<!-- نهاية المباراة -->
-
-<div id="matchEnd">
-
-    <div id="matchEndTitle">
-        انتهت المباراة 🏁
     </div>
 
-    <div id="matchEndScore">
-        0 - 0
+
+    <div id="teammate1"
+         class="playerUnit blue">
+
+        <div class="controlArrow">▼</div>
+
+        🧍
+
     </div>
 
-    <button id="newMatchButton">
-        مباراة جديدة 🔄
-    </button>
+
+    <div id="teammate2"
+         class="playerUnit blue">
+
+        <div class="controlArrow">▼</div>
+
+        🧍
+
+    </div>
+
+
+    <div id="teammate3"
+         class="playerUnit blue">
+
+        <div class="controlArrow">▼</div>
+
+        🧍
+
+    </div>
+
+
+    <div id="teammate4"
+         class="playerUnit blue">
+
+        <div class="controlArrow">▼</div>
+
+        🧍
+
+    </div>
+
+
+    <!-- اللاعبين الأحمر -->
+
+    <div id="opponent1"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <div id="opponent2"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <div id="opponent3"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <div id="opponent4"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <div id="opponent5"
+         class="playerUnit red">
+
+        🧍
+
+    </div>
+
+
+    <!-- الكرة -->
+
+    <div id="ball">⚽</div>
+
+    <div id="aim"></div>
+
+
+    <!-- النتيجة والوقت -->
+
+    <div id="matchInfo">
+
+        <div id="matchTime">
+            03:00
+        </div>
+
+        <div id="score">
+            0 - 0
+        </div>
+
+    </div>
+
+
+    <!-- رسالة الهدف -->
+
+    <div id="goalMessage">
+        GOAL! ⚽️🎉
+    </div>
+
+
+    <!-- نهاية المباراة -->
+
+    <div id="matchEnd">
+
+        <div id="matchEndTitle">
+            انتهت المباراة 🏁
+        </div>
+
+        <div id="matchEndScore">
+            0 - 0
+        </div>
+
+        <button id="newMatchButton">
+            مباراة جديدة 🔄
+        </button>
+
+    </div>
+
 
 </div>
 
 
-<!-- =================================================
-     الفريق الأزرق
-================================================= -->
-
-<div id="player" class="playerUnit blue">
-    <div class="controlArrow">▼</div>🧍
-</div>
-
-<div id="teammate1" class="playerUnit blue">
-    <div class="controlArrow">▼</div>🧍
-</div>
-
-<div id="teammate2" class="playerUnit blue">
-    <div class="controlArrow">▼</div>🧍
-</div>
-
-<div id="teammate3" class="playerUnit blue">
-    <div class="controlArrow">▼</div>🧍
-</div>
-
-<div id="teammate4" class="playerUnit blue">
-    <div class="controlArrow">▼</div>🧍
-</div>
-
-
-<!-- =================================================
-     الفريق الأحمر
-================================================= -->
-
-<div id="opponent1" class="playerUnit red">🧍</div>
-<div id="opponent2" class="playerUnit red">🧍</div>
-<div id="opponent3" class="playerUnit red">🧍</div>
-<div id="opponent4" class="playerUnit red">🧍</div>
-<div id="opponent5" class="playerUnit red">🧍</div>
-
-
-<!-- الكرة -->
-
-<div id="ball">⚽</div>
-
-<div id="aim"></div>
-
-</div>
-
-
-<!-- =================================================
-     قوة الركلة
-================================================= -->
+<!-- قوة الركلة -->
 
 <div id="powerBox">
+
     <div id="power"></div>
+
 </div>
+
 
 <div id="powerText">
     قوة الركلة
 </div>
 
 
-<!-- =================================================
-     Joystick
-================================================= -->
+<!-- Joystick -->
 
 <div id="movePad">
 
-    <div class="moveArrow" id="arrowUp">▲</div>
-    <div class="moveArrow" id="arrowDown">▼</div>
-    <div class="moveArrow" id="arrowLeft">◀</div>
-    <div class="moveArrow" id="arrowRight">▶</div>
+    <div class="moveArrow"
+         id="arrowUp">▲</div>
+
+    <div class="moveArrow"
+         id="arrowDown">▼</div>
+
+    <div class="moveArrow"
+         id="arrowLeft">◀</div>
+
+    <div class="moveArrow"
+         id="arrowRight">▶</div>
 
     <div id="joystickCenter"></div>
 
 </div>
 
 
-<!-- =================================================
-     الركل
-================================================= -->
+<!-- الركل -->
 
 <div id="kickControl">
 
-    <div id="kickButton">👟</div>
+    <div id="kickButton">
+        👟
+    </div>
 
     <div id="kickDot"></div>
 
 </div>
 
 
-<!-- =================================================
-     المعلومات
-================================================= -->
+<!-- المعلومات -->
 
 <div id="info">
     حرّك إصبعك للتحكم • الحركة والركل معًا
 </div>
 
-<div id="hint"></div>
 
 
 <script>
 
-'use strict';
+"use strict";
 
 
 /* =================================================
    عناصر الواجهة
 ================================================= */
 
-const game=
+const game =
     document.getElementById("game");
 
-const ball=
+const ballElement =
     document.getElementById("ball");
 
-const aim=
+const aimArrow =
     document.getElementById("aim");
 
+const powerBox =
+    document.getElementById("powerBox");
 
-const kickControl=
-    document.getElementById("kickControl");
-
-const kickButton=
-    document.getElementById("kickButton");
-
-const kickDot=
-    document.getElementById("kickDot");
-
-
-const powerBar=
+const powerElement =
     document.getElementById("power");
 
+const powerText =
+    document.getElementById("powerText");
 
-const movePad=
+const movePad =
     document.getElementById("movePad");
 
-const joystickCenter=
+const joystickCenter =
     document.getElementById("joystickCenter");
 
+const kickControl =
+    document.getElementById("kickControl");
 
-const scoreElement=
+const kickButton =
+    document.getElementById("kickButton");
+
+const kickDot =
+    document.getElementById("kickDot");
+
+const scoreElement =
     document.getElementById("score");
 
-
-const matchTimeElement=
+const matchTimeElement =
     document.getElementById("matchTime");
 
-
-const matchEndElement=
+const matchEndElement =
     document.getElementById("matchEnd");
 
-
-const matchEndScoreElement=
+const matchEndScoreElement =
     document.getElementById("matchEndScore");
 
-
-const newMatchButton=
+const newMatchButton =
     document.getElementById("newMatchButton");
 
-
-const goalMessage=
+const goalMessage =
     document.getElementById("goalMessage");
 
-
-const hintElement=
-    document.getElementById("hint");
-
-
-const centerLine=
+const centerLine =
     document.querySelector(".center-line");
 
-
-const centerCircle=
+const centerCircle =
     document.querySelector(".center-circle");
 
-
-const topGoal=
+const topGoal =
     document.getElementById("topGoal");
 
-
-const bottomGoal=
+const bottomGoal =
     document.getElementById("bottomGoal");
 
 
 /* =================================================
-   أبعاد اللعبة والعالم
+   أبعاد الشاشة والعالم
 ================================================= */
 
-let gameWidth=
+let viewWidth =
     game.clientWidth;
 
-let gameHeight=
+let viewHeight =
     game.clientHeight;
 
 
 /*
-   الملعب أصبح ضعف ارتفاع الشاشة.
-
-   gameHeight = الجزء الظاهر
-   worldHeight = طول الملعب الحقيقي
+   العالم ضعف ارتفاع الشاشة.
 */
 
-let worldWidth=
-    gameWidth;
+let worldWidth =
+    viewWidth;
 
-let worldHeight=
-    gameHeight*2;
+let worldHeight =
+    viewHeight * 2;
 
 
 /* =================================================
    الكاميرا
 ================================================= */
 
-let cameraX=0;
-let cameraY=0;
+let cameraX = 0;
 
-const CAMERA_SMOOTH=0.08;
+let cameraY = 0;
+
+const CAMERA_SMOOTH = 0.12;
 
 
-/*
-   تحديث الكاميرا مع الكرة.
+/* =================================================
+   الثوابت
+================================================= */
 
-   الكاميرا تتحرك فقط عندما تتحرك الكرة
-   داخل العالم الطويل.
-*/
+const MATCH_DURATION = 180;
+
+const PLAYER_RADIUS = 19;
+
+const BALL_RADIUS = 11;
+
+const FRICTION = 0.985;
+
+const MAX_POWER = 100;
+
+const POWER_SPEED = 90;
+
+const GOAL_WIDTH = 190;
+
+const PLAYER_SWITCH_MARGIN = 45;
+
+const MANUAL_SWITCH_MIN_DISTANCE = 180;
+
+
+/* =================================================
+   حالة المباراة
+================================================= */
+
+let matchTimeRemaining =
+    MATCH_DURATION;
+
+let matchRunning = true;
+
+let matchEnded = false;
+
+let lastFrameTime =
+    performance.now();
+
+let matchLastTimestamp =
+    performance.now();
+
+
+let blueScore = 0;
+
+let redScore = 0;
+
+
+/* =================================================
+   الكرة
+================================================= */
+
+let ballX =
+    worldWidth / 2;
+
+let ballY =
+    worldHeight * 0.28;
+
+let ballVX = 0;
+
+let ballVY = 0;
+
+let ballOwner = null;
+
+
+/* =================================================
+   التحكم
+================================================= */
+
+let activePlayerIndex = 0;
+
+
+/* Joystick */
+
+let joystickX = 0;
+
+let joystickY = 0;
+
+let joystickActive = false;
+
+let joystickPointerId = null;
+
+const JOYSTICK_MAX_DISTANCE = 48;
+
+
+/* الركل */
+
+let aiming = false;
+
+let chargePower = 0;
+
+let aimX = worldWidth / 2;
+
+let aimY = 0;
+
+
+/* =================================================
+   الفريق الأزرق
+================================================= */
+
+const teamPlayers = [
+
+    {
+        id:"player",
+        role:"forward",
+        team:"blue",
+
+        x:worldWidth/2,
+        y:worldHeight*0.28,
+
+        anchorX:worldWidth/2,
+        anchorY:worldHeight*0.28,
+
+        speed:130,
+
+        el:document.getElementById("player"),
+
+        moveX:0,
+        moveY:0,
+        direction:0,
+        controlled:true
+    },
+
+
+    {
+        id:"teammate1",
+        role:"wing",
+        team:"blue",
+
+        x:worldWidth*0.12,
+        y:worldHeight*0.36,
+
+        anchorX:worldWidth*0.12,
+        anchorY:worldHeight*0.36,
+
+        speed:95,
+
+        el:document.getElementById("teammate1"),
+
+        moveX:0,
+        moveY:0,
+        direction:0,
+        controlled:false
+    },
+
+
+    {
+        id:"teammate2",
+        role:"wing",
+        team:"blue",
+
+        x:worldWidth*0.88,
+        y:worldHeight*0.36,
+
+        anchorX:worldWidth*0.88,
+        anchorY:worldHeight*0.36,
+
+        speed:95,
+
+        el:document.getElementById("teammate2"),
+
+        moveX:0,
+        moveY:0,
+        direction:0,
+        controlled:false
+    },
+
+
+    {
+        id:"teammate3",
+        role:"defender",
+        team:"blue",
+
+        x:worldWidth/2,
+        y:worldHeight*0.78,
+
+        anchorX:worldWidth/2,
+        anchorY:worldHeight*0.78,
+
+        speed:90,
+
+        el:document.getElementById("teammate3"),
+
+        moveX:0,
+        moveY:0,
+        direction:0,
+        controlled:false
+    },
+
+
+    {
+        id:"teammate4",
+        role:"guard",
+        team:"blue",
+
+        x:worldWidth/2,
+        y:worldHeight*0.94,
+
+        anchorX:worldWidth/2,
+        anchorY:worldHeight*0.94,
+
+        speed:75,
+
+        el:document.getElementById("teammate4"),
+
+        moveX:0,
+        moveY:0,
+        direction:0,
+        controlled:false
+    }
+
+];
+
+
+/* =================================================
+   الفريق الأحمر
+================================================= */
+
+const opponents = [
+
+    {
+        id:"opponent1",
+        role:"forward",
+        team:"red",
+
+        x:worldWidth/2,
+        y:worldHeight*0.72,
+
+        anchorX:worldWidth/2,
+        anchorY:worldHeight*0.72,
+
+        speed:85,
+
+        el:document.getElementById("opponent1"),
+
+        moveX:0,
+        moveY:0,
+        direction:0
+    },
+
+
+    {
+        id:"opponent2",
+        role:"wing",
+        team:"red",
+
+        x:worldWidth*0.12,
+        y:worldHeight*0.64,
+
+        anchorX:worldWidth*0.12,
+        anchorY:worldHeight*0.64,
+
+        speed:88,
+
+        el:document.getElementById("opponent2"),
+
+        moveX:0,
+        moveY:0,
+        direction:0
+    },
+
+
+    {
+        id:"opponent3",
+        role:"wing",
+        team:"red",
+
+        x:worldWidth*0.88,
+        y:worldHeight*0.64,
+
+        anchorX:worldWidth*0.88,
+        anchorY:worldHeight*0.64,
+
+        speed:88,
+
+        el:document.getElementById("opponent3"),
+
+        moveX:0,
+        moveY:0,
+        direction:0
+    },
+
+
+    {
+        id:"opponent4",
+        role:"defender",
+        team:"red",
+
+        x:worldWidth/2,
+        y:worldHeight*0.22,
+
+        anchorX:worldWidth/2,
+        anchorY:worldHeight*0.22,
+
+        speed:82,
+
+        el:document.getElementById("opponent4"),
+
+        moveX:0,
+        moveY:0,
+        direction:0
+    },
+
+
+    {
+        id:"opponent5",
+        role:"guard",
+        team:"red",
+
+        x:worldWidth/2,
+        y:worldHeight*0.06,
+
+        anchorX:worldWidth/2,
+        anchorY:worldHeight*0.06,
+
+        speed:70,
+
+        el:document.getElementById("opponent5"),
+
+        moveX:0,
+        moveY:0,
+        direction:0
+    }
+
+];
+
+
+/* =================================================
+   أدوات
+================================================= */
+
+function clamp(value,min,max){
+
+    return Math.max(
+        min,
+        Math.min(max,value)
+    );
+
+}
+
+
+function distance(a,b){
+
+    return Math.hypot(
+        a.x-b.x,
+        a.y-b.y
+    );
+
+}
+
+
+/* =================================================
+   حدود حركة اللاعبين
+================================================= */
+
+function getRoleBounds(p){
+
+    /*
+       اللاعب الذي يتحكم به المستخدم
+       يستطيع التحرك في كامل الملعب.
+    */
+
+    if(
+        p.team === "blue" &&
+        p === teamPlayers[activePlayerIndex]
+    ){
+
+        return {
+            minX:PLAYER_RADIUS,
+            maxX:worldWidth-PLAYER_RADIUS,
+
+            minY:PLAYER_RADIUS,
+            maxY:worldHeight-PLAYER_RADIUS
+        };
+
+    }
+
+
+    if(p.team === "blue"){
+
+        if(p.role === "wing"){
+
+            return {
+                minX:PLAYER_RADIUS,
+                maxX:worldWidth-PLAYER_RADIUS,
+
+                minY:worldHeight*0.18,
+                maxY:worldHeight*0.52
+            };
+
+        }
+
+
+        if(p.role === "forward"){
+
+            return {
+                minX:PLAYER_RADIUS,
+                maxX:worldWidth-PLAYER_RADIUS,
+
+                minY:worldHeight*0.12,
+                maxY:worldHeight*0.55
+            };
+
+        }
+
+
+        if(p.role === "defender"){
+
+            return {
+                minX:PLAYER_RADIUS,
+                maxX:worldWidth-PLAYER_RADIUS,
+
+                minY:worldHeight*0.58,
+                maxY:worldHeight*0.90
+            };
+
+        }
+
+
+        if(p.role === "guard"){
+
+            return {
+                minX:worldWidth*0.30,
+                maxX:worldWidth*0.70,
+
+                minY:worldHeight*0.84,
+                maxY:worldHeight-PLAYER_RADIUS
+            };
+
+        }
+
+    }
+
+
+    if(p.team === "red"){
+
+        if(p.role === "wing"){
+
+            return {
+                minX:PLAYER_RADIUS,
+                maxX:worldWidth-PLAYER_RADIUS,
+
+                minY:worldHeight*0.48,
+                maxY:worldHeight*0.82
+            };
+
+        }
+
+
+        if(p.role === "forward"){
+
+            return {
+                minX:PLAYER_RADIUS,
+                maxX:worldWidth-PLAYER_RADIUS,
+
+                minY:worldHeight*0.45,
+                maxY:worldHeight*0.88
+            };
+
+        }
+
+
+        if(p.role === "defender"){
+
+            return {
+                minX:PLAYER_RADIUS,
+                maxX:worldWidth-PLAYER_RADIUS,
+
+                minY:worldHeight*0.10,
+                maxY:worldHeight*0.42
+            };
+
+        }
+
+
+        if(p.role === "guard"){
+
+            return {
+                minX:worldWidth*0.30,
+                maxX:worldWidth*0.70,
+
+                minY:PLAYER_RADIUS,
+                maxY:worldHeight*0.16
+            };
+
+        }
+
+    }
+
+
+    return {
+        minX:PLAYER_RADIUS,
+        maxX:worldWidth-PLAYER_RADIUS,
+
+        minY:PLAYER_RADIUS,
+        maxY:worldHeight-PLAYER_RADIUS
+    };
+
+}
+
+
+/* =================================================
+   تحريك لاعب
+================================================= */
+
+function movePlayer(p,dx,dy,dt){
+
+    const length =
+        Math.hypot(dx,dy);
+
+
+    if(length > 1){
+
+        dx /= length;
+        dy /= length;
+
+    }
+
+
+    p.x +=
+        dx * p.speed * dt;
+
+    p.y +=
+        dy * p.speed * dt;
+
+
+    const bounds =
+        getRoleBounds(p);
+
+
+    p.x =
+        clamp(
+            p.x,
+            bounds.minX,
+            bounds.maxX
+        );
+
+
+    p.y =
+        clamp(
+            p.y,
+            bounds.minY,
+            bounds.maxY
+        );
+
+
+    if(
+        Math.abs(dx)>0.01 ||
+        Math.abs(dy)>0.01
+    ){
+
+        p.direction =
+            Math.atan2(dy,dx);
+
+    }
+
+}
+
+
+/* =================================================
+   رسم اللاعب
+================================================= */
+
+function drawPlayer(p){
+
+    if(!p.el)
+        return;
+
+
+    p.el.style.transform =
+        `translate3d(
+            ${p.x-PLAYER_RADIUS}px,
+            ${p.y-cameraY-PLAYER_RADIUS}px,
+            0
+        )`;
+
+
+    if(
+        p === teamPlayers[activePlayerIndex]
+    ){
+
+        p.el.classList.add(
+            "controlled"
+        );
+
+    }else{
+
+        p.el.classList.remove(
+            "controlled"
+        );
+
+    }
+
+}
+
+
+/* =================================================
+   رسم الكرة
+================================================= */
+
+function drawBall(){
+
+    ballElement.style.transform =
+        `translate3d(
+            ${ballX-BALL_RADIUS}px,
+            ${ballY-cameraY-BALL_RADIUS}px,
+            0
+        )`;
+
+}
+
+
+/* =================================================
+   رسم سهم التسديد
+================================================= */
+
+function drawAim(){
+
+    if(
+        !aiming ||
+        ballOwner !==
+        teamPlayers[activePlayerIndex]
+    ){
+
+        aimArrow.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    const angle =
+        Math.atan2(
+            aimY-ballY,
+            aimX-ballX
+        );
+
+
+    const length =
+        45 +
+        chargePower * 0.7;
+
+
+    aimArrow.style.display =
+        "block";
+
+
+    aimArrow.style.width =
+        `${length}px`;
+
+
+    aimArrow.style.transform =
+        `translate3d(
+            ${ballX}px,
+            ${ballY-cameraY}px,
+            0
+        )
+        rotate(${angle}rad)`;
+
+}
+
+
+/* =================================================
+   رسم الملعب
+================================================= */
+
+function draw(){
+
+    for(
+        const p of teamPlayers
+    ){
+
+        drawPlayer(p);
+
+    }
+
+
+    for(
+        const p of opponents
+    ){
+
+        drawPlayer(p);
+
+    }
+
+
+    drawBall();
+
+    drawAim();
+
+
+    centerLine.style.top =
+        `${worldHeight/2-cameraY}px`;
+
+
+    centerCircle.style.top =
+        `${worldHeight/2-cameraY}px`;
+
+
+    /*
+       الهدف العلوي
+    */
+
+    topGoal.style.top =
+        `${-cameraY}px`;
+
+
+    /*
+       الهدف السفلي
+    */
+
+    bottomGoal.style.top =
+        `${worldHeight-48-cameraY}px`;
+
+}
+
+
+/* =================================================
+   الكاميرا
+================================================= */
 
 function updateCamera(){
 
-    const targetX=
-        ballX-(gameWidth/2);
+    const targetX =
+        ballX -
+        viewWidth/2;
 
 
-    const targetY=
-        ballY-(gameHeight/2);
+    const targetY =
+        ballY -
+        viewHeight/2;
 
 
-    const maxCameraX=
+    const maxX =
         Math.max(
             0,
-            worldWidth-gameWidth
+            worldWidth-viewWidth
         );
 
 
-    const maxCameraY=
+    const maxY =
         Math.max(
             0,
-            worldHeight-gameHeight
+            worldHeight-viewHeight
         );
 
 
-    const clampedX=
-        Math.max(
+    const desiredX =
+        clamp(
+            targetX,
             0,
-            Math.min(
-                targetX,
-                maxCameraX
-            )
+            maxX
         );
 
 
-    const clampedY=
-        Math.max(
+    const desiredY =
+        clamp(
+            targetY,
             0,
-            Math.min(
-                targetY,
-                maxCameraY
-            )
+            maxY
         );
 
 
-    cameraX+=
-        (clampedX-cameraX)*
+    cameraX +=
+        (
+            desiredX-cameraX
+        ) *
         CAMERA_SMOOTH;
 
 
-    cameraY+=
-        (clampedY-cameraY)*
+    cameraY +=
+        (
+            desiredY-cameraY
+        ) *
         CAMERA_SMOOTH;
 
 }
 
 
 /* =================================================
-   وقت المباراة
+   تحديث اللاعب المتحكم به
 ================================================= */
 
-const MATCH_DURATION=180;
+function updateControlledPlayer(dt){
 
-let matchTimeRemaining=
-    MATCH_DURATION;
-
-let matchRunning=true;
-
-let matchEnded=false;
-
-let matchLastTimestamp=
-    performance.now();
+    const p =
+        teamPlayers[
+            activePlayerIndex
+        ];
 
 
-function formatMatchTime(seconds){
+    if(!p)
+        return;
 
-    const total=
-        Math.max(
-            0,
-            Math.floor(seconds)
+
+    p.moveX =
+        joystickX;
+
+    p.moveY =
+        joystickY;
+
+
+    if(
+        Math.abs(joystickX)>0.01 ||
+        Math.abs(joystickY)>0.01
+    ){
+
+        movePlayer(
+            p,
+            joystickX,
+            joystickY,
+            dt
+        );
+
+    }
+
+}
+
+
+/* =================================================
+   هدف لاعبي الأزرق
+================================================= */
+
+function getBlueAITarget(p){
+
+    const d =
+        Math.hypot(
+            ballX-p.x,
+            ballY-p.y
         );
 
 
-    const minutes=
-        Math.floor(total/60);
+    /*
+       الجناح
+    */
+
+    if(p.role === "wing"){
+
+        if(
+            ballOwner &&
+            ballOwner.team === "red" &&
+            d < 210
+        ){
+
+            return {
+                x:ballX,
+                y:ballY
+            };
+
+        }
 
 
-    const secs=
-        total%60;
+        return {
+            x:p.anchorX,
+            y:p.anchorY
+        };
+
+    }
 
 
-    return(
-        String(minutes).padStart(2,"0")+
-        ":"+
-        String(secs).padStart(2,"0")
+    /*
+       المهاجم
+    */
+
+    if(p.role === "forward"){
+
+        if(
+            ballOwner &&
+            ballOwner.team === "red" &&
+            d < 210
+        ){
+
+            return {
+                x:ballX,
+                y:ballY
+            };
+
+        }
+
+
+        return {
+            x:worldWidth/2,
+            y:worldHeight*0.25
+        };
+
+    }
+
+
+    /*
+       المدافع
+    */
+
+    if(p.role === "defender"){
+
+        if(
+            ballOwner &&
+            ballOwner.team === "red" &&
+            d < 250
+        ){
+
+            return {
+                x:ballX,
+                y:ballY
+            };
+
+        }
+
+
+        return {
+            x:p.anchorX,
+            y:worldHeight*0.78
+        };
+
+    }
+
+
+    /*
+       الحارس
+    */
+
+    if(p.role === "guard"){
+
+        return {
+            x:clamp(
+                ballX,
+                worldWidth*0.30,
+                worldWidth*0.70
+            ),
+
+            y:worldHeight*0.94
+        };
+
+    }
+
+
+    return {
+        x:p.anchorX,
+        y:p.anchorY
+    };
+
+}
+
+
+/* =================================================
+   AI الأزرق
+================================================= */
+
+function updateBlueAI(dt){
+
+    for(
+        let i=0;
+        i<teamPlayers.length;
+        i++
+    ){
+
+        const p =
+            teamPlayers[i];
+
+
+        /*
+           اللاعب الذي يتحكم به المستخدم
+           لا يتحرك بواسطة AI.
+        */
+
+        if(
+            i === activePlayerIndex
+        ){
+
+            continue;
+
+        }
+
+
+        const target =
+            getBlueAITarget(p);
+
+
+        if(!target)
+            continue;
+
+
+        let dx =
+            target.x-p.x;
+
+        let dy =
+            target.y-p.y;
+
+
+        const d =
+            Math.hypot(dx,dy);
+
+
+        if(d < 6){
+
+            p.moveX=0;
+            p.moveY=0;
+
+            continue;
+
+        }
+
+
+        dx /= d;
+        dy /= d;
+
+
+        p.moveX=dx;
+        p.moveY=dy;
+
+
+        movePlayer(
+            p,
+            dx,
+            dy,
+            dt
+        );
+
+    }
+
+}
+
+
+/* =================================================
+   هدف لاعبي الأحمر
+================================================= */
+
+function getRedAITarget(p){
+
+    const d =
+        Math.hypot(
+            ballX-p.x,
+            ballY-p.y
+        );
+
+
+    /*
+       الحارس
+    */
+
+    if(p.role === "guard"){
+
+        return {
+            x:clamp(
+                ballX,
+                worldWidth*0.30,
+                worldWidth*0.70
+            ),
+
+            y:worldHeight*0.06
+        };
+
+    }
+
+
+    /*
+       المدافع
+    */
+
+    if(p.role === "defender"){
+
+        if(
+            ballOwner &&
+            ballOwner.team === "blue" &&
+            d < 250
+        ){
+
+            return {
+                x:ballX,
+                y:ballY
+            };
+
+        }
+
+
+        return {
+            x:p.anchorX,
+            y:worldHeight*0.22
+        };
+
+    }
+
+
+    /*
+       الجناح
+    */
+
+    if(p.role === "wing"){
+
+        if(d < 210){
+
+            return {
+                x:ballX,
+                y:ballY
+            };
+
+        }
+
+
+        return {
+            x:p.anchorX,
+            y:p.anchorY
+        };
+
+    }
+
+
+    /*
+       المهاجم
+    */
+
+    if(p.role === "forward"){
+
+        if(d < 210){
+
+            return {
+                x:ballX,
+                y:ballY
+            };
+
+        }
+
+
+        return {
+            x:worldWidth/2,
+            y:worldHeight*0.72
+        };
+
+    }
+
+
+    return {
+        x:p.anchorX,
+        y:p.anchorY
+    };
+
+}
+
+
+/* =================================================
+   AI الأحمر
+================================================= */
+
+function updateRedAI(dt){
+
+    for(
+        const p of opponents
+    ){
+
+        const target =
+            getRedAITarget(p);
+
+
+        if(!target)
+            continue;
+
+
+        let dx =
+            target.x-p.x;
+
+        let dy =
+            target.y-p.y;
+
+
+        const d =
+            Math.hypot(dx,dy);
+
+
+        if(d < 6){
+
+            p.moveX=0;
+            p.moveY=0;
+
+            continue;
+
+        }
+
+
+        dx /= d;
+        dy /= d;
+
+
+        p.moveX=dx;
+        p.moveY=dy;
+
+
+        movePlayer(
+            p,
+            dx,
+            dy,
+            dt
+        );
+
+    }
+
+}
+
+
+/* =================================================
+   أقرب لاعب أزرق
+================================================= */
+
+function closestBluePlayer(){
+
+    let best =
+        null;
+
+    let bestDistance =
+        Infinity;
+
+
+    for(
+        const p of teamPlayers
+    ){
+
+        const d =
+            Math.hypot(
+                p.x-ballX,
+                p.y-ballY
+            );
+
+
+        if(d < bestDistance){
+
+            bestDistance=d;
+            best=p;
+
+        }
+
+    }
+
+
+    return best;
+
+}
+
+
+/* =================================================
+   أقرب لاعب أحمر
+================================================= */
+
+function closestRedPlayer(){
+
+    let best =
+        null;
+
+    let bestDistance =
+        Infinity;
+
+
+    for(
+        const p of opponents
+    ){
+
+        const d =
+            Math.hypot(
+                p.x-ballX,
+                p.y-ballY
+            );
+
+
+        if(d < bestDistance){
+
+            bestDistance=d;
+            best=p;
+
+        }
+
+    }
+
+
+    return best;
+
+}
+
+
+/* =================================================
+   فصل اللاعبين
+================================================= */
+
+function separatePlayers(
+    players,
+    minimum
+){
+
+    for(
+        let i=0;
+        i<players.length;
+        i++
+    ){
+
+        for(
+            let j=i+1;
+            j<players.length;
+            j++
+        ){
+
+            const a =
+                players[i];
+
+            const b =
+                players[j];
+
+
+            const dx =
+                b.x-a.x;
+
+            const dy =
+                b.y-a.y;
+
+
+            const d =
+                Math.hypot(dx,dy);
+
+
+            if(
+                d <= 0 ||
+                d >= minimum
+            ){
+
+                continue;
+
+            }
+
+
+            const nx =
+                dx/d;
+
+            const ny =
+                dy/d;
+
+
+            const push =
+                (minimum-d)/2;
+
+
+            if(
+                a !==
+                teamPlayers[
+                    activePlayerIndex
+                ]
+            ){
+
+                a.x -=
+                    nx*push;
+
+                a.y -=
+                    ny*push;
+
+            }
+
+
+            if(
+                b !==
+                teamPlayers[
+                    activePlayerIndex
+                ]
+            ){
+
+                b.x +=
+                    nx*push;
+
+                b.y +=
+                    ny*push;
+
+            }
+
+
+            const ba =
+                getRoleBounds(a);
+
+            const bb =
+                getRoleBounds(b);
+
+
+            a.x =
+                clamp(
+                    a.x,
+                    ba.minX,
+                    ba.maxX
+                );
+
+            a.y =
+                clamp(
+                    a.y,
+                    ba.minY,
+                    ba.maxY
+                );
+
+
+            b.x =
+                clamp(
+                    b.x,
+                    bb.minX,
+                    bb.maxX
+                );
+
+            b.y =
+                clamp(
+                    b.y,
+                    bb.minY,
+                    bb.maxY
+                );
+
+        }
+
+    }
+
+}
+
+
+/* =================================================
+   استحواذ على الكرة
+================================================= */
+
+function tryBallPickup(){
+
+    if(ballOwner)
+        return;
+
+
+    const blue =
+        closestBluePlayer();
+
+    const red =
+        closestRedPlayer();
+
+
+    const blueDistance =
+        blue
+        ? distance(
+            blue,
+            {
+                x:ballX,
+                y:ballY
+            }
+          )
+        : Infinity;
+
+
+    const redDistance =
+        red
+        ? distance(
+            red,
+            {
+                x:ballX,
+                y:ballY
+            }
+          )
+        : Infinity;
+
+
+    if(
+        blueDistance <= 30 &&
+        blueDistance <= redDistance
+    ){
+
+        ballOwner=blue;
+
+        ballVX=0;
+        ballVY=0;
+
+        return;
+
+    }
+
+
+    if(
+        redDistance <= 29
+    ){
+
+        ballOwner=red;
+
+        ballVX=0;
+        ballVY=0;
+
+    }
+
+}
+
+
+/* =================================================
+   تحديث الكرة
+================================================= */
+
+function updateBall(dt){
+
+    if(ballOwner){
+
+        const offset =
+            ballOwner.team === "blue"
+            ? -30
+            : -30;
+
+
+        ballX =
+            ballOwner.x;
+
+        ballY =
+            ballOwner.y+offset;
+
+
+        ballVX=0;
+        ballVY=0;
+
+        return;
+
+    }
+
+
+    ballX +=
+        ballVX*dt;
+
+    ballY +=
+        ballVY*dt;
+
+
+    const friction =
+        Math.pow(
+            FRICTION,
+            dt*60
+        );
+
+
+    ballVX *= friction;
+
+    ballVY *= friction;
+
+
+    /*
+       إذا دخلت الكرة منطقة المرمى
+       نفحص الهدف أولاً.
+    */
+
+    if(
+        checkGoal()
+    ){
+
+        return;
+
+    }
+
+
+    /*
+       الجدار الأيسر
+    */
+
+    if(
+        ballX-BALL_RADIUS < 0
+    ){
+
+        ballX =
+            BALL_RADIUS;
+
+        ballVX =
+            Math.abs(ballVX)*0.72;
+
+    }
+
+
+    /*
+       الجدار الأيمن
+    */
+
+    if(
+        ballX+BALL_RADIUS >
+        worldWidth
+    ){
+
+        ballX =
+            worldWidth-BALL_RADIUS;
+
+        ballVX =
+            -Math.abs(ballVX)*0.72;
+
+    }
+
+
+    /*
+       أعلى الملعب
+    */
+
+    if(
+        ballY < 0
+    ){
+
+        ballY=0;
+
+        ballVY =
+            Math.abs(ballVY)*0.72;
+
+    }
+
+
+    /*
+       أسفل الملعب
+    */
+
+    if(
+        ballY > worldHeight
+    ){
+
+        ballY =
+            worldHeight;
+
+        ballVY =
+            -Math.abs(ballVY)*0.72;
+
+    }
+
+
+    if(
+        Math.hypot(
+            ballVX,
+            ballVY
+        ) < 0.15
+    ){
+
+        ballVX=0;
+        ballVY=0;
+
+    }
+
+}
+
+
+/* =================================================
+   التسديد
+================================================= */
+
+function kickBall(){
+
+    const p =
+        teamPlayers[
+            activePlayerIndex
+        ];
+
+
+    if(
+        !p ||
+        ballOwner !== p
+    ){
+
+        aiming=false;
+        return;
+
+    }
+
+
+    let dx =
+        aimX-ballX;
+
+    let dy =
+        aimY-ballY;
+
+
+    const d =
+        Math.hypot(dx,dy);
+
+
+    if(d < 5){
+
+        aiming=false;
+        return;
+
+    }
+
+
+    dx /= d;
+    dy /= d;
+
+
+    const normalizedPower =
+        Math.max(
+            0.15,
+            chargePower/100
+        );
+
+
+    const speed =
+        500+
+        normalizedPower*850;
+
+
+    ballOwner=null;
+
+
+    ballX =
+        p.x+dx*30;
+
+    ballY =
+        p.y+dy*30;
+
+
+    ballVX =
+        dx*speed;
+
+    ballVY =
+        dy*speed;
+
+
+    chargePower=0;
+
+    powerElement.style.width =
+        "0%";
+
+    powerText.textContent =
+        "قوة الركلة";
+
+    powerBox.style.display =
+        "block";
+
+
+    aiming=false;
+
+    aimArrow.style.display =
+        "none";
+
+}
+
+
+/* =================================================
+   AI تسديد
+================================================= */
+
+function aiShoot(p){
+
+    if(
+        !p ||
+        ballOwner !== p
+    )
+        return;
+
+
+    const targetY =
+        p.team === "red"
+        ? worldHeight+50
+        : -50;
+
+
+    const targetX =
+        worldWidth/2;
+
+
+    let dx =
+        targetX-p.x;
+
+    let dy =
+        targetY-p.y;
+
+
+    const d =
+        Math.hypot(dx,dy);
+
+
+    if(d < 1)
+        return;
+
+
+    dx/=d;
+    dy/=d;
+
+
+    ballOwner=null;
+
+
+    ballX =
+        p.x+dx*30;
+
+    ballY =
+        p.y+dy*30;
+
+
+    ballVX =
+        dx*650;
+
+    ballVY =
+        dy*650;
+
+}
+
+
+/* =================================================
+   AI تمرير
+================================================= */
+
+function aiPass(p){
+
+    if(
+        !p ||
+        ballOwner !== p
+    )
+        return;
+
+
+    const players =
+        p.team === "blue"
+        ? teamPlayers
+        : opponents;
+
+
+    let best =
+        null;
+
+    let bestScore =
+        -Infinity;
+
+
+    for(
+        const mate of players
+    ){
+
+        if(mate === p)
+            continue;
+
+
+        const d =
+            distance(
+                p,
+                mate
+            );
+
+
+        if(
+            d < 70 ||
+            d > 300
+        )
+            continue;
+
+
+        let progress;
+
+
+        if(p.team === "blue"){
+
+            progress =
+                worldHeight-mate.y;
+
+        }else{
+
+            progress =
+                mate.y;
+
+        }
+
+
+        const score =
+            progress-
+            d*0.3;
+
+
+        if(score>bestScore){
+
+            bestScore=score;
+            best=mate;
+
+        }
+
+    }
+
+
+    if(!best)
+        return;
+
+
+    let dx =
+        best.x-p.x;
+
+    let dy =
+        best.y-p.y;
+
+
+    const d =
+        Math.hypot(dx,dy);
+
+
+    if(d<1)
+        return;
+
+
+    dx/=d;
+    dy/=d;
+
+
+    ballOwner=null;
+
+
+    ballX =
+        p.x+dx*30;
+
+    ballY =
+        p.y+dy*30;
+
+
+    ballVX =
+        dx*Math.min(
+            700,
+            400+d
+        );
+
+    ballVY =
+        dy*Math.min(
+            700,
+            400+d
+        );
+
+}
+
+
+/* =================================================
+   AI مع الكرة
+================================================= */
+
+function updateBallAI(){
+
+    if(!ballOwner)
+        return;
+
+
+    const p =
+        ballOwner;
+
+
+    /*
+       إذا كان اللاعب الذي يتحكم به المستخدم
+       لا يتدخل AI.
+    */
+
+    if(
+        p === teamPlayers[
+            activePlayerIndex
+        ]
+    ){
+
+        return;
+
+    }
+
+
+    const targetGoalDistance =
+        p.team === "blue"
+        ? p.y
+        : worldHeight-p.y;
+
+
+    /*
+       التسديد عند الاقتراب من المرمى
+    */
+
+    if(
+        targetGoalDistance < 250
+    ){
+
+        if(
+            Math.random()<0.04
+        ){
+
+            aiShoot(p);
+
+            return;
+
+        }
+
+    }
+
+
+    /*
+       تمرير أحياناً
+    */
+
+    if(
+        Math.random()<0.008
+    ){
+
+        aiPass(p);
+
+        return;
+
+    }
+
+
+    /*
+       وإلا يستمر اللاعب بالتحرك نحو المرمى.
+    */
+
+    let targetY =
+        p.team === "blue"
+        ? 0
+        : worldHeight;
+
+
+    let dx =
+        worldWidth/2-p.x;
+
+    let dy =
+        targetY-p.y;
+
+
+    const d =
+        Math.hypot(dx,dy);
+
+
+    if(d>1){
+
+        dx/=d;
+        dy/=d;
+
+        movePlayer(
+            p,
+            dx,
+            dy,
+            1/60
+        );
+
+    }
+
+}
+
+
+/* =================================================
+   الافتكاك
+================================================= */
+
+function tackle(){
+
+    if(!ballOwner)
+        return;
+
+
+    if(
+        ballOwner.team === "blue"
+    ){
+
+        const red =
+            closestRedPlayer();
+
+
+        if(
+            red &&
+            distance(
+                red,
+                ballOwner
+            ) < 38
+        ){
+
+            if(
+                Math.random()<0.025
+            ){
+
+                ballOwner=red;
+
+                ballVX=0;
+                ballVY=0;
+
+            }
+
+        }
+
+    }
+
+
+    else{
+
+        const blue =
+            closestBluePlayer();
+
+
+        if(
+            blue &&
+            distance(
+                blue,
+                ballOwner
+            ) < 38
+        ){
+
+            if(
+                Math.random()<0.04
+            ){
+
+                ballOwner=blue;
+
+                ballVX=0;
+                ballVY=0;
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =================================================
+   الهدف
+================================================= */
+
+function checkGoal(){
+
+    /*
+       الكرة وصلت أعلى الملعب
+       = هدف للأزرق
+    */
+
+    if(
+        ballY <= 8 &&
+        Math.abs(
+            ballX-worldWidth/2
+        ) <= GOAL_WIDTH/2
+    ){
+
+        blueScore++;
+
+        updateScore();
+
+        showGoal(
+            "GOAL! 🔵⚽"
+        );
+
+        resetAfterGoal(
+            "blue"
+        );
+
+        return true;
+
+    }
+
+
+    /*
+       الكرة وصلت أسفل الملعب
+       = هدف للأحمر
+    */
+
+    if(
+        ballY >= worldHeight-8 &&
+        Math.abs(
+            ballX-worldWidth/2
+        ) <= GOAL_WIDTH/2
+    ){
+
+        redScore++;
+
+        updateScore();
+
+        showGoal(
+            "GOAL! 🔴⚽"
+        );
+
+        resetAfterGoal(
+            "red"
+        );
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =================================================
+   عرض النتيجة
+================================================= */
+
+function updateScore(){
+
+    scoreElement.textContent =
+        `${blueScore} - ${redScore}`;
+
+}
+
+
+/* =================================================
+   رسالة الهدف
+================================================= */
+
+function showGoal(text){
+
+    goalMessage.textContent =
+        text;
+
+    goalMessage.classList.add(
+        "show"
+    );
+
+
+    setTimeout(
+        () => {
+
+            goalMessage.classList.remove(
+                "show"
+            );
+
+        },
+        1200
     );
 
 }
 
 
-function updateMatchTimeDisplay(){
+/* =================================================
+   بعد الهدف
+================================================= */
 
-    matchTimeElement.textContent=
-        formatMatchTime(
+function resetAfterGoal(scoringTeam){
+
+    ballVX=0;
+    ballVY=0;
+
+
+    /*
+       إعادة الجميع إلى مراكزهم.
+    */
+
+    for(
+        const p of teamPlayers
+    ){
+
+        p.x=p.anchorX;
+        p.y=p.anchorY;
+
+    }
+
+
+    for(
+        const p of opponents
+    ){
+
+        p.x=p.anchorX;
+        p.y=p.anchorY;
+
+    }
+
+
+    /*
+       الفريق الذي سجل يبدأ بالكرة.
+    */
+
+    if(
+        scoringTeam === "blue"
+    ){
+
+        ballOwner =
+            teamPlayers[
+                activePlayerIndex
+            ];
+
+    }else{
+
+        ballOwner =
+            opponents[0];
+
+    }
+
+
+    ballX =
+        ballOwner.x;
+
+    ballY =
+        ballOwner.y-30;
+
+
+    /*
+       الكاميرا تتبع مكان الكرة الجديد
+       مباشرة.
+    */
+
+    cameraX=0;
+
+    cameraY =
+        clamp(
+            ballY-viewHeight/2,
+            0,
+            worldHeight-viewHeight
+        );
+
+
+    draw();
+
+}
+
+
+/* =================================================
+   شحن الركلة
+================================================= */
+
+function startCharging(){
+
+    if(
+        matchEnded
+    )
+        return;
+
+
+    const p =
+        teamPlayers[
+            activePlayerIndex
+        ];
+
+
+    if(
+        !p ||
+        ballOwner !== p
+    ){
+
+        return;
+
+    }
+
+
+    aiming=true;
+
+    chargePower=0;
+
+    powerElement.style.width =
+        "0%";
+
+    powerText.textContent =
+        "0";
+
+}
+
+
+/* =================================================
+   تحديث قوة الركلة
+================================================= */
+
+function updateCharge(dt){
+
+    if(!aiming)
+        return;
+
+
+    chargePower +=
+        POWER_SPEED*dt;
+
+
+    chargePower =
+        Math.min(
+            MAX_POWER,
+            chargePower
+        );
+
+
+    powerElement.style.width =
+        `${chargePower}%`;
+
+
+    powerText.textContent =
+        Math.round(
+            chargePower
+        );
+
+}
+
+
+/* =================================================
+   تحديد اتجاه الركلة
+================================================= */
+
+function updateAim(
+    clientX,
+    clientY
+){
+
+    const rect =
+        game.getBoundingClientRect();
+
+
+    aimX =
+        clientX-
+        rect.left+
+        cameraX;
+
+
+    aimY =
+        clientY-
+        rect.top+
+        cameraY;
+
+}
+
+
+/* =================================================
+   إنهاء الركلة
+================================================= */
+
+function finishKick(){
+
+    if(!aiming)
+        return;
+
+
+    kickBall();
+
+}
+
+
+/* =================================================
+   Joystick
+================================================= */
+
+function resetJoystick(){
+
+    joystickActive=false;
+
+    joystickPointerId=null;
+
+    joystickX=0;
+    joystickY=0;
+
+
+    joystickCenter.style.transform =
+        "translate(-50%,-50%)";
+
+}
+
+
+function updateJoystick(
+    clientX,
+    clientY
+){
+
+    const rect =
+        movePad.getBoundingClientRect();
+
+
+    const centerX =
+        rect.left+
+        rect.width/2;
+
+
+    const centerY =
+        rect.top+
+        rect.height/2;
+
+
+    let dx =
+        clientX-centerX;
+
+    let dy =
+        clientY-centerY;
+
+
+    const d =
+        Math.hypot(dx,dy);
+
+
+    if(
+        d >
+        JOYSTICK_MAX_DISTANCE
+    ){
+
+        dx =
+            dx/d*
+            JOYSTICK_MAX_DISTANCE;
+
+        dy =
+            dy/d*
+            JOYSTICK_MAX_DISTANCE;
+
+    }
+
+
+    joystickX =
+        dx/
+        JOYSTICK_MAX_DISTANCE;
+
+
+    joystickY =
+        dy/
+        JOYSTICK_MAX_DISTANCE;
+
+
+    joystickCenter.style.transform =
+        `translate(
+            calc(-50% + ${dx}px),
+            calc(-50% + ${dy}px)
+        )`;
+
+}
+
+
+/* =================================================
+   Joystick Events
+================================================= */
+
+movePad.addEventListener(
+    "pointerdown",
+    e => {
+
+        e.preventDefault();
+
+        joystickActive=true;
+
+        joystickPointerId=
+            e.pointerId;
+
+
+        movePad.setPointerCapture(
+            e.pointerId
+        );
+
+
+        updateJoystick(
+            e.clientX,
+            e.clientY
+        );
+
+    }
+);
+
+
+movePad.addEventListener(
+    "pointermove",
+    e => {
+
+        if(
+            !joystickActive ||
+            e.pointerId !==
+            joystickPointerId
+        )
+            return;
+
+
+        e.preventDefault();
+
+
+        updateJoystick(
+            e.clientX,
+            e.clientY
+        );
+
+    }
+);
+
+
+movePad.addEventListener(
+    "pointerup",
+    e => {
+
+        if(
+            e.pointerId !==
+            joystickPointerId
+        )
+            return;
+
+
+        resetJoystick();
+
+    }
+);
+
+
+movePad.addEventListener(
+    "pointercancel",
+    e => {
+
+        if(
+            e.pointerId !==
+            joystickPointerId
+        )
+            return;
+
+
+        resetJoystick();
+
+    }
+);
+
+
+/* =================================================
+   زر الركل
+================================================= */
+
+kickControl.addEventListener(
+    "pointerdown",
+    e => {
+
+        e.preventDefault();
+
+        kickPointerId=
+            e.pointerId;
+
+        startCharging();
+
+    }
+);
+
+
+kickControl.addEventListener(
+    "pointermove",
+    e => {
+
+        if(
+            !aiming
+        )
+            return;
+
+
+        updateAim(
+            e.clientX,
+            e.clientY
+        );
+
+    }
+);
+
+
+kickControl.addEventListener(
+    "pointerup",
+    e => {
+
+        if(
+            e.pointerId !==
+            kickPointerId
+        )
+            return;
+
+
+        finishKick();
+
+        kickPointerId=null;
+
+    }
+);
+
+
+kickControl.addEventListener(
+    "pointercancel",
+    e => {
+
+        if(
+            e.pointerId !==
+            kickPointerId
+        )
+            return;
+
+
+        finishKick();
+
+        kickPointerId=null;
+
+    }
+);
+
+
+/* =================================================
+   تحريك اتجاه التسديد
+================================================= */
+
+game.addEventListener(
+    "pointermove",
+    e => {
+
+        if(
+            aiming
+        ){
+
+            updateAim(
+                e.clientX,
+                e.clientY
+            );
+
+        }
+
+    }
+);
+
+
+/* =================================================
+   تبديل اللاعب
+   بالنقر المزدوج
+================================================= */
+
+let lastTapTime=0;
+
+
+game.addEventListener(
+    "pointerdown",
+    e => {
+
+        /*
+           لا نبدل اللاعب إذا كان اللمس
+           على عناصر التحكم.
+        */
+
+        if(
+            e.target === movePad ||
+            movePad.contains(e.target) ||
+            e.target === kickControl ||
+            kickControl.contains(e.target)
+        ){
+
+            return;
+
+        }
+
+
+        const now =
+            performance.now();
+
+
+        if(
+            now-lastTapTime <
+            320
+        ){
+
+            switchPlayer();
+
+        }
+
+
+        lastTapTime=now;
+
+    }
+);
+
+
+/* =================================================
+   تبديل اللاعب
+================================================= */
+
+function switchPlayer(){
+
+    const current =
+        teamPlayers[
+            activePlayerIndex
+        ];
+
+
+    let bestIndex=-1;
+
+    let bestDistance=
+        Infinity;
+
+
+    for(
+        let i=0;
+        i<teamPlayers.length;
+        i++
+    ){
+
+        if(
+            i === activePlayerIndex
+        )
+            continue;
+
+
+        const p =
+            teamPlayers[i];
+
+
+        const d =
+            Math.hypot(
+                p.x-ballX,
+                p.y-ballY
+            );
+
+
+        if(
+            d < bestDistance
+        ){
+
+            bestDistance=d;
+
+            bestIndex=i;
+
+        }
+
+    }
+
+
+    if(
+        bestIndex >= 0 &&
+        bestDistance <=
+        MANUAL_SWITCH_MIN_DISTANCE
+    ){
+
+        activePlayerIndex=
+            bestIndex;
+
+
+        /*
+           إذا كان اللاعب الجديد بعيداً
+           قليلاً، تسمح له اللعبة بالحركة
+           في كامل الملعب لأنه أصبح متحكماً به.
+        */
+
+        for(
+            let i=0;
+            i<teamPlayers.length;
+            i++
+        ){
+
+            teamPlayers[i].controlled =
+                i === activePlayerIndex;
+
+        }
+
+
+        /*
+           إذا كانت الكرة قريبة منه يأخذها.
+        */
+
+        const p =
+            teamPlayers[
+                activePlayerIndex
+            ];
+
+
+        if(
+            !ballOwner &&
+            distance(
+                p,
+                {
+                    x:ballX,
+                    y:ballY
+                }
+            ) < 38
+        ){
+
+            ballOwner=p;
+
+            ballVX=0;
+            ballVY=0;
+
+        }
+
+    }
+
+}
+
+
+/* =================================================
+   تحديث اللعبة
+================================================= */
+
+function updateGame(dt){
+
+    if(
+        !matchRunning ||
+        matchEnded
+    )
+        return;
+
+
+    updateControlledPlayer(dt);
+
+    updateBlueAI(dt);
+
+    updateRedAI(dt);
+
+    updateBallAI();
+
+    tackle();
+
+    updateCharge(dt);
+
+    updateBall(dt);
+
+    tryBallPickup();
+
+    separatePlayers(
+        teamPlayers,
+        52
+    );
+
+    separatePlayers(
+        opponents,
+        58
+    );
+
+    updateCamera();
+
+    draw();
+
+}
+
+
+/* =================================================
+   المؤقت
+================================================= */
+
+function formatTime(seconds){
+
+    seconds =
+        Math.max(
+            0,
+            Math.ceil(seconds)
+        );
+
+
+    const minutes =
+        Math.floor(
+            seconds/60
+        );
+
+
+    const secs =
+        seconds%60;
+
+
+    return (
+        String(minutes)
+            .padStart(2,"0")
+        +
+        ":"
+        +
+        String(secs)
+            .padStart(2,"0")
+    );
+
+}
+
+
+function updateTimer(){
+
+    matchTimeElement.textContent =
+        formatTime(
             matchTimeRemaining
         );
 
 
     if(
-        matchTimeRemaining<=10&&
-        matchTimeRemaining>0
+        matchTimeRemaining <= 10
     ){
 
         matchTimeElement.classList.add(
@@ -1056,19 +4000,19 @@ function updateMatchTimeDisplay(){
 
 
 /* =================================================
-   تحديث مؤقت المباراة
+   تحديث الوقت
 ================================================= */
 
 function updateMatchTimer(now){
 
     if(
-        !matchRunning||
+        !matchRunning ||
         matchEnded
     )
         return;
 
 
-    let elapsed=
+    let elapsed =
         (now-matchLastTimestamp)/1000;
 
 
@@ -1076,23 +4020,28 @@ function updateMatchTimer(now){
 
 
     /*
-       منع قفزة كبيرة في الوقت
-       عند الرجوع من الخلفية.
+       حماية من القفزات عند العودة
+       من الخلفية.
     */
 
-    if(elapsed>0.2)
-        elapsed=0.2;
+    elapsed =
+        Math.min(
+            elapsed,
+            0.1
+        );
 
 
-    matchTimeRemaining-=
+    matchTimeRemaining -=
         elapsed;
 
 
-    if(matchTimeRemaining<=0){
+    if(
+        matchTimeRemaining <= 0
+    ){
 
         matchTimeRemaining=0;
 
-        updateMatchTimeDisplay();
+        updateTimer();
 
         endMatch();
 
@@ -1101,4390 +4050,501 @@ function updateMatchTimer(now){
     }
 
 
-    updateMatchTimeDisplay();
+    updateTimer();
 
 }
 
 
 /* =================================================
-   الثوابت العامة
-================================================= */
-
-const FRICTION=0.985;
-
-const MAX_POWER=100;
-
-const POWER_SPEED=90;
-
-const KICK_CHARGE_DISTANCE=35;
-
-
-const PLAYER_RADIUS=19;
-
-const BALL_RADIUS=11;
-
-
-const BALL_PICKUP_BLUE=32;
-
-const BALL_PICKUP_RED=30;
-
-const BALL_STEAL_TOUCH_DISTANCE=32;
-
-
-const GOAL_WIDTH=190;
-
-const POST_WIDTH=12;
-
-
-const COLLISION_MIN_DIST=36;
-
-const SIDE_WALL_RADIUS=15;
-
-
-const MANUAL_SWITCH_MIN_DIST=55;
-
-const MANUAL_SWITCH_DOT=0.70;
-
-const MANUAL_SWITCH_COOLDOWN=500;
-
-const AUTO_SWITCH_COOLDOWN=300;
-
-
-/* =================================================
-   حالة الكرة
-================================================= */
-
-let ballX=
-    gameWidth/2;
-
-let ballY=
-    worldHeight/2-42;
-
-
-let ballVX=0;
-
-let ballVY=0;
-
-let ballMoving=false;
-
-
-/* =================================================
-   حالة التحكم
-================================================= */
-
-let activePlayerIndex=0;
-
-let ballOwner=null;
-
-let aimAngle=-Math.PI/2;
-
-
-let charging=false;
-
-let power=0;
-
-
-let topScore=0;
-
-let bottomScore=0;
-
-
-let goalScored=false;
-
-let goalTimer=null;
-
-
-/* =================================================
-   حالة Joystick
-================================================= */
-
-let movePointerId=null;
-
-let moveTouching=false;
-
-let moveX=0;
-
-let moveY=0;
-
-
-/* =================================================
-   حالة الركل
-================================================= */
-
-let kickPointerId=null;
-
-let kickTouching=false;
-
-let kickDirectionDistance=0;
-
-
-/* =================================================
-   التبديل بين اللاعبين
-================================================= */
-
-let lastManualSwitchTime=0;
-
-let manualSwitchArmed=true;
-
-let lastAutoSwitchTime=0;
-
-
-/* =================================================
-   حالات AI
-================================================= */
-
-let redPressIndex=-1;
-
-let bluePressIndex=-1;
-
-
-let redTackleIndex=-1;
-
-let redTackleFrames=0;
-
-
-let blueTackleIndex=-1;
-
-let blueTackleFrames=0;
-
-
-let redDecisionCooldown=0;
-
-let redPassCooldown=0;
-
-
-let redLastDribbleSide=1;
-
-let redDribbleCommitFrames=0;
-
-
-let redLastMoveX=[];
-
-let redLastMoveY=[];
-
-
-/* =================================================
-   ثوابت الذكاء
-================================================= */
-
-const RED_TACKLE_DISTANCE=39;
-
-const RED_TACKLE_FRAMES=10;
-
-const RED_SHOOT_DISTANCE=235;
-
-const RED_PASS_DISTANCE=270;
-
-const RED_DRIBBLE_DISTANCE=120;
-
-const RED_NEAR_BALL_DIST=210;
-
-const RED_MIN_SEPARATION=58;
-
-
-const BLUE_TACKLE_DISTANCE=39;
-
-const BLUE_TACKLE_FRAMES=10;
-
-const BLUE_SHOOT_DISTANCE=235;
-
-const BLUE_PASS_DISTANCE=270;
-
-const BLUE_DRIBBLE_DISTANCE=120;
-
-const BLUE_NEAR_BALL_DIST=210;
-
-const BLUE_MIN_SEPARATION=52;
-
-
-/* =================================================
-   أدوات عامة
-================================================= */
-
-function distanceBetween(
-    x1,
-    y1,
-    x2,
-    y2
-){
-
-    const dx=x2-x1;
-
-    const dy=y2-y1;
-
-    return Math.sqrt(
-        dx*dx+
-        dy*dy
-    );
-
-}
-
-
-function getActivePlayer(){
-
-    return teamPlayers[
-        activePlayerIndex
-    ];
-
-}
-
-
-function isTeamPlayer(p){
-
-    return teamPlayers.indexOf(p)!==-1;
-
-}
-
-
-function isOpponent(p){
-
-    return opponents.indexOf(p)!==-1;
-
-}
-
-
-function clamp(v,a,b){
-
-    return v<a?a:v>b?b:v;
-
-}
-/* =========================================================
-   القسم 3 — اللاعبين + الفرق + الرسم + الكاميرا
-   ========================================================= */
-
-/* =========================
-   الفريق الأزرق
-   ========================= */
-
-const teamPlayers = [
-
-  {
-    id:"player",
-    name:"المهاجم",
-    role:"forward",
-    team:"blue",
-    x:worldWidth/2,
-    y:worldHeight*0.72,
-    anchorX:worldWidth/2,
-    anchorY:worldHeight*0.72,
-    speed:130,
-    el:null,
-    controlled:true
-  },
-
-  {
-    id:"teammate1",
-    name:"الجناح الأيمن",
-    role:"wing",
-    team:"blue",
-    x:worldWidth*0.18,
-    y:worldHeight*0.62,
-    anchorX:worldWidth*0.18,
-    anchorY:worldHeight*0.62,
-    speed:95,
-    el:null,
-    controlled:false
-  },
-
-  {
-    id:"teammate2",
-    name:"الجناح الأيسر",
-    role:"wing",
-    team:"blue",
-    x:worldWidth*0.82,
-    y:worldHeight*0.62,
-    anchorX:worldWidth*0.82,
-    anchorY:worldHeight*0.62,
-    speed:95,
-    el:null,
-    controlled:false
-  },
-
-  {
-    id:"teammate3",
-    name:"المدافع",
-    role:"defender",
-    team:"blue",
-    x:worldWidth/2,
-    y:worldHeight*0.86,
-    anchorX:worldWidth/2,
-    anchorY:worldHeight*0.86,
-    speed:90,
-    el:null,
-    controlled:false
-  },
-
-  {
-    id:"teammate4",
-    name:"الحارس",
-    role:"guard",
-    team:"blue",
-    x:worldWidth/2,
-    y:worldHeight*0.95,
-    anchorX:worldWidth/2,
-    anchorY:worldHeight*0.95,
-    speed:75,
-    el:null,
-    controlled:false
-  }
-
-];
-
-
-/* =========================
-   الفريق الأحمر
-   ========================= */
-
-const opponents = [
-
-  {
-    id:"opponent1",
-    name:"مهاجم",
-    role:"forward",
-    team:"red",
-    x:worldWidth/2,
-    y:worldHeight*0.28,
-    anchorX:worldWidth/2,
-    anchorY:worldHeight*0.28,
-    speed:85,
-    el:null
-  },
-
-  {
-    id:"opponent2",
-    name:"جناح أيمن",
-    role:"wing",
-    team:"red",
-    x:worldWidth*0.18,
-    y:worldHeight*0.38,
-    anchorX:worldWidth*0.18,
-    anchorY:worldHeight*0.38,
-    speed:88,
-    el:null
-  },
-
-  {
-    id:"opponent3",
-    name:"جناح أيسر",
-    role:"wing",
-    team:"red",
-    x:worldWidth*0.82,
-    y:worldHeight*0.38,
-    anchorX:worldWidth*0.82,
-    anchorY:worldHeight*0.38,
-    speed:88,
-    el:null
-  },
-
-  {
-    id:"opponent4",
-    name:"حارس",
-    role:"guard",
-    team:"red",
-    x:worldWidth/2,
-    y:worldHeight*0.05,
-    anchorX:worldWidth/2,
-    anchorY:worldHeight*0.05,
-    speed:70,
-    el:null
-  },
-
-  {
-    id:"opponent5",
-    name:"مدافع",
-    role:"defender",
-    team:"red",
-    x:worldWidth/2,
-    y:worldHeight*0.14,
-    anchorX:worldWidth/2,
-    anchorY:worldHeight*0.14,
-    speed:82,
-    el:null
-  }
-
-];
-
-
-/* =========================
-   حدود الحراس
-   ========================= */
-
-const GUARD_Y =
-  worldHeight * 0.95;
-
-const GUARD_MIN_X =
-  worldWidth * 0.30;
-
-const GUARD_MAX_X =
-  worldWidth * 0.70;
-
-
-const BLUE_GUARD_Y =
-  worldHeight * 0.95;
-
-const BLUE_GUARD_MIN_X =
-  worldWidth * 0.30;
-
-const BLUE_GUARD_MAX_X =
-  worldWidth * 0.70;
-
-
-/* =========================
-   المسافات
-   ========================= */
-
-const RED_TACKLE_DISTANCE = 39;
-const RED_TACKLE_FRAMES = 10;
-
-const RED_SHOOT_DISTANCE = 235;
-const RED_PASS_DISTANCE = 270;
-const RED_DRIBBLE_DISTANCE = 120;
-const RED_NEAR_BALL_DIST = 210;
-const RED_MIN_SEPARATION = 58;
-
-const BLUE_TACKLE_DISTANCE = 39;
-const BLUE_TACKLE_FRAMES = 10;
-
-const BLUE_SHOOT_DISTANCE = 235;
-const BLUE_PASS_DISTANCE = 270;
-const BLUE_DRIBBLE_DISTANCE = 120;
-const BLUE_NEAR_BALL_DIST = 210;
-const BLUE_MIN_SEPARATION = 52;
-
-
-/* =========================
-   أدوات مساعدة
-   ========================= */
-
-function distanceBetween(a,b){
-
-  return Math.hypot(
-    a.x-b.x,
-    a.y-b.y
-  );
-
-}
-
-
-function clamp(value,min,max){
-
-  return Math.max(
-    min,
-    Math.min(max,value)
-  );
-
-}
-
-
-/* =========================
-   المسافة من نقطة إلى خط
-   ========================= */
-
-function pointToSegmentDistance(
-  px,py,
-  x1,y1,
-  x2,y2
-){
-
-  const dx = x2-x1;
-  const dy = y2-y1;
-
-  if(dx === 0 && dy === 0){
-
-    return Math.hypot(
-      px-x1,
-      py-y1
-    );
-
-  }
-
-  const t = clamp(
-    (
-      (px-x1)*dx +
-      (py-y1)*dy
-    ) /
-    (
-      dx*dx +
-      dy*dy
-    ),
-    0,
-    1
-  );
-
-  const xx =
-    x1+t*dx;
-
-  const yy =
-    y1+t*dy;
-
-  return Math.hypot(
-    px-xx,
-    py-yy
-  );
-
-}
-
-
-/* =========================
-   فحص إمكانية التمرير
-   ========================= */
-
-function canPassTo(from,to){
-
-  if(!from || !to) return false;
-
-  const d =
-    distanceBetween(from,to);
-
-  if(d > BLUE_PASS_DISTANCE)
-    return false;
-
-  for(const opp of opponents){
-
-    const block =
-      pointToSegmentDistance(
-        opp.x,
-        opp.y,
-        from.x,
-        from.y,
-        to.x,
-        to.y
-      );
-
-    if(block < 28)
-      return false;
-
-  }
-
-  return true;
-
-}
-
-
-function redCanPassTo(from,to){
-
-  if(!from || !to) return false;
-
-  const d =
-    distanceBetween(from,to);
-
-  if(d > RED_PASS_DISTANCE)
-    return false;
-
-  for(const blue of teamPlayers){
-
-    const block =
-      pointToSegmentDistance(
-        blue.x,
-        blue.y,
-        from.x,
-        from.y,
-        to.x,
-        to.y
-      );
-
-    if(block < 28)
-      return false;
-
-  }
-
-  return true;
-
-}
-
-
-/* =========================
-   أقرب لاعب أزرق للكرة
-   ========================= */
-
-function getClosestBlueToBall(){
-
-  let closest = null;
-  let best = Infinity;
-
-  for(const p of teamPlayers){
-
-    const d =
-      Math.hypot(
-        p.x-ballX,
-        p.y-ballY
-      );
-
-    if(d < best){
-
-      best = d;
-      closest = p;
-
-    }
-
-  }
-
-  return closest;
-
-}
-
-
-/* =========================
-   أقرب لاعب أحمر للكرة
-   ========================= */
-
-function getClosestRedToBall(){
-
-  let closest = null;
-  let best = Infinity;
-
-  for(const p of opponents){
-
-    const d =
-      Math.hypot(
-        p.x-ballX,
-        p.y-ballY
-      );
-
-    if(d < best){
-
-      best = d;
-      closest = p;
-
-    }
-
-  }
-
-  return closest;
-
-}
-
-
-/* =========================
-   تحديد اللاعب الأقرب
-   ========================= */
-
-function autoSelectClosestPlayer(){
-
-  if(ballOwner &&
-     ballOwner.team === "blue"){
-
-    return;
-
-  }
-
-  const closest =
-    getClosestBlueToBall();
-
-  if(!closest) return;
-
-  const current =
-    teamPlayers[activePlayerIndex];
-
-  if(!current){
-
-    activePlayerIndex =
-      teamPlayers.indexOf(closest);
-
-    return;
-
-  }
-
-  const currentDist =
-    Math.hypot(
-      current.x-ballX,
-      current.y-ballY
-    );
-
-  const closestDist =
-    Math.hypot(
-      closest.x-ballX,
-      closest.y-ballY
-    );
-
-  if(
-    closestDist + playerSwitchMargin <
-    currentDist
-  ){
-
-    activePlayerIndex =
-      teamPlayers.indexOf(closest);
-
-  }
-
-}
-
-
-/* =========================
-   وضع الكرة مع اللاعب
-   ========================= */
-
-function placeBallWithOwner(player){
-
-  if(!player) return;
-
-  ballOwner = player;
-
-  ballX =
-    player.x;
-
-  ballY =
-    player.y -
-    BALL_PICKUP_BLUE;
-
-  ballVX = 0;
-  ballVY = 0;
-
-}
-
-
-/* =========================
-   اتجاه اللاعب
-   ========================= */
-
-function getPlayerDirection(p){
-
-  if(!p) return 0;
-
-  if(
-    Math.abs(p.moveX) >
-    0.05 ||
-    Math.abs(p.moveY) >
-    0.05
-  ){
-
-    return Math.atan2(
-      p.moveY,
-      p.moveX
-    );
-
-  }
-
-  return p.direction || 0;
-
-}
-
-
-/* =========================
-   إنشاء عناصر اللاعبين
-   ========================= */
-
-function createPlayerElements(){
-
-  for(const p of teamPlayers){
-
-    const el =
-      document.createElement("div");
-
-    el.className =
-      "player bluePlayer";
-
-    el.textContent =
-      "⚽";
-
-    el.style.position =
-      "absolute";
-
-    el.style.width =
-      `${PLAYER_RADIUS*2}px`;
-
-    el.style.height =
-      `${PLAYER_RADIUS*2}px`;
-
-    el.style.zIndex =
-      "20";
-
-    game.appendChild(el);
-
-    p.el = el;
-
-  }
-
-
-  for(const p of opponents){
-
-    const el =
-      document.createElement("div");
-
-    el.className =
-      "player redPlayer";
-
-    el.textContent =
-      "⚽";
-
-    el.style.position =
-      "absolute";
-
-    el.style.width =
-      `${PLAYER_RADIUS*2}px`;
-
-    el.style.height =
-      `${PLAYER_RADIUS*2}px`;
-
-    el.style.zIndex =
-      "20";
-
-    game.appendChild(el);
-
-    p.el = el;
-
-  }
-
-}
-
-
-/* =========================
-   حدود حركة اللاعب حسب دوره
-   ========================= */
-
-function getRoleBounds(p){
-
-  const minX =
-    PLAYER_RADIUS;
-
-  const maxX =
-    worldWidth -
-    PLAYER_RADIUS;
-
-  if(p.team === "blue"){
-
-    if(p.role === "guard"){
-
-      return {
-        minX:BLUE_GUARD_MIN_X,
-        maxX:BLUE_GUARD_MAX_X,
-        minY:worldHeight*0.84,
-        maxY:worldHeight-PLAYER_RADIUS
-      };
-
-    }
-
-    if(p.role === "defender"){
-
-      return {
-        minX,
-        maxX,
-        minY:worldHeight*0.68,
-        maxY:worldHeight*0.92
-      };
-
-    }
-
-    if(p.role === "wing"){
-
-      return {
-        minX,
-        maxX,
-        minY:worldHeight*0.42,
-        maxY:worldHeight*0.78
-      };
-
-    }
-
-    if(p.role === "forward"){
-
-      return {
-        minX,
-        maxX,
-        minY:worldHeight*0.20,
-        maxY:worldHeight*0.78
-      };
-
-    }
-
-  }
-
-
-  if(p.team === "red"){
-
-    if(p.role === "guard"){
-
-      return {
-        minX:GUARD_MIN_X,
-        maxX:GUARD_MAX_X,
-        minY:PLAYER_RADIUS,
-        maxY:worldHeight*0.16
-      };
-
-    }
-
-    if(p.role === "defender"){
-
-      return {
-        minX,
-        maxX,
-        minY:worldHeight*0.08,
-        maxY:worldHeight*0.32
-      };
-
-    }
-
-    if(p.role === "wing"){
-
-      return {
-        minX,
-        maxX,
-        minY:worldHeight*0.22,
-        maxY:worldHeight*0.58
-      };
-
-    }
-
-    if(p.role === "forward"){
-
-      return {
-        minX,
-        maxX,
-        minY:worldHeight*0.20,
-        maxY:worldHeight*0.80
-      };
-
-    }
-
-  }
-
-
-  return {
-    minX,
-    maxX,
-    minY:PLAYER_RADIUS,
-    maxY:worldHeight-PLAYER_RADIUS
-  };
-
-}
-
-
-/* =========================
-   رسم لاعب
-   ========================= */
-
-function drawPlayer(p){
-
-  if(!p.el) return;
-
-  p.el.style.transform =
-    `translate3d(
-      ${p.x-PLAYER_RADIUS}px,
-      ${p.y-cameraY-PLAYER_RADIUS}px,
-      0
-    )`;
-
-}
-
-
-/* =========================
-   رسم الكرة
-   ========================= */
-
-function drawBallAndAim(){
-
-  ballElement.style.transform =
-    `translate3d(
-      ${ballX-BALL_RADIUS}px,
-      ${ballY-cameraY-BALL_RADIUS}px,
-      0
-    )`;
-
-
-  if(
-    aiming &&
-    ballOwner === teamPlayers[activePlayerIndex]
-  ){
-
-    aimArrow.style.display =
-      "block";
-
-    const angle =
-      Math.atan2(
-        aimY-ballY,
-        aimX-ballX
-      );
-
-    const length =
-      45 + chargePower*0.65;
-
-    aimArrow.style.width =
-      `${length}px`;
-
-    aimArrow.style.transform =
-      `translate3d(
-        ${ballX}px,
-        ${ballY-cameraY}px,
-        0
-      )
-      rotate(${angle}rad)`;
-
-  }else{
-
-    aimArrow.style.display =
-      "none";
-
-  }
-
-}
-
-
-/* =========================
-   رسم الملعب والكاميرا
-   ========================= */
-
-function draw(){
-
-  for(const p of teamPlayers)
-    drawPlayer(p);
-
-  for(const p of opponents)
-    drawPlayer(p);
-
-
-  drawBallAndAim();
-
-
-  /* خط منتصف الملعب */
-
-  centerLine.style.top =
-    `${worldHeight/2-cameraY}px`;
-
-
-  /* دائرة المنتصف */
-
-  centerCircle.style.top =
-    `${worldHeight/2-cameraY}px`;
-
-
-  /*
-     الأهداف تتحرك مع الكاميرا.
-     نستخدم top بدل bottom حتى يعمل
-     الملعب الطويل بشكل صحيح.
-  */
-
-  topGoal.style.top =
-    `${-cameraY}px`;
-
-  topGoal.style.bottom =
-    "auto";
-
-  topGoal.style.transform =
-    "translateX(-50%)";
-
-
-  bottomGoal.style.top =
-    `${worldHeight-48-cameraY}px`;
-
-  bottomGoal.style.bottom =
-    "auto";
-
-  bottomGoal.style.transform =
-    "translateX(-50%)";
-
-}
-
-
-/* =========================
-   الكاميرا
-   ========================= */
-
-function updateCamera(){
-
-  const targetX =
-    ballX -
-    viewWidth/2;
-
-  const targetY =
-    ballY -
-    viewHeight/2;
-
-
-  const maxCameraX =
-    Math.max(
-      0,
-      worldWidth-viewWidth
-    );
-
-
-  const maxCameraY =
-    Math.max(
-      0,
-      worldHeight-viewHeight
-    );
-
-
-  const clampedX =
-    clamp(
-      targetX,
-      0,
-      maxCameraX
-    );
-
-
-  const clampedY =
-    clamp(
-      targetY,
-      0,
-      maxCameraY
-    );
-
-
-  cameraX +=
-    (
-      clampedX-cameraX
-    ) *
-    CAMERA_SMOOTH;
-
-
-  cameraY +=
-    (
-      clampedY-cameraY
-    ) *
-    CAMERA_SMOOTH;
-
-}
-
-
-/* =========================
-   تهيئة اللاعبين
-   ========================= */
-
-createPlayerElements();
-
-
-/* أول لاعب هو اللاعب المتحكم به */
-
-activePlayerIndex = 0;
-
-teamPlayers.forEach(
-  (p,i)=>{
-
-    p.controlled =
-      i === activePlayerIndex;
-
-    p.direction = 0;
-
-    p.moveX = 0;
-    p.moveY = 0;
-
-  }
-);
-
-
-/* الكرة تبدأ مع المهاجم */
-
-ballOwner =
-  teamPlayers[0];
-
-ballX =
-  teamPlayers[0].x;
-
-ballY =
-  teamPlayers[0].y -
-  BALL_PICKUP_BLUE;
-
-ballVX = 0;
-ballVY = 0;
-
-
-/* أول رسم */
-
-draw();
-/* =========================================================
-   القسم 4 — حركة اللاعبين + الكرة + التصادم + الأهداف
-   ========================================================= */
-
-
-/* =========================
-   تحريك اللاعب
-   ========================= */
-
-function movePlayer(p,dx,dy,dt){
-
-  if(!p) return;
-
-  const len =
-    Math.hypot(dx,dy);
-
-  if(len > 1){
-
-    dx /= len;
-    dy /= len;
-
-  }
-
-
-  const speed =
-    p.speed || 90;
-
-
-  p.x +=
-    dx * speed * dt;
-
-  p.y +=
-    dy * speed * dt;
-
-
-  const bounds =
-    getRoleBounds(p);
-
-
-  p.x =
-    clamp(
-      p.x,
-      bounds.minX,
-      bounds.maxX
-    );
-
-
-  p.y =
-    clamp(
-      p.y,
-      bounds.minY,
-      bounds.maxY
-    );
-
-
-  if(
-    Math.abs(dx) > 0.01 ||
-    Math.abs(dy) > 0.01
-  ){
-
-    p.direction =
-      Math.atan2(dy,dx);
-
-  }
-
-}
-
-
-/* =========================
-   حركة اللاعب المتحكم به
-   ========================= */
-
-function updateControlledPlayer(dt){
-
-  const p =
-    teamPlayers[activePlayerIndex];
-
-  if(!p) return;
-
-
-  p.moveX =
-    joystickX;
-
-  p.moveY =
-    joystickY;
-
-
-  if(
-    Math.abs(joystickX) > 0.01 ||
-    Math.abs(joystickY) > 0.01
-  ){
-
-    movePlayer(
-      p,
-      joystickX,
-      joystickY,
-      dt
-    );
-
-  }
-
-}
-
-
-/* =========================
-   معرفة الهدف المناسب للاعب
-   ========================= */
-
-function getTeamAITarget(p){
-
-  if(!p) return null;
-
-
-  /* اللاعب الذي يملك الكرة */
-
-  if(ballOwner === p){
-
-    return {
-      x:ballX,
-      y:ballY
-    };
-
-  }
-
-
-  const ballZone =
-    ballY / worldHeight;
-
-
-  /* الجناح */
-
-  if(p.role === "wing"){
-
-    let targetY =
-      p.anchorY;
-
-
-    /*
-       عندما تكون الكرة في نصف ملعب
-       الخصم، يتقدم الجناح قليلاً.
-    */
-
-    if(ballZone < 0.55){
-
-      targetY =
-        Math.min(
-          worldHeight*0.30,
-          p.anchorY
-        );
-
-    }
-
-
-    /*
-       إذا كانت الكرة قريبة من الجناح
-       يتحرك باتجاهها.
-    */
-
-    const ballDist =
-      Math.hypot(
-        ballX-p.x,
-        ballY-p.y
-      );
-
-
-    if(ballDist < 210){
-
-      return {
-        x:ballX,
-        y:ballY
-      };
-
-    }
-
-
-    return {
-      x:p.anchorX,
-      y:targetY
-    };
-
-  }
-
-
-  /* المهاجم */
-
-  if(p.role === "forward"){
-
-    const d =
-      Math.hypot(
-        ballX-p.x,
-        ballY-p.y
-      );
-
-
-    if(
-      ballOwner &&
-      ballOwner.team === "blue"
-    ){
-
-      /*
-         لا يطارد المهاجم اللاعب
-         إذا كانت الكرة مع لاعب أزرق آخر.
-      */
-
-      if(d < 170){
-
-        return {
-          x:ballX,
-          y:ballY
-        };
-
-      }
-
-      return {
-        x:p.anchorX,
-        y:worldHeight*0.30
-      };
-
-    }
-
-
-    if(d < BLUE_NEAR_BALL_DIST){
-
-      return {
-        x:ballX,
-        y:ballY
-      };
-
-    }
-
-
-    return {
-      x:p.anchorX,
-      y:worldHeight*0.30
-    };
-
-  }
-
-
-  /* المدافع */
-
-  if(p.role === "defender"){
-
-    const d =
-      Math.hypot(
-        ballX-p.x,
-        ballY-p.y
-      );
-
-
-    if(
-      ballOwner &&
-      ballOwner.team === "red" &&
-      d < 230
-    ){
-
-      return {
-        x:ballX,
-        y:ballY
-      };
-
-    }
-
-
-    return {
-      x:p.anchorX,
-      y:worldHeight*0.84
-    };
-
-  }
-
-
-  /* الحارس */
-
-  if(p.role === "guard"){
-
-    let gx =
-      ballX;
-
-
-    gx =
-      clamp(
-        gx,
-        BLUE_GUARD_MIN_X,
-        BLUE_GUARD_MAX_X
-      );
-
-
-    return {
-      x:gx,
-      y:BLUE_GUARD_Y
-    };
-
-  }
-
-
-  return {
-    x:p.anchorX,
-    y:p.anchorY
-  };
-
-}
-
-
-/* =========================
-   حركة لاعبي الأزرق AI
-   ========================= */
-
-function updateBlueAI(dt){
-
-  for(let i=0;i<teamPlayers.length;i++){
-
-    const p =
-      teamPlayers[i];
-
-
-    /*
-       اللاعب المتحكم به لا يتحرك
-       بواسطة AI.
-    */
-
-    if(i === activePlayerIndex){
-
-      p.controlled = true;
-      continue;
-
-    }
-
-
-    p.controlled = false;
-
-
-    const target =
-      getTeamAITarget(p);
-
-
-    if(!target) continue;
-
-
-    let dx =
-      target.x-p.x;
-
-    let dy =
-      target.y-p.y;
-
-
-    const d =
-      Math.hypot(dx,dy);
-
-
-    /*
-       لا نحتاج للحركة إذا كان اللاعب
-       قريباً من موقعه المطلوب.
-    */
-
-    if(d < 5){
-
-      p.moveX = 0;
-      p.moveY = 0;
-
-      continue;
-
-    }
-
-
-    dx /= d;
-    dy /= d;
-
-
-    p.moveX = dx;
-    p.moveY = dy;
-
-
-    movePlayer(
-      p,
-      dx,
-      dy,
-      dt
-    );
-
-  }
-
-}
-
-
-/* =========================
-   هدف الفريق الأحمر
-   ========================= */
-
-function getRedFormationTarget(p){
-
-  if(!p) return null;
-
-
-  /* الحارس الأحمر */
-
-  if(p.role === "guard"){
-
-    return {
-      x:clamp(
-        ballX,
-        GUARD_MIN_X,
-        GUARD_MAX_X
-      ),
-      y:GUARD_Y
-    };
-
-  }
-
-
-  /* المدافع الأحمر */
-
-  if(p.role === "defender"){
-
-    const d =
-      Math.hypot(
-        ballX-p.x,
-        ballY-p.y
-      );
-
-
-    if(
-      ballOwner &&
-      ballOwner.team === "blue" &&
-      d < 230
-    ){
-
-      return {
-        x:ballX,
-        y:ballY
-      };
-
-    }
-
-
-    return {
-      x:p.anchorX,
-      y:worldHeight*0.14
-    };
-
-  }
-
-
-  /* الأجنحة */
-
-  if(p.role === "wing"){
-
-    const d =
-      Math.hypot(
-        ballX-p.x,
-        ballY-p.y
-      );
-
-
-    if(
-      d < RED_NEAR_BALL_DIST
-    ){
-
-      return {
-        x:ballX,
-        y:ballY
-      };
-
-    }
-
-
-    return {
-      x:p.anchorX,
-      y:worldHeight*0.38
-    };
-
-  }
-
-
-  /* المهاجم */
-
-  if(p.role === "forward"){
-
-    const d =
-      Math.hypot(
-        ballX-p.x,
-        ballY-p.y
-      );
-
-
-    if(d < RED_NEAR_BALL_DIST){
-
-      return {
-        x:ballX,
-        y:ballY
-      };
-
-    }
-
-
-    return {
-      x:p.anchorX,
-      y:worldHeight*0.30
-    };
-
-  }
-
-
-  return {
-    x:p.anchorX,
-    y:p.anchorY
-  };
-
-}
-
-
-/* =========================
-   حركة الفريق الأحمر
-   ========================= */
-
-function updateRedAI(dt){
-
-  for(const p of opponents){
-
-    const target =
-      getRedFormationTarget(p);
-
-
-    if(!target) continue;
-
-
-    let dx =
-      target.x-p.x;
-
-    let dy =
-      target.y-p.y;
-
-
-    const d =
-      Math.hypot(dx,dy);
-
-
-    if(d < 5){
-
-      p.moveX = 0;
-      p.moveY = 0;
-
-      continue;
-
-    }
-
-
-    dx /= d;
-    dy /= d;
-
-
-    p.moveX = dx;
-    p.moveY = dy;
-
-
-    movePlayer(
-      p,
-      dx,
-      dy,
-      dt
-    );
-
-  }
-
-}
-
-
-/* =========================
-   فصل اللاعبين عن بعض
-   ========================= */
-
-function separatePlayers(players,minDistance){
-
-  for(let i=0;i<players.length;i++){
-
-    for(let j=i+1;j<players.length;j++){
-
-      const a =
-        players[i];
-
-      const b =
-        players[j];
-
-
-      const dx =
-        b.x-a.x;
-
-      const dy =
-        b.y-a.y;
-
-
-      const d =
-        Math.hypot(dx,dy);
-
-
-      if(
-        d === 0 ||
-        d >= minDistance
-      ){
-
-        continue;
-
-      }
-
-
-      const nx =
-        dx/d;
-
-      const ny =
-        dy/d;
-
-
-      const push =
-        (minDistance-d)/2;
-
-
-      /*
-         لا ندفع اللاعب المتحكم به
-         بقوة كبيرة.
-      */
-
-      if(a !== teamPlayers[activePlayerIndex]){
-
-        a.x -=
-          nx*push;
-
-        a.y -=
-          ny*push;
-
-      }
-
-
-      if(b !== teamPlayers[activePlayerIndex]){
-
-        b.x +=
-          nx*push;
-
-        b.y +=
-          ny*push;
-
-      }
-
-
-      const ba =
-        getRoleBounds(a);
-
-      const bb =
-        getRoleBounds(b);
-
-
-      a.x =
-        clamp(
-          a.x,
-          ba.minX,
-          ba.maxX
-        );
-
-      a.y =
-        clamp(
-          a.y,
-          ba.minY,
-          ba.maxY
-        );
-
-
-      b.x =
-        clamp(
-          b.x,
-          bb.minX,
-          bb.maxX
-        );
-
-      b.y =
-        clamp(
-          b.y,
-          bb.minY,
-          bb.maxY
-        );
-
-    }
-
-  }
-
-}
-
-
-/* =========================
-   تصادم اللاعبين مع الكرة
-   ========================= */
-
-function resolvePlayerBallCollision(){
-
-  /*
-     إذا كانت الكرة مملوكة للاعب
-     لا نعمل تصادم عشوائي.
-  */
-
-  if(ballOwner)
-    return;
-
-
-  const allPlayers =
-    [
-      ...teamPlayers,
-      ...opponents
-    ];
-
-
-  let nearest =
-    null;
-
-  let nearestDistance =
-    Infinity;
-
-
-  for(const p of allPlayers){
-
-    const d =
-      Math.hypot(
-        ballX-p.x,
-        ballY-p.y
-      );
-
-
-    if(
-      d < nearestDistance
-    ){
-
-      nearestDistance = d;
-      nearest = p;
-
-    }
-
-  }
-
-
-  if(
-    nearest &&
-    nearestDistance <
-    BALL_PICKUP_BLUE
-  ){
-
-    /*
-       الاستحواذ على الكرة.
-    */
-
-    ballOwner =
-      nearest;
-
-    ballVX = 0;
-    ballVY = 0;
-
-    ballX =
-      nearest.x;
-
-    ballY =
-      nearest.y -
-      (
-        nearest.team === "blue"
-        ? BALL_PICKUP_BLUE
-        : BALL_PICKUP_RED
-      );
-
-  }
-
-}
-
-
-/* =========================
-   تحديث الكرة
-   ========================= */
-
-function updateBall(dt){
-
-  /*
-     إذا كانت الكرة مع لاعب
-     تتحرك معه.
-  */
-
-  if(ballOwner){
-
-    ballX =
-      ballOwner.x;
-
-    ballY =
-      ballOwner.y -
-      (
-        ballOwner.team === "blue"
-        ? BALL_PICKUP_BLUE
-        : BALL_PICKUP_RED
-      );
-
-    ballVX = 0;
-    ballVY = 0;
-
-    return;
-
-  }
-
-
-  ballX +=
-    ballVX * dt;
-
-  ballY +=
-    ballVY * dt;
-
-
-  /*
-     الاحتكاك
-  */
-
-  ballVX *=
-    Math.pow(FRICTION,dt*60);
-
-  ballVY *=
-    Math.pow(FRICTION,dt*60);
-
-
-  /*
-     إيقاف الكرة عندما تصبح بطيئة جداً.
-  */
-
-  const speed =
-    Math.hypot(
-      ballVX,
-      ballVY
-    );
-
-
-  if(speed < 0.15){
-
-    ballVX = 0;
-    ballVY = 0;
-
-  }
-
-
-  /*
-     الجدار الأيسر
-  */
-
-  if(
-    ballX-BALL_RADIUS < 0
-  ){
-
-    ballX =
-      BALL_RADIUS;
-
-    ballVX =
-      Math.abs(ballVX) *
-      0.72;
-
-  }
-
-
-  /*
-     الجدار الأيمن
-  */
-
-  if(
-    ballX+BALL_RADIUS >
-    worldWidth
-  ){
-
-    ballX =
-      worldWidth-BALL_RADIUS;
-
-    ballVX =
-      -Math.abs(ballVX) *
-      0.72;
-
-  }
-
-
-  /*
-     أعلى الملعب
-  */
-
-  if(
-    ballY-BALL_RADIUS < 0
-  ){
-
-    ballY =
-      BALL_RADIUS;
-
-    ballVY =
-      Math.abs(ballVY) *
-      0.72;
-
-  }
-
-
-  /*
-     أسفل الملعب
-  */
-
-  if(
-    ballY+BALL_RADIUS >
-    worldHeight
-  ){
-
-    ballY =
-      worldHeight-BALL_RADIUS;
-
-    ballVY =
-      -Math.abs(ballVY) *
-      0.72;
-
-  }
-
-}
-
-
-/* =========================
-   التحقق من الهدف
-   ========================= */
-
-function checkGoal(){
-
-  /*
-     الهدف العلوي
-     = هدف الفريق الأحمر
-  */
-
-  if(
-    ballY < 30 &&
-    Math.abs(
-      ballX-worldWidth/2
-    ) <
-    GOAL_WIDTH/2
-  ){
-
-    scoreBlue++;
-
-    scoreBlueElement.textContent =
-      scoreBlue;
-
-
-    resetAfterGoal(
-      "blue"
-    );
-
-    return true;
-
-  }
-
-
-  /*
-     الهدف السفلي
-     = هدف الفريق الأزرق
-  */
-
-  if(
-    ballY >
-    worldHeight-30 &&
-    Math.abs(
-      ballX-worldWidth/2
-    ) <
-    GOAL_WIDTH/2
-  ){
-
-    scoreRed++;
-
-    scoreRedElement.textContent =
-      scoreRed;
-
-
-    resetAfterGoal(
-      "red"
-    );
-
-    return true;
-
-  }
-
-
-  return false;
-
-}
-
-
-/* =========================
-   إعادة اللعب بعد الهدف
-   ========================= */
-
-function resetAfterGoal(scoringTeam){
-
-  ballOwner = null;
-
-  ballVX = 0;
-  ballVY = 0;
-
-
-  if(scoringTeam === "blue"){
-
-    for(const p of teamPlayers){
-
-      if(p.role === "forward"){
-
-        p.x =
-          worldWidth/2;
-
-        p.y =
-          worldHeight*0.72;
-
-      }
-
-      else if(p.role === "wing"){
-
-        p.y =
-          worldHeight*0.62;
-
-      }
-
-      else if(p.role === "defender"){
-
-        p.x =
-          worldWidth/2;
-
-        p.y =
-          worldHeight*0.86;
-
-      }
-
-      else if(p.role === "guard"){
-
-        p.x =
-          worldWidth/2;
-
-        p.y =
-          worldHeight*0.95;
-
-      }
-
-    }
-
-
-    for(const p of opponents){
-
-      p.x =
-        p.anchorX;
-
-      p.y =
-        p.anchorY;
-
-    }
-
-
-    const p =
-      teamPlayers[activePlayerIndex];
-
-
-    ballOwner = p;
-
-    ballX = p.x;
-    ballY =
-      p.y-BALL_PICKUP_BLUE;
-
-  }
-
-  else{
-
-    for(const p of teamPlayers){
-
-      p.x =
-        p.anchorX;
-
-      p.y =
-        p.anchorY;
-
-    }
-
-
-    for(const p of opponents){
-
-      p.x =
-        p.anchorX;
-
-      p.y =
-        p.anchorY;
-
-    }
-
-
-    const p =
-      opponents[0];
-
-
-    ballOwner = p;
-
-    ballX = p.x;
-    ballY =
-      p.y-BALL_PICKUP_RED;
-
-  }
-
-
-  cameraX = 0;
-
-  cameraY = 0;
-
-}
-
-
-/* =========================
-   تحديد الاستحواذ القريب
-   ========================= */
-
-function tryBlueBallPickup(){
-
-  if(
-    ballOwner
-  )
-    return;
-
-
-  const p =
-    teamPlayers[activePlayerIndex];
-
-  if(!p)
-    return;
-
-
-  const d =
-    Math.hypot(
-      ballX-p.x,
-      ballY-p.y
-    );
-
-
-  if(
-    d <= BALL_PICKUP_BLUE
-  ){
-
-    ballOwner =
-      p;
-
-    ballX =
-      p.x;
-
-    ballY =
-      p.y-BALL_PICKUP_BLUE;
-
-    ballVX = 0;
-    ballVY = 0;
-
-  }
-
-}
-
-
-/* =========================
-   محاولة الأحمر للاستحواذ
-   ========================= */
-
-function tryRedBallPickup(){
-
-  if(ballOwner)
-    return;
-
-
-  const p =
-    getClosestRedToBall();
-
-
-  if(!p)
-    return;
-
-
-  const d =
-    Math.hypot(
-      ballX-p.x,
-      ballY-p.y
-    );
-
-
-  if(
-    d <= BALL_PICKUP_RED
-  ){
-
-    ballOwner =
-      p;
-
-    ballX =
-      p.x;
-
-    ballY =
-      p.y-BALL_PICKUP_RED;
-
-    ballVX = 0;
-    ballVY = 0;
-
-  }
-
-}
-
-/* =========================================================
-   القسم 5 — التسديد + التمرير + AI + التحكم
-   ========================================================= */
-
-
-/* =========================
-   إطلاق الكرة
-   ========================= */
-
-function kickBall(){
-
-  if(!ballOwner)
-    return;
-
-  const p =
-    ballOwner;
-
-
-  /*
-     اللاعب الأزرق المتحكم به
-  */
-
-  if(
-    p.team === "blue" &&
-    p === teamPlayers[activePlayerIndex]
-  ){
-
-    let dx =
-      aimX-ballX;
-
-    let dy =
-      aimY-ballY;
-
-
-    const d =
-      Math.hypot(dx,dy);
-
-
-    if(d < 5)
-      return;
-
-
-    dx /= d;
-    dy /= d;
-
-
-    const power =
-      Math.max(
-        0.15,
-        chargePower/MAX_POWER
-      );
-
-
-    const kickSpeed =
-      500 +
-      power*850;
-
-
-    ballOwner = null;
-
-
-    ballX =
-      p.x +
-      dx*30;
-
-    ballY =
-      p.y +
-      dy*30;
-
-
-    ballVX =
-      dx*kickSpeed;
-
-    ballVY =
-      dy*kickSpeed;
-
-
-    chargePower = 0;
-
-    powerText.textContent =
-      "0";
-
-
-    powerBox.classList.remove(
-      "charging"
-    );
-
-    aiming = false;
-
-    aimArrow.style.display =
-      "none";
-
-
-    return;
-
-  }
-
-
-  /*
-     AI
-  */
-
-  aiKickBall(p);
-
-}
-
-
-/* =========================
-   تسديد AI
-   ========================= */
-
-function aiKickBall(p){
-
-  if(!p)
-    return;
-
-  if(ballOwner !== p)
-    return;
-
-
-  let targetX =
-    worldWidth/2;
-
-  let targetY;
-
-
-  if(p.team === "blue"){
-
-    /*
-       الأزرق يهاجم المرمى العلوي
-    */
-
-    targetY = -20;
-
-  }else{
-
-    /*
-       الأحمر يهاجم المرمى السفلي
-    */
-
-    targetY =
-      worldHeight+20;
-
-  }
-
-
-  let dx =
-    targetX-ballX;
-
-  let dy =
-    targetY-ballY;
-
-
-  const d =
-    Math.hypot(dx,dy);
-
-
-  if(d < 1)
-    return;
-
-
-  dx /= d;
-  dy /= d;
-
-
-  const speed =
-    620;
-
-
-  ballOwner = null;
-
-
-  ballX =
-    p.x+dx*32;
-
-  ballY =
-    p.y+dy*32;
-
-
-  ballVX =
-    dx*speed;
-
-  ballVY =
-    dy*speed;
-
-}
-
-
-/* =========================
-   اختيار لاعب للتمرير
-   ========================= */
-
-function getBestPassTarget(
-  p,
-  players
-){
-
-  if(!p)
-    return null;
-
-
-  let best = null;
-  let bestScore = -Infinity;
-
-
-  for(const mate of players){
-
-    if(mate === p)
-      continue;
-
-
-    const d =
-      distanceBetween(
-        p,
-        mate
-      );
-
-
-    if(d < 45)
-      continue;
-
-
-    if(d > BLUE_PASS_DISTANCE &&
-       p.team === "blue")
-      continue;
-
-
-    if(d > RED_PASS_DISTANCE &&
-       p.team === "red")
-      continue;
-
-
-    const passOK =
-      p.team === "blue"
-      ? canPassTo(p,mate)
-      : redCanPassTo(p,mate);
-
-
-    if(!passOK)
-      continue;
-
-
-    /*
-       اللاعب الأقرب للمرمى
-       يحصل على أولوية أكبر.
-    */
-
-    let progress;
-
-
-    if(p.team === "blue"){
-
-      progress =
-        worldHeight-mate.y;
-
-    }else{
-
-      progress =
-        mate.y;
-
-    }
-
-
-    const score =
-      progress*0.8 -
-      d*0.35;
-
-
-    if(score > bestScore){
-
-      bestScore = score;
-      best = mate;
-
-    }
-
-  }
-
-
-  return best;
-
-}
-
-
-/* =========================
-   تمريرة AI
-   ========================= */
-
-function aiPass(p,target){
-
-  if(!p || !target)
-    return false;
-
-  if(ballOwner !== p)
-    return false;
-
-
-  const dx =
-    target.x-p.x;
-
-  const dy =
-    target.y-p.y;
-
-
-  const d =
-    Math.hypot(dx,dy);
-
-
-  if(d < 1)
-    return false;
-
-
-  const nx =
-    dx/d;
-
-  const ny =
-    dy/d;
-
-
-  const passSpeed =
-    Math.min(
-      720,
-      430+d*0.75
-    );
-
-
-  ballOwner = null;
-
-
-  ballX =
-    p.x+nx*32;
-
-  ballY =
-    p.y+ny*32;
-
-
-  ballVX =
-    nx*passSpeed;
-
-  ballVY =
-    ny*passSpeed;
-
-
-  return true;
-
-}
-
-
-/* =========================
-   ذكاء الأزرق مع الكرة
-   ========================= */
-
-function updateBlueBallAI(){
-
-  if(!ballOwner)
-    return;
-
-
-  const p =
-    ballOwner;
-
-
-  if(p.team !== "blue")
-    return;
-
-
-  /*
-     اللاعب الذي يتحكم به المستخدم
-     لا نترك AI يتدخل فيه.
-  */
-
-  if(
-    p === teamPlayers[activePlayerIndex]
-  )
-    return;
-
-
-  const goalDistance =
-    Math.abs(
-      p.y
-    );
-
-
-  /*
-     إذا اقترب من المرمى
-     يسدد.
-  */
-
-  if(
-    p.y < BLUE_SHOOT_DISTANCE
-  ){
-
-    aiKickBall(p);
-
-    return;
-
-  }
-
-
-  /*
-     محاولة التمرير.
-  */
-
-  const target =
-    getBestPassTarget(
-      p,
-      teamPlayers
-    );
-
-
-  if(target){
-
-    const passDistance =
-      distanceBetween(
-        p,
-        target
-      );
-
-
-    if(
-      passDistance >
-      90 &&
-      Math.random() < 0.018
-    ){
-
-      aiPass(
-        p,
-        target
-      );
-
-      return;
-
-    }
-
-  }
-
-}
-
-
-/* =========================
-   ذكاء الأحمر مع الكرة
-   ========================= */
-
-function updateRedBallAI(){
-
-  if(!ballOwner)
-    return;
-
-
-  const p =
-    ballOwner;
-
-
-  if(p.team !== "red")
-    return;
-
-
-  /*
-     إذا كان قريباً من مرمى الأزرق
-     يسدد.
-  */
-
-  if(
-    p.y >
-    worldHeight-RED_SHOOT_DISTANCE
-  ){
-
-    aiKickBall(p);
-
-    return;
-
-  }
-
-
-  /*
-     محاولة تمرير الكرة.
-  */
-
-  const target =
-    getBestPassTarget(
-      p,
-      opponents
-    );
-
-
-  if(target){
-
-    const passDistance =
-      distanceBetween(
-        p,
-        target
-      );
-
-
-    if(
-      passDistance >
-      90 &&
-      Math.random() < 0.022
-    ){
-
-      aiPass(
-        p,
-        target
-      );
-
-      return;
-
-    }
-
-  }
-
-}
-
-
-/* =========================
-   تدخل الأحمر على اللاعب الأزرق
-   ========================= */
-
-function redTackle(){
-
-  const blue =
-    teamPlayers[
-      activePlayerIndex
-    ];
-
-
-  if(!blue)
-    return;
-
-
-  const red =
-    getClosestRedToBall();
-
-
-  if(!red)
-    return;
-
-
-  const d =
-    distanceBetween(
-      red,
-      blue
-    );
-
-
-  if(
-    d <= RED_TACKLE_DISTANCE &&
-    ballOwner === blue
-  ){
-
-    /*
-       نسبة نجاح بسيطة
-       حتى لا تصبح اللعبة آلية بالكامل.
-    */
-
-    if(
-      Math.random() < 0.08
-    ){
-
-      ballOwner =
-        red;
-
-      ballX =
-        red.x;
-
-      ballY =
-        red.y-BALL_PICKUP_RED;
-
-      ballVX = 0;
-      ballVY = 0;
-
-    }
-
-  }
-
-}
-
-
-/* =========================
-   تدخل الأزرق
-   ========================= */
-
-function blueTackle(){
-
-  const blue =
-    teamPlayers[
-      activePlayerIndex
-    ];
-
-
-  if(!blue)
-    return;
-
-
-  const red =
-    getClosestRedToBall();
-
-
-  if(!red)
-    return;
-
-
-  const d =
-    distanceBetween(
-      blue,
-      red
-    );
-
-
-  if(
-    d <= BLUE_TACKLE_DISTANCE &&
-    ballOwner === red
-  ){
-
-    if(
-      Math.random() < 0.12
-    ){
-
-      ballOwner =
-        blue;
-
-      ballX =
-        blue.x;
-
-      ballY =
-        blue.y-BALL_PICKUP_BLUE;
-
-      ballVX = 0;
-      ballVY = 0;
-
-    }
-
-  }
-
-}
-
-
-/* =========================
-   تبديل اللاعب يدوياً
-   ========================= */
-
-function switchPlayer(){
-
-  const current =
-    teamPlayers[
-      activePlayerIndex
-    ];
-
-
-  let bestIndex = -1;
-  let bestDistance =
-    Infinity;
-
-
-  for(let i=0;i<teamPlayers.length;i++){
-
-    if(i === activePlayerIndex)
-      continue;
-
-
-    const p =
-      teamPlayers[i];
-
-
-    const d =
-      Math.hypot(
-        p.x-ballX,
-        p.y-ballY
-      );
-
-
-    if(d < bestDistance){
-
-      bestDistance = d;
-      bestIndex = i;
-
-    }
-
-  }
-
-
-  if(
-    bestIndex >= 0 &&
-    bestDistance <=
-    manualSwitchMinDistance
-  ){
-
-    activePlayerIndex =
-      bestIndex;
-
-
-    for(let i=0;i<teamPlayers.length;i++){
-
-      teamPlayers[i].controlled =
-        i === activePlayerIndex;
-
-    }
-
-
-    lastManualSwitchTime =
-      performance.now();
-
-  }
-
-}
-
-
-/* =========================
-   اختيار اللاعب بالاتجاه
-   ========================= */
-
-function switchPlayerByDirection(){
-
-  const current =
-    teamPlayers[
-      activePlayerIndex
-    ];
-
-
-  if(!current)
-    return;
-
-
-  const ax =
-    joystickX;
-
-  const ay =
-    joystickY;
-
-
-  const magnitude =
-    Math.hypot(
-      ax,
-      ay
-    );
-
-
-  if(
-    magnitude <
-    manualSwitchDot
-  )
-    return;
-
-
-  let bestIndex = -1;
-  let bestScore =
-    Infinity;
-
-
-  for(let i=0;i<teamPlayers.length;i++){
-
-    if(i === activePlayerIndex)
-      continue;
-
-
-    const p =
-      teamPlayers[i];
-
-
-    const dx =
-      p.x-current.x;
-
-    const dy =
-      p.y-current.y;
-
-
-    const d =
-      Math.hypot(
-        dx,
-        dy
-      );
-
-
-    if(d < 1)
-      continue;
-
-
-    const dot =
-      (
-        dx*ax +
-        dy*ay
-      ) / d;
-
-
-    if(
-      dot < manualSwitchDot
-    )
-      continue;
-
-
-    const score =
-      d/(dot+0.01);
-
-
-    if(score < bestScore){
-
-      bestScore = score;
-      bestIndex = i;
-
-    }
-
-  }
-
-
-  if(bestIndex >= 0){
-
-    activePlayerIndex =
-      bestIndex;
-
-
-    for(let i=0;i<teamPlayers.length;i++){
-
-      teamPlayers[i].controlled =
-        i === activePlayerIndex;
-
-    }
-
-
-    lastManualSwitchTime =
-      performance.now();
-
-  }
-
-}
-
-
-/* =========================
-   لمس الكرة من اللاعب
-   ========================= */
-
-function handlePlayerBallContact(){
-
-  if(!ballOwner){
-
-    tryBlueBallPickup();
-    tryRedBallPickup();
-
-    return;
-
-  }
-
-
-  /*
-     الأزرق يأخذ الكرة من الأحمر
-  */
-
-  if(
-    ballOwner.team === "red"
-  ){
-
-    blueTackle();
-
-  }
-
-
-  /*
-     الأحمر يأخذ الكرة من الأزرق
-  */
-
-  if(
-    ballOwner.team === "blue"
-  ){
-
-    redTackle();
-
-  }
-
-}
-
-
-/* =========================
-   شحن الركلة
-   ========================= */
-
-function startCharging(){
-
-  if(matchEnded)
-    return;
-
-
-  const p =
-    teamPlayers[
-      activePlayerIndex
-    ];
-
-
-  if(
-    !p ||
-    ballOwner !== p
-  ){
-
-    return;
-
-  }
-
-
-  if(aiming)
-    return;
-
-
-  aiming = true;
-
-  chargePower = 0;
-
-
-  powerBox.classList.add(
-    "charging"
-  );
-
-
-  powerText.textContent =
-    "0";
-
-}
-
-
-/* =========================
-   تحديث قوة الركلة
-   ========================= */
-
-function updateCharge(dt){
-
-  if(!aiming)
-    return;
-
-
-  chargePower +=
-    POWER_SPEED * dt;
-
-
-  if(
-    chargePower >
-    MAX_POWER
-  ){
-
-    chargePower =
-      MAX_POWER;
-
-  }
-
-
-  powerText.textContent =
-    Math.round(
-      chargePower
-    );
-
-}
-
-
-/* =========================
-   إنهاء الشحن والركل
-   ========================= */
-
-function finishCharging(){
-
-  if(!aiming)
-    return;
-
-
-  kickBall();
-
-}
-
-
-/* =========================
-   تحديث مكان الهدف
-   ========================= */
-
-function updateAimFromPoint(
-  clientX,
-  clientY
-){
-
-  const rect =
-    game.getBoundingClientRect();
-
-
-  const x =
-    clientX -
-    rect.left;
-
-
-  const y =
-    clientY -
-    rect.top;
-
-
-  aimX =
-    x +
-    cameraX;
-
-  aimY =
-    y +
-    cameraY;
-
-}
-
-
-/* =========================
-   زر الركل
-   ========================= */
-
-kickControl.addEventListener(
-  "pointerdown",
-  e => {
-
-    e.preventDefault();
-
-    startCharging();
-
-  }
-);
-
-
-kickControl.addEventListener(
-  "pointerup",
-  e => {
-
-    e.preventDefault();
-
-    finishCharging();
-
-  }
-);
-
-
-kickControl.addEventListener(
-  "pointercancel",
-  e => {
-
-    e.preventDefault();
-
-    finishCharging();
-
-  }
-);
-
-
-/* =========================
-   حركة إصبع المستخدم
-   ========================= */
-
-game.addEventListener(
-  "pointermove",
-  e => {
-
-    if(!aiming)
-      return;
-
-
-    updateAimFromPoint(
-      e.clientX,
-      e.clientY
-    );
-
-  }
-);
-
-
-/* =========================
-   تبديل اللاعب
-   ========================= */
-
-game.addEventListener(
-  "dblclick",
-  e => {
-
-    e.preventDefault();
-
-    switchPlayer();
-
-  }
-);
-
-
-/* =========================
-   فصل الفريقين
-   ========================= */
-
-function resolveTeamSeparation(){
-
-  separatePlayers(
-    teamPlayers,
-    BLUE_MIN_SEPARATION
-  );
-
-
-  separatePlayers(
-    opponents,
-    RED_MIN_SEPARATION
-  );
-
-}
-
-
-/* =========================
-   تحديث كل ذكاء المباراة
-   ========================= */
-
-function updateAI(dt){
-
-  updateBlueAI(dt);
-
-  updateRedAI(dt);
-
-  resolveTeamSeparation();
-
-  updateBlueBallAI();
-
-  updateRedBallAI();
-
-  redTackle();
-
-  blueTackle();
-
-}
-
-
-/* =========================
-   تحديث اللعبة
-   ========================= */
-
-function updateGame(dt){
-
-  if(
-    !matchRunning ||
-    matchEnded
-  )
-    return;
-
-
-  updateControlledPlayer(dt);
-
-  updateAI(dt);
-
-  updateCharge(dt);
-
-  updateBall(dt);
-
-  handlePlayerBallContact();
-
-  checkGoal();
-
-  updateCamera();
-
-  draw();
-
-}
-/* =========================================================
-   القسم 6 — Joystick + المؤقت + الحلقة الرئيسية + Resize
-   ========================================================= */
-
-
-/* =========================
-   Joystick
-   ========================= */
-
-let joystickActive = false;
-let joystickPointerId = null;
-
-let joystickX = 0;
-let joystickY = 0;
-
-
-function resetJoystick(){
-
-  joystickActive = false;
-  joystickPointerId = null;
-
-  joystickX = 0;
-  joystickY = 0;
-
-
-  movePad.style.transform =
-    "translate3d(0,0,0)";
-
-}
-
-
-/* =========================
-   حساب حركة Joystick
-   ========================= */
-
-function updateJoystick(
-  clientX,
-  clientY
-){
-
-  const rect =
-    movePad.getBoundingClientRect();
-
-
-  const centerX =
-    rect.left +
-    rect.width/2;
-
-  const centerY =
-    rect.top +
-    rect.height/2;
-
-
-  let dx =
-    clientX-centerX;
-
-  let dy =
-    clientY-centerY;
-
-
-  const distance =
-    Math.hypot(dx,dy);
-
-
-  if(
-    distance >
-    joystickMaxDistance
-  ){
-
-    dx =
-      dx/distance *
-      joystickMaxDistance;
-
-    dy =
-      dy/distance *
-      joystickMaxDistance;
-
-  }
-
-
-  joystickX =
-    dx/joystickMaxDistance;
-
-  joystickY =
-    dy/joystickMaxDistance;
-
-
-  /*
-     الحركة القطرية تكون بنفس السرعة
-     في جميع الاتجاهات.
-  */
-
-  const magnitude =
-    Math.hypot(
-      joystickX,
-      joystickY
-    );
-
-
-  if(magnitude > 1){
-
-    joystickX /= magnitude;
-    joystickY /= magnitude;
-
-  }
-
-
-  movePad.style.transform =
-    `translate3d(
-      ${dx}px,
-      ${dy}px,
-      0
-    )`;
-
-}
-
-
-/* =========================
-   بدء Joystick
-   ========================= */
-
-movePad.addEventListener(
-  "pointerdown",
-  e => {
-
-    e.preventDefault();
-
-    joystickActive = true;
-
-    joystickPointerId =
-      e.pointerId;
-
-
-    movePad.setPointerCapture(
-      e.pointerId
-    );
-
-
-    updateJoystick(
-      e.clientX,
-      e.clientY
-    );
-
-  }
-);
-
-
-/* =========================
-   تحريك Joystick
-   ========================= */
-
-movePad.addEventListener(
-  "pointermove",
-  e => {
-
-    if(
-      !joystickActive ||
-      e.pointerId !==
-      joystickPointerId
-    )
-      return;
-
-
-    e.preventDefault();
-
-
-    updateJoystick(
-      e.clientX,
-      e.clientY
-    );
-
-  }
-);
-
-
-/* =========================
-   إنهاء Joystick
-   ========================= */
-
-movePad.addEventListener(
-  "pointerup",
-  e => {
-
-    if(
-      e.pointerId !==
-      joystickPointerId
-    )
-      return;
-
-
-    resetJoystick();
-
-  }
-);
-
-
-movePad.addEventListener(
-  "pointercancel",
-  e => {
-
-    if(
-      e.pointerId !==
-      joystickPointerId
-    )
-      return;
-
-
-    resetJoystick();
-
-  }
-);
-
-
-/* =========================
-   منع لمس الشاشة من التحريك
-   ========================= */
-
-movePad.addEventListener(
-  "touchstart",
-  e => {
-
-    e.preventDefault();
-
-  },
-  {passive:false}
-);
-
-
-kickControl.addEventListener(
-  "touchstart",
-  e => {
-
-    e.preventDefault();
-
-  },
-  {passive:false}
-);
-
-
-/* =========================================================
-   المؤقت
-   ========================================================= */
-
-function formatTime(seconds){
-
-  seconds =
-    Math.max(
-      0,
-      Math.ceil(seconds)
-    );
-
-
-  const minutes =
-    Math.floor(
-      seconds/60
-    );
-
-
-  const secs =
-    seconds%60;
-
-
-  return (
-    String(minutes)
-      .padStart(2,"0")
-    +
-    ":"
-    +
-    String(secs)
-      .padStart(2,"0")
-  );
-
-}
-
-
-/* =========================
-   تحديث المؤقت
-   ========================= */
-
-function updateMatchTimer(now){
-
-  if(
-    !matchRunning ||
-    matchEnded
-  )
-    return;
-
-
-  const elapsed =
-    (
-      now-matchLastTimestamp
-    )/1000;
-
-
-  matchLastTimestamp =
-    now;
-
-
-  matchTimeRemaining -=
-    elapsed;
-
-
-  if(
-    matchTimeRemaining <= 0
-  ){
-
-    matchTimeRemaining = 0;
-
-    updateMatchTimerDisplay();
-
-    endMatch();
-
-    return;
-
-  }
-
-
-  updateMatchTimerDisplay();
-
-}
-
-
-/* =========================
-   عرض الوقت
-   ========================= */
-
-function updateMatchTimerDisplay(){
-
-  matchTimeElement.textContent =
-    formatTime(
-      matchTimeRemaining
-    );
-
-
-  if(
-    matchTimeRemaining <= 10
-  ){
-
-    matchTimeElement.classList.add(
-      "warning"
-    );
-
-  }else{
-
-    matchTimeElement.classList.remove(
-      "warning"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
    نهاية المباراة
-   ========================================================= */
+================================================= */
 
 function endMatch(){
 
-  if(matchEnded)
-    return;
+    if(matchEnded)
+        return;
 
 
-  matchEnded = true;
-  matchRunning = false;
+    matchEnded=true;
+
+    matchRunning=false;
 
 
-  ballOwner = null;
+    ballOwner=null;
 
-  ballVX = 0;
-  ballVY = 0;
-
-
-  joystickX = 0;
-  joystickY = 0;
+    ballVX=0;
+    ballVY=0;
 
 
-  resetJoystick();
+    aiming=false;
+
+    chargePower=0;
 
 
-  aiming = false;
-  chargePower = 0;
+    powerElement.style.width =
+        "0%";
 
 
-  powerBox.classList.remove(
-    "charging"
-  );
+    powerText.textContent =
+        "قوة الركلة";
 
 
-  powerText.textContent =
-    "0";
+    aimArrow.style.display =
+        "none";
 
 
-  aimArrow.style.display =
-    "none";
+    resetJoystick();
 
 
-  /*
-     إيقاف اللاعبين
-  */
-
-  for(const p of teamPlayers){
-
-    p.moveX = 0;
-    p.moveY = 0;
-
-  }
+    matchEndScoreElement.textContent =
+        `${blueScore} - ${redScore}`;
 
 
-  for(const p of opponents){
-
-    p.moveX = 0;
-    p.moveY = 0;
-
-  }
-
-
-  /*
-     شاشة نهاية المباراة
-  */
-
-  if(matchEndOverlay){
-
-    matchEndOverlay.style.display =
-      "flex";
-
-  }
-
-
-  if(finalScoreElement){
-
-    finalScoreElement.textContent =
-      `${scoreBlue} - ${scoreRed}`;
-
-  }
+    matchEndElement.classList.add(
+        "show"
+    );
 
 }
 
 
-/* =========================================================
-   إعادة المباراة
-   ========================================================= */
+/* =================================================
+   مباراة جديدة
+================================================= */
 
 function resetMatch(){
 
-  scoreBlue = 0;
-  scoreRed = 0;
+    blueScore=0;
+    redScore=0;
 
 
-  scoreBlueElement.textContent =
-    "0";
+    updateScore();
 
-  scoreRedElement.textContent =
-    "0";
 
+    matchTimeRemaining=
+        MATCH_DURATION;
 
-  matchTimeRemaining =
-    MATCH_DURATION;
 
+    matchEnded=false;
 
-  matchEnded = false;
-  matchRunning = true;
+    matchRunning=true;
 
 
-  matchLastTimestamp =
-    performance.now();
+    activePlayerIndex=0;
 
 
-  /*
-     إعادة مواقع الأزرق
-  */
+    /*
+       إعادة مراكز الأزرق
+    */
 
-  teamPlayers[0].x =
-    worldWidth/2;
+    teamPlayers[0].x=
+        worldWidth/2;
 
-  teamPlayers[0].y =
-    worldHeight*0.72;
+    teamPlayers[0].y=
+        worldHeight*0.28;
 
 
-  teamPlayers[1].x =
-    worldWidth*0.18;
+    teamPlayers[1].x=
+        worldWidth*0.12;
 
-  teamPlayers[1].y =
-    worldHeight*0.62;
+    teamPlayers[1].y=
+        worldHeight*0.36;
 
 
-  teamPlayers[2].x =
-    worldWidth*0.82;
+    teamPlayers[2].x=
+        worldWidth*0.88;
 
-  teamPlayers[2].y =
-    worldHeight*0.62;
+    teamPlayers[2].y=
+        worldHeight*0.36;
 
 
-  teamPlayers[3].x =
-    worldWidth/2;
+    teamPlayers[3].x=
+        worldWidth/2;
 
-  teamPlayers[3].y =
-    worldHeight*0.86;
+    teamPlayers[3].y=
+        worldHeight*0.78;
 
 
-  teamPlayers[4].x =
-    worldWidth/2;
+    teamPlayers[4].x=
+        worldWidth/2;
 
-  teamPlayers[4].y =
-    worldHeight*0.95;
+    teamPlayers[4].y=
+        worldHeight*0.94;
 
 
-  /*
-     إعادة مواقع الأحمر
-  */
+    /*
+       إعادة مراكز الأحمر
+    */
 
-  opponents[0].x =
-    worldWidth/2;
+    opponents[0].x=
+        worldWidth/2;
 
-  opponents[0].y =
-    worldHeight*0.28;
+    opponents[0].y=
+        worldHeight*0.72;
 
 
-  opponents[1].x =
-    worldWidth*0.18;
+    opponents[1].x=
+        worldWidth*0.12;
 
-  opponents[1].y =
-    worldHeight*0.38;
+    opponents[1].y=
+        worldHeight*0.64;
 
 
-  opponents[2].x =
-    worldWidth*0.82;
+    opponents[2].x=
+        worldWidth*0.88;
 
-  opponents[2].y =
-    worldHeight*0.38;
+    opponents[2].y=
+        worldHeight*0.64;
 
 
-  opponents[3].x =
-    worldWidth/2;
+    opponents[3].x=
+        worldWidth/2;
 
-  opponents[3].y =
-    worldHeight*0.05;
+    opponents[3].y=
+        worldHeight*0.22;
 
 
-  opponents[4].x =
-    worldWidth/2;
+    opponents[4].x=
+        worldWidth/2;
 
-  opponents[4].y =
-    worldHeight*0.14;
+    opponents[4].y=
+        worldHeight*0.06;
 
 
-  /*
-     اللاعب الأول هو المتحكم
-  */
+    /*
+       اللاعب الأول متحكم به
+    */
 
-  activePlayerIndex = 0;
+    for(
+        let i=0;
+        i<teamPlayers.length;
+        i++
+    ){
 
+        teamPlayers[i].controlled =
+            i===0;
 
-  for(
-    let i=0;
-    i<teamPlayers.length;
-    i++
-  ){
-
-    teamPlayers[i].controlled =
-      i === activePlayerIndex;
-
-    teamPlayers[i].moveX = 0;
-    teamPlayers[i].moveY = 0;
-
-  }
-
-
-  /*
-     الكرة مع المهاجم
-  */
-
-  ballOwner =
-    teamPlayers[0];
-
-
-  ballX =
-    teamPlayers[0].x;
-
-  ballY =
-    teamPlayers[0].y -
-    BALL_PICKUP_BLUE;
-
-
-  ballVX = 0;
-  ballVY = 0;
-
-
-  /*
-     إعادة الكاميرا
-  */
-
-  cameraX = 0;
-  cameraY = 0;
-
-
-  /*
-     إخفاء شاشة النهاية
-  */
-
-  if(matchEndOverlay){
-
-    matchEndOverlay.style.display =
-      "none";
-
-  }
-
-
-  updateMatchTimerDisplay();
-
-  draw();
-
-}
-
-
-/* =========================
-   زر New Match
-   ========================= */
-
-if(newMatchButton){
-
-  newMatchButton.addEventListener(
-    "click",
-    () => {
-
-      resetMatch();
+        teamPlayers[i].moveX=0;
+        teamPlayers[i].moveY=0;
 
     }
-  );
+
+
+    /*
+       الكرة مع المهاجم الأزرق
+    */
+
+    ballOwner=
+        teamPlayers[0];
+
+
+    ballX=
+        ballOwner.x;
+
+    ballY=
+        ballOwner.y-30;
+
+
+    ballVX=0;
+    ballVY=0;
+
+
+    /*
+       الكاميرا تبدأ حول الكرة.
+       هذه النقطة مهمة جداً.
+    */
+
+    cameraX=
+        clamp(
+            ballX-viewWidth/2,
+            0,
+            Math.max(
+                0,
+                worldWidth-viewWidth
+            )
+        );
+
+
+    cameraY=
+        clamp(
+            ballY-viewHeight/2,
+            0,
+            Math.max(
+                0,
+                worldHeight-viewHeight
+            )
+        );
+
+
+    matchEndElement.classList.remove(
+        "show"
+    );
+
+
+    updateTimer();
+
+    draw();
 
 }
 
 
-/* =========================================================
-   Resize
-   ========================================================= */
+/* =================================================
+   تغيير حجم الشاشة
+================================================= */
 
 function resizeGame(){
 
-  viewWidth =
-    game.clientWidth;
+    viewWidth=
+        game.clientWidth;
 
 
-  viewHeight =
-    game.clientHeight;
+    viewHeight=
+        game.clientHeight;
 
 
-  /*
-     الملعب الحقيقي أطول من الشاشة
-  */
-
-  worldWidth =
-    viewWidth;
+    worldWidth=
+        viewWidth;
 
 
-  worldHeight =
-    viewHeight*2;
+    worldHeight=
+        viewHeight*2;
 
 
-  /*
-     إبقاء اللاعبين داخل الملعب
-  */
+    /*
+       تحديث مواقع الـanchor
+    */
 
-  for(const p of teamPlayers){
+    teamPlayers[0].anchorX=
+        worldWidth/2;
 
-    const b =
-      getRoleBounds(p);
-
-
-    p.x =
-      clamp(
-        p.x,
-        b.minX,
-        b.maxX
-      );
+    teamPlayers[0].anchorY=
+        worldHeight*0.28;
 
 
-    p.y =
-      clamp(
-        p.y,
-        b.minY,
-        b.maxY
-      );
+    teamPlayers[1].anchorX=
+        worldWidth*0.12;
 
-  }
+    teamPlayers[1].anchorY=
+        worldHeight*0.36;
 
 
-  for(const p of opponents){
+    teamPlayers[2].anchorX=
+        worldWidth*0.88;
 
-    const b =
-      getRoleBounds(p);
-
-
-    p.x =
-      clamp(
-        p.x,
-        b.minX,
-        b.maxX
-      );
+    teamPlayers[2].anchorY=
+        worldHeight*0.36;
 
 
-    p.y =
-      clamp(
-        p.y,
-        b.minY,
-        b.maxY
-      );
+    teamPlayers[3].anchorX=
+        worldWidth/2;
 
-  }
+    teamPlayers[3].anchorY=
+        worldHeight*0.78;
 
 
-  /*
-     إبقاء الكرة داخل العالم
-  */
+    teamPlayers[4].anchorX=
+        worldWidth/2;
 
-  ballX =
-    clamp(
-      ballX,
-      BALL_RADIUS,
-      worldWidth-BALL_RADIUS
-    );
+    teamPlayers[4].anchorY=
+        worldHeight*0.94;
 
 
-  ballY =
-    clamp(
-      ballY,
-      BALL_RADIUS,
-      worldHeight-BALL_RADIUS
-    );
+    opponents[0].anchorX=
+        worldWidth/2;
+
+    opponents[0].anchorY=
+        worldHeight*0.72;
 
 
-  /*
-     حدود الكاميرا
-  */
+    opponents[1].anchorX=
+        worldWidth*0.12;
 
-  cameraX =
-    clamp(
-      cameraX,
-      0,
-      Math.max(
-        0,
-        worldWidth-viewWidth
-      )
-    );
+    opponents[1].anchorY=
+        worldHeight*0.64;
 
 
-  cameraY =
-    clamp(
-      cameraY,
-      0,
-      Math.max(
-        0,
-        worldHeight-viewHeight
-      )
-    );
+    opponents[2].anchorX=
+        worldWidth*0.88;
+
+    opponents[2].anchorY=
+        worldHeight*0.64;
 
 
-  draw();
+    opponents[3].anchorX=
+        worldWidth/2;
+
+    opponents[3].anchorY=
+        worldHeight*0.22;
+
+
+    opponents[4].anchorX=
+        worldWidth/2;
+
+    opponents[4].anchorY=
+        worldHeight*0.06;
+
+
+    /*
+       إذا تغيرت الشاشة والكرة مع لاعب
+       تبقى معه.
+    */
+
+    if(ballOwner){
+
+        ballX=
+            ballOwner.x;
+
+        ballY=
+            ballOwner.y-30;
+
+    }
+
+
+    cameraX=
+        clamp(
+            cameraX,
+            0,
+            Math.max(
+                0,
+                worldWidth-viewWidth
+            )
+        );
+
+
+    cameraY=
+        clamp(
+            cameraY,
+            0,
+            Math.max(
+                0,
+                worldHeight-viewHeight
+            )
+        );
+
+
+    draw();
 
 }
 
 
 window.addEventListener(
-  "resize",
-  resizeGame
+    "resize",
+    resizeGame
 );
 
 
-/* =========================================================
+/* =================================================
    الحلقة الرئيسية
-   ========================================================= */
-
-let lastFrameTime =
-  performance.now();
-
+================================================= */
 
 function gameLoop(now){
 
-  let dt =
-    (now-lastFrameTime)/1000;
+    let dt =
+        (now-lastFrameTime)/1000;
 
 
-  lastFrameTime =
-    now;
+    lastFrameTime=now;
 
 
-  /*
-     حماية من القفزات الكبيرة
-     في حال توقف التطبيق للحظة.
-  */
+    dt =
+        Math.min(
+            dt,
+            0.033
+        );
 
-  dt =
-    Math.min(
-      dt,
-      0.033
+
+    updateMatchTimer(now);
+
+    updateGame(dt);
+
+
+    requestAnimationFrame(
+        gameLoop
     );
-
-
-  updateMatchTimer(now);
-
-  updateGame(dt);
-
-
-  requestAnimationFrame(
-    gameLoop
-  );
 
 }
 
 
-/* =========================================================
-   تشغيل اللعبة
-   ========================================================= */
+/* =================================================
+   البداية
+================================================= */
 
 resizeGame();
 
-updateMatchTimerDisplay();
+
+/*
+   الكرة تبدأ مع اللاعب.
+*/
+
+ballOwner=
+    teamPlayers[0];
 
 
-matchLastTimestamp =
-  performance.now();
+ballX=
+    teamPlayers[0].x;
 
-lastFrameTime =
-  performance.now();
-
-
-matchRunning = true;
-matchEnded = false;
+ballY=
+    teamPlayers[0].y-30;
 
 
 /*
-   تأكيد أن الكرة مع اللاعب الأول
+   الكاميرا تبدأ حول اللاعب.
 */
 
-ballOwner =
-  teamPlayers[0];
+cameraX=
+    clamp(
+        ballX-viewWidth/2,
+        0,
+        Math.max(
+            0,
+            worldWidth-viewWidth
+        )
+    );
 
-ballX =
-  teamPlayers[0].x;
 
-ballY =
-  teamPlayers[0].y -
-  BALL_PICKUP_BLUE;
+cameraY=
+    clamp(
+        ballY-viewHeight/2,
+        0,
+        Math.max(
+            0,
+            worldHeight-viewHeight
+        )
+    );
 
+
+updateTimer();
 
 draw();
 
 
-/* بدء اللعبة */
+lastFrameTime=
+    performance.now();
+
+matchLastTimestamp=
+    performance.now();
+
 
 requestAnimationFrame(
-  gameLoop
+    gameLoop
 );
 
 
-/* =========================================================
-   نهاية JavaScript
-   ========================================================= */
+/* =================================================
+   زر مباراة جديدة
+================================================= */
+
+newMatchButton.addEventListener(
+    "click",
+    e => {
+
+        e.preventDefault();
+
+        resetMatch();
+
+    }
+);
 
 </script>
 
 </body>
 </html>
-
