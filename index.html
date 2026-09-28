@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.3</title>
+<title>كرة القدم ⚽️ v4.4</title>
 
 <style>
 
@@ -137,7 +137,8 @@ html,body{
 
 
 /* =========================================================
-   المرمى - منظور علوي
+   المرمى
+   تم زيادة السماكة إلى 14px
 ========================================================= */
 
 .goalLine{
@@ -148,7 +149,7 @@ html,body{
 
     width:190px;
 
-    height:8px;
+    height:14px;
 
     background:white;
 
@@ -692,11 +693,6 @@ html,body{
 
 <div id="field">
 
-
-    <!-- =====================================================
-         خطوط الملعب
-    ====================================================== -->
-
     <div class="line centerLine"></div>
 
     <div class="centerCircle"></div>
@@ -704,18 +700,12 @@ html,body{
     <div class="centerDot"></div>
 
 
-    <!-- =====================================================
-         المرمى
-    ====================================================== -->
-
     <div class="goalLine topGoal"></div>
 
     <div class="goalLine bottomGoal"></div>
 
 
-    <!-- =====================================================
-         الفريق الأزرق
-    ====================================================== -->
+    <!-- الفريق الأزرق -->
 
     <div id="player"
          class="playerUnit blue">
@@ -777,9 +767,7 @@ html,body{
     </div>
 
 
-    <!-- =====================================================
-         الفريق الأحمر
-    ====================================================== -->
+    <!-- الفريق الأحمر -->
 
     <div id="opponent1"
          class="playerUnit red">
@@ -821,27 +809,21 @@ html,body{
     </div>
 
 
-    <!-- =====================================================
-         الكرة
-    ====================================================== -->
+    <!-- الكرة -->
 
     <div id="ball">
         ⚽
     </div>
 
 
-    <!-- =====================================================
-         سهم التصويب
-    ====================================================== -->
+    <!-- سهم التصويب -->
 
     <div id="aimArrow"></div>
 
 </div>
 
 
-<!-- =========================================================
-     لوحة النتيجة
-========================================================= -->
+<!-- لوحة النتيجة -->
 
 <div id="scoreBoard">
 
@@ -866,9 +848,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     احتفال الهدف
-========================================================= -->
+<!-- احتفال الهدف -->
 
 <div id="goalCelebration">
 
@@ -881,9 +861,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     القوة
-========================================================= -->
+<!-- القوة -->
 
 <div id="powerBox">
 
@@ -892,9 +870,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     الجويستك
-========================================================= -->
+<!-- الجويستك -->
 
 <div id="movePad">
 
@@ -903,9 +879,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     زر الركل
-========================================================= -->
+<!-- زر الركل -->
 
 <div id="kickControl">
 
@@ -914,9 +888,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     نهاية المباراة
-========================================================= -->
+<!-- نهاية المباراة -->
 
 <div id="matchEnd">
 
@@ -1031,6 +1003,15 @@ const PLAYER_PICKUP_DISTANCE =
 
 const TACKLE_DISTANCE =
     40;
+
+
+/*
+   مسافة إضافية بسيطة للتأكد أن الكرة
+   تجاوزت خط المرمى بالكامل.
+*/
+
+const GOAL_EXIT_DISTANCE =
+    BALL_RADIUS;
 
 
 /* =========================================================
@@ -1175,11 +1156,6 @@ let aimX =
 
 let aimY =
     0;
-
-
-/*
-   نقطة بداية سحب التسديد
-*/
 
 let kickStartX =
     0;
@@ -1433,11 +1409,6 @@ function getRoleBounds(p){
         PLAYER_RADIUS;
 
 
-    /*
-       اللاعب المتحكم
-       يستطيع كامل الملعب
-    */
-
     if(
         p.team === "blue" &&
         p ===
@@ -1458,16 +1429,13 @@ function getRoleBounds(p){
     }
 
 
-    /* =====================================================
-       الأزرق
-    ====================================================== */
-
     if(
         p.team === "blue"
     ){
 
         if(
-            p.role === "guard"
+            p.role ===
+            "guard"
         ){
 
             minY =
@@ -1480,7 +1448,8 @@ function getRoleBounds(p){
         }
 
         else if(
-            p.role === "defender"
+            p.role ===
+            "defender"
         ){
 
             minY =
@@ -1492,7 +1461,8 @@ function getRoleBounds(p){
         }
 
         else if(
-            p.role === "wing"
+            p.role ===
+            "wing"
         ){
 
             minY =
@@ -1504,7 +1474,8 @@ function getRoleBounds(p){
         }
 
         else if(
-            p.role === "forward"
+            p.role ===
+            "forward"
         ){
 
             minY =
@@ -1518,16 +1489,13 @@ function getRoleBounds(p){
     }
 
 
-    /* =====================================================
-       الأحمر
-    ====================================================== */
-
     if(
         p.team === "red"
     ){
 
         if(
-            p.role === "guard"
+            p.role ===
+            "guard"
         ){
 
             minY =
@@ -1539,7 +1507,8 @@ function getRoleBounds(p){
         }
 
         else if(
-            p.role === "defender"
+            p.role ===
+            "defender"
         ){
 
             minY =
@@ -1551,7 +1520,8 @@ function getRoleBounds(p){
         }
 
         else if(
-            p.role === "wing"
+            p.role ===
+            "wing"
         ){
 
             minY =
@@ -1563,7 +1533,8 @@ function getRoleBounds(p){
         }
 
         else if(
-            p.role === "forward"
+            p.role ===
+            "forward"
         ){
 
             minY =
@@ -1778,10 +1749,6 @@ function updateBlueAI(
                 "red";
 
 
-        /* =================================================
-           دفاع
-        ================================================== */
-
         if(
             redHasBall
         ){
@@ -1868,11 +1835,6 @@ function updateBlueAI(
             }
 
         }
-
-
-        /* =================================================
-           هجوم
-        ================================================== */
 
         else{
 
@@ -3053,10 +3015,6 @@ function separatePlayers(
 
 function updateCamera(){
 
-    /*
-       الكاميرا تلاحق الكرة
-    */
-
     const targetX =
         ballX -
         viewWidth / 2;
@@ -4058,7 +4016,7 @@ function updateBall(
 
 
     /*
-       الكرة حرة
+       الكرة الحرة
     */
 
     ballX +=
@@ -4128,98 +4086,209 @@ function updateBall(
 
 
     /*
-   ========================================================
-   المرمى العلوي
-   ========================================================
-
-   لا يحتسب الهدف عند لمس الخط.
-
-   يجب أن تتجاوز الكرة الخط بالكامل
-   وتختفي من الشاشة أولاً.
-
-   الكرة نصف قطرها 11px،
-   لذلك لا نحتسب الهدف إلا عندما:
-
-   ballY < -BALL_RADIUS
-*/
-
-if(
-    ballY <
-    -BALL_RADIUS
-){
+       الجدار الأيمن
+    */
 
     if(
-        Math.abs(
-            ballX -
-            worldWidth / 2
-        ) <
-        GOAL_WIDTH / 2
+        ballX >
+        worldWidth -
+        BALL_RADIUS
     ){
 
-        scoreBlue();
-
-        return;
-
-    }
-
-    else{
-
-        ballY =
-            -BALL_RADIUS;
-
-        ballVY =
-            Math.abs(
-                ballVY
-            ) * 0.8;
-
-    }
-
-}
-
-
-/*
-   ========================================================
-   المرمى السفلي
-   ========================================================
-
-   نفس الفكرة:
-
-   يجب أن تتجاوز الكرة الخط بالكامل
-   وتخرج من الشاشة.
-
-   ballY > worldHeight + BALL_RADIUS
-*/
-
-if(
-    ballY >
-    worldHeight +
-    BALL_RADIUS
-){
-
-    if(
-        Math.abs(
-            ballX -
-            worldWidth / 2
-        ) <
-        GOAL_WIDTH / 2
-    ){
-
-        scoreRed();
-
-        return;
-
-    }
-
-    else{
-
-        ballY =
-            worldHeight +
+        ballX =
+            worldWidth -
             BALL_RADIUS;
 
-        ballVY =
+        ballVX =
             -Math.abs(
-                ballVY
+                ballVX
             ) * 0.8;
+
+    }
+
+
+    /* =====================================================
+       المرمى العلوي
+       لا يوجد هدف بمجرد لمس الخط.
+       
+       يجب أن تتجاوز الكرة الخط بالكامل.
+       مركز الكرة يجب أن يصبح أقل من -11px.
+    ====================================================== */
+
+    if(
+        ballY <
+        -GOAL_EXIT_DISTANCE
+    ){
+
+        const insideGoal =
+            Math.abs(
+                ballX -
+                worldWidth / 2
+            ) <=
+            GOAL_WIDTH / 2;
+
+
+        if(
+            insideGoal
+        ){
+
+            scoreBlue();
+
+            return;
+
+        }
+
+        else{
+
+            /*
+               الكرة خرجت من الملعب
+               ولكن خارج المرمى،
+               لذلك ترتد.
+            */
+
+            ballY =
+                BALL_RADIUS;
+
+            ballVY =
+                Math.abs(
+                    ballVY
+                ) * 0.8;
+
+        }
+
+    }
+
+
+    /*
+       حماية إضافية عند خط المرمى العلوي.
+
+       إذا كانت الكرة تلمس الخط ولكن لم
+       تتجاوزه بالكامل، لا يوجد هدف.
+    */
+
+    if(
+        ballY <=
+        BALL_RADIUS &&
+        ballY >=
+        -GOAL_EXIT_DISTANCE
+    ){
+
+        const insideGoal =
+            Math.abs(
+                ballX -
+                worldWidth / 2
+            ) <=
+            GOAL_WIDTH / 2;
+
+
+        if(
+            !insideGoal &&
+            ballVY < 0
+        ){
+
+            ballY =
+                BALL_RADIUS;
+
+            ballVY =
+                Math.abs(
+                    ballVY
+                ) * 0.8;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       المرمى السفلي
+       
+       يجب أن تتجاوز الكرة الخط بالكامل.
+       مركز الكرة يجب أن يصبح أكبر من:
+       
+       worldHeight + 11
+    ===================================================== */
+
+    if(
+        ballY >
+        worldHeight +
+        GOAL_EXIT_DISTANCE
+    ){
+
+        const insideGoal =
+            Math.abs(
+                ballX -
+                worldWidth / 2
+            ) <=
+            GOAL_WIDTH / 2;
+
+
+        if(
+            insideGoal
+        ){
+
+            scoreRed();
+
+            return;
+
+        }
+
+        else{
+
+            /*
+               خرجت من الملعب خارج المرمى.
+               ترتد إلى الداخل.
+            */
+
+            ballY =
+                worldHeight -
+                BALL_RADIUS;
+
+            ballVY =
+                -Math.abs(
+                    ballVY
+                ) * 0.8;
+
+        }
+
+    }
+
+
+    /*
+       حماية إضافية عند خط المرمى السفلي.
+    */
+
+    if(
+        ballY >=
+        worldHeight -
+        BALL_RADIUS &&
+        ballY <=
+        worldHeight +
+        GOAL_EXIT_DISTANCE
+    ){
+
+        const insideGoal =
+            Math.abs(
+                ballX -
+                worldWidth / 2
+            ) <=
+            GOAL_WIDTH / 2;
+
+
+        if(
+            !insideGoal &&
+            ballVY > 0
+        ){
+
+            ballY =
+                worldHeight -
+                BALL_RADIUS;
+
+            ballVY =
+                -Math.abs(
+                    ballVY
+                ) * 0.8;
+
+        }
 
     }
 
@@ -4232,10 +4301,35 @@ if(
 
 function scoreBlue(){
 
+    if(
+        goalCelebrationActive ||
+        matchEnded
+    ){
+
+        return;
+
+    }
+
+
     blueScore++;
 
     blueScoreElement.textContent =
         blueScore;
+
+
+    /*
+       إيقاف حركة الكرة فور تسجيل الهدف
+       حتى تبقى خارج المرمى أثناء الاحتفال.
+    */
+
+    ballVX =
+        0;
+
+    ballVY =
+        0;
+
+    ballOwner =
+        null;
 
 
     showGoalCelebration();
@@ -4245,10 +4339,30 @@ function scoreBlue(){
 
 function scoreRed(){
 
+    if(
+        goalCelebrationActive ||
+        matchEnded
+    ){
+
+        return;
+
+    }
+
+
     redScore++;
 
     redScoreElement.textContent =
         redScore;
+
+
+    ballVX =
+        0;
+
+    ballVY =
+        0;
+
+    ballOwner =
+        null;
 
 
     showGoalCelebration();
@@ -4276,7 +4390,12 @@ function showGoalCelebration(){
 
 
     /*
-       إيقاف المباراة مؤقتًا
+       إيقاف المباراة مؤقتًا.
+
+       مهم:
+       لا نحرك الكاميرا هنا.
+       لذلك تبقى الكاميرا على المرمى الذي دخلت
+       منه الكرة.
     */
 
     matchRunning =
@@ -4288,18 +4407,9 @@ function showGoalCelebration(){
     resetJoystick();
 
 
-    /*
-       إظهار الاحتفال
-    */
-
     goalCelebration.style.display =
         "flex";
 
-
-    /*
-       بعد 1.6 ثانية:
-       العودة للمنتصف
-    */
 
     if(
         goalResetTimer
@@ -4363,7 +4473,7 @@ function resetAfterGoal(){
 
 
     /*
-       إعادة اللاعبين
+       إعادة اللاعبين إلى أماكنهم
     */
 
     for(
@@ -4393,8 +4503,7 @@ function resetAfterGoal(){
 
 
     /*
-       اللاعب المتحكم
-       يبدأ في المنتصف
+       اللاعب المتحكم يبدأ في المنتصف
     */
 
     const p =
@@ -4449,37 +4558,16 @@ function resetAfterGoal(){
 
 
     /*
-       الكاميرا إلى منتصف الملعب
+       مهم جدًا:
+
+       لا نضع الكاميرا مباشرة في المنتصف.
+
+       الكاميرا تبقى عند مكان المرمى
+       الذي حصل فيه الهدف، وبعد بدء اللعب
+       تتحرك تدريجيًا مع الكرة.
+
+       هذا يمنع القفزة المفاجئة إلى نصف الملعب.
     */
-
-    cameraX =
-        clamp(
-            worldWidth / 2 -
-            viewWidth / 2,
-
-            0,
-
-            Math.max(
-                0,
-                worldWidth -
-                viewWidth
-            )
-        );
-
-
-    cameraY =
-        clamp(
-            worldHeight / 2 -
-            viewHeight * 0.50,
-
-            0,
-
-            Math.max(
-                0,
-                worldHeight -
-                viewHeight
-            )
-        );
 
 
     draw();
@@ -5029,84 +5117,44 @@ function updateGame(
     );
 
 
-    /*
-       اللاعب المتحكم
-    */
-
     updateControlledPlayer(
         dt
     );
 
-
-    /*
-       الأزرق
-    */
 
     updateBlueAI(
         dt
     );
 
 
-    /*
-       الأحمر
-    */
-
     updateRedAI(
         dt
     );
 
-
-    /*
-       ذكاء صاحب الكرة
-    */
 
     updateBallAI(
         dt
     );
 
 
-    /*
-       الافتكاك
-    */
-
     tackle();
 
-
-    /*
-       شحن التسديد
-    */
 
     updateCharge(
         dt
     );
 
 
-    /*
-       فيزياء الكرة
-    */
-
     updateBall(
         dt
     );
 
 
-    /*
-       التقاط الكرة
-    */
-
     tryBallPickup();
 
 
-    /*
-       تبديل التحكم
-    */
-
     autoSwitchPlayer();
 
-
-    /*
-       إبعاد اللاعبين
-    */
 
     separatePlayers(
         teamPlayers,
@@ -5120,16 +5168,8 @@ function updateGame(
     );
 
 
-    /*
-       الكاميرا
-    */
-
     updateCamera();
 
-
-    /*
-       الرسم
-    */
 
     draw();
 
@@ -5186,10 +5226,6 @@ function initializeGame(){
     createTeams();
 
 
-    /*
-       الكرة تبدأ مع اللاعب
-    */
-
     ballOwner =
         teamPlayers[0];
 
@@ -5210,10 +5246,6 @@ function initializeGame(){
         0;
 
 
-    /*
-       اللاعب الأول متحكم
-    */
-
     activePlayerIndex =
         0;
 
@@ -5222,10 +5254,6 @@ function initializeGame(){
         0
     );
 
-
-    /*
-       الكاميرا
-    */
 
     cameraX =
         clamp(
