@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.1</title>
+<title>كرة القدم ⚽️ v4.2</title>
 
 <style>
 
@@ -31,6 +31,7 @@ content="telephone=no">
     -webkit-user-select:none;
     user-select:none;
     -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
@@ -42,6 +43,7 @@ html,body{
     background:#111;
     font-family:Arial,sans-serif;
     touch-action:none;
+    -webkit-text-size-adjust:100%;
 }
 
 #game{
@@ -49,6 +51,7 @@ html,body{
     inset:0;
     overflow:hidden;
     background:#16843a;
+    touch-action:none;
 }
 
 
@@ -582,104 +585,70 @@ html,body{
     <div class="goal bottomGoal"></div>
 
 
-    <!-- =====================================================
-         الفريق الأزرق
-    ====================================================== -->
+    <!-- الفريق الأزرق -->
 
     <div id="player" class="playerUnit blue">
-
         <div class="controlArrow">▼</div>
-
         🧍
-
     </div>
-
 
     <div id="teammate1" class="playerUnit blue">
-
         <div class="controlArrow">▼</div>
-
         🧍
-
     </div>
-
 
     <div id="teammate2" class="playerUnit blue">
-
         <div class="controlArrow">▼</div>
-
         🧍
-
     </div>
-
 
     <div id="teammate3" class="playerUnit blue">
-
         <div class="controlArrow">▼</div>
-
         🧍
-
     </div>
-
 
     <div id="teammate4" class="playerUnit blue">
-
         <div class="controlArrow">▼</div>
-
-        🧍
-
-    </div>
-
-
-    <!-- =====================================================
-         الفريق الأحمر
-    ====================================================== -->
-
-    <div id="opponent1"
-         class="playerUnit red">
-        🧍
-    </div>
-
-    <div id="opponent2"
-         class="playerUnit red">
-        🧍
-    </div>
-
-    <div id="opponent3"
-         class="playerUnit red">
-        🧍
-    </div>
-
-    <div id="opponent4"
-         class="playerUnit red">
-        🧍
-    </div>
-
-    <div id="opponent5"
-         class="playerUnit red">
         🧍
     </div>
 
 
-    <!-- =====================================================
-         الكرة
-    ====================================================== -->
+    <!-- الفريق الأحمر -->
+
+    <div id="opponent1" class="playerUnit red">
+        🧍
+    </div>
+
+    <div id="opponent2" class="playerUnit red">
+        🧍
+    </div>
+
+    <div id="opponent3" class="playerUnit red">
+        🧍
+    </div>
+
+    <div id="opponent4" class="playerUnit red">
+        🧍
+    </div>
+
+    <div id="opponent5" class="playerUnit red">
+        🧍
+    </div>
+
+
+    <!-- الكرة -->
 
     <div id="ball">⚽</div>
 
 
-    <!-- =====================================================
-         سهم التصويب
-    ====================================================== -->
+    <!-- سهم التصويب -->
 
     <div id="aimArrow"></div>
 
 </div>
 
 
-<!-- =========================================================
-     لوحة النتيجة
-========================================================= -->
+<!-- لوحة النتيجة -->
 
 <div id="scoreBoard">
 
@@ -704,9 +673,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     القوة
-========================================================= -->
+<!-- القوة -->
 
 <div id="powerBox">
 
@@ -715,9 +682,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     الجويستك
-========================================================= -->
+<!-- الجويستك -->
 
 <div id="movePad">
 
@@ -726,9 +691,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     زر الركل
-========================================================= -->
+<!-- زر الركل -->
 
 <div id="kickControl">
 
@@ -737,9 +700,7 @@ html,body{
 </div>
 
 
-<!-- =========================================================
-     نهاية المباراة
-========================================================= -->
+<!-- نهاية المباراة -->
 
 <div id="matchEnd">
 
@@ -952,6 +913,19 @@ let aimX =
     worldWidth / 2;
 
 let aimY = 0;
+
+
+/*
+   جديد:
+   نقطة بداية سحب زر الركل.
+   الاتجاه يحسب من حركة الإصبع،
+   وليس من موقع الإصبع بالنسبة للكرة.
+*/
+
+let kickStartX = 0;
+let kickStartY = 0;
+
+let kickDragDistance = 0;
 
 
 /* =========================================================
@@ -1184,11 +1158,6 @@ function getRoleBounds(p){
         PLAYER_RADIUS;
 
 
-    /*
-       اللاعب المتحكم فيه
-       يستطيع كامل الملعب
-    */
-
     if(
         p.team === "blue" &&
         p === teamPlayers[activePlayerIndex]
@@ -1203,10 +1172,6 @@ function getRoleBounds(p){
 
     }
 
-
-    /* =====================================================
-       الأزرق
-    ====================================================== */
 
     if(p.team === "blue"){
 
@@ -1253,10 +1218,6 @@ function getRoleBounds(p){
 
     }
 
-
-    /* =====================================================
-       الأحمر
-    ====================================================== */
 
     if(p.team === "red"){
 
@@ -1437,10 +1398,6 @@ function updateBlueAI(dt){
         i++
     ){
 
-        /*
-           اللاعب المتحكم لا يتحرك بالـ AI
-        */
-
         if(i === activePlayerIndex)
             continue;
 
@@ -1448,10 +1405,6 @@ function updateBlueAI(dt){
         const p =
             teamPlayers[i];
 
-
-        /*
-           صاحب الكرة لا يتحرك هنا
-        */
 
         if(ballOwner === p)
             continue;
@@ -1475,10 +1428,6 @@ function updateBlueAI(dt){
             ballOwner &&
             ballOwner.team === "red";
 
-
-        /* =================================================
-           دفاع
-        ================================================= */
 
         if(redHasBall){
 
@@ -1545,10 +1494,6 @@ function updateBlueAI(dt){
             }
 
         }
-
-        /* =================================================
-           هجوم
-        ================================================= */
 
         else{
 
@@ -1643,10 +1588,6 @@ function updateRedAI(dt){
                 ballY - p.y
             );
 
-
-        /*
-           ضغط مباشر
-        */
 
         if(distToBall < 70){
 
@@ -1837,10 +1778,6 @@ function updateBallAI(dt){
         ballOwner;
 
 
-    /*
-       اللاعب المتحكم لا يتحرك بالـ AI
-    */
-
     if(
         p ===
         teamPlayers[activePlayerIndex]
@@ -1866,10 +1803,6 @@ function updateBallAI(dt){
             goalY - p.y
         );
 
-
-    /*
-       تسديد
-    */
 
     if(distToGoal < 280){
 
@@ -1925,10 +1858,6 @@ function updateBallAI(dt){
 
     }
 
-
-    /*
-       تمرير
-    */
 
     let nearEnemy =
         null;
@@ -2000,10 +1929,6 @@ function updateBallAI(dt){
 
     }
 
-
-    /*
-       تقدم بالكرة
-    */
 
     let dx =
         goalX - p.x;
@@ -2117,11 +2042,6 @@ function autoSwitchPlayer(){
     }
 
 
-    /*
-       إذا استلم لاعب أزرق الكرة،
-       ينتقل التحكم إليه.
-    */
-
     if(
         ballOwner &&
         ballOwner.team === "blue"
@@ -2137,11 +2057,6 @@ function autoSwitchPlayer(){
             index >= 0 &&
             index !== activePlayerIndex
         ){
-
-            /*
-               لا نسحب التحكم مباشرة
-               أثناء التبديل اليدوي
-            */
 
             if(
                 now - lastManualSwitchTime >
@@ -2161,12 +2076,6 @@ function autoSwitchPlayer(){
 
     }
 
-
-    /*
-       إذا الكرة حرة:
-       اللاعب الأقرب إليها يحصل
-       على التحكم عندما يقترب منها.
-    */
 
     if(!ballOwner){
 
@@ -2246,10 +2155,6 @@ function tryBallPickup(){
         Infinity;
 
 
-    /*
-       الأزرق
-    */
-
     for(const p of teamPlayers){
 
         const d =
@@ -2276,10 +2181,6 @@ function tryBallPickup(){
 
     }
 
-
-    /*
-       الأحمر
-    */
 
     for(const p of opponents){
 
@@ -2318,11 +2219,6 @@ function tryBallPickup(){
         ballVY = 0;
 
 
-        /*
-           إذا اللاعب الذي استلم الكرة أزرق
-           يصبح هو المتحكم.
-        */
-
         if(
             nearest.team === "blue"
         ){
@@ -2357,10 +2253,6 @@ function tackle(){
     if(!ballOwner)
         return;
 
-
-    /*
-       الكرة مع الأزرق
-    */
 
     if(ballOwner.team === "blue"){
 
@@ -2415,10 +2307,6 @@ function tackle(){
     }
 
 
-    /*
-       الكرة مع الأحمر
-    */
-
     else{
 
         for(
@@ -2461,11 +2349,6 @@ function tackle(){
 
                     ballVY = 0;
 
-
-                    /*
-                       اللاعب الأزرق الذي
-                       افتك الكرة يحصل على التحكم
-                    */
 
                     const index =
                         teamPlayers.indexOf(
@@ -2615,21 +2498,10 @@ function separatePlayers(
 
 function updateCamera(){
 
-    /*
-       الكاميرا تلاحق الكرة،
-       وليس اللاعب مباشرة.
-    */
-
     const targetX =
         ballX -
         viewWidth / 2;
 
-
-    /*
-       الكرة تكون أعلى قليلًا
-       من منتصف الشاشة حتى يكون
-       أمام اللاعب مساحة أكبر.
-    */
 
     const targetY =
         ballY -
@@ -2696,13 +2568,6 @@ function drawPlayer(p){
         return;
 
 
-    /*
-       مهم جدًا:
-       اللاعب الآن داخل field.
-       والـ field نفسه يتحرك مع الكاميرا.
-       لذلك لا نطرح cameraX/cameraY هنا.
-    */
-
     p.el.style.transform =
         `translate3d(
             ${p.x - PLAYER_RADIUS}px,
@@ -2760,11 +2625,6 @@ function drawPlayer(p){
 
 function drawBall(){
 
-    /*
-       الكرة داخل field أيضًا.
-       لا نطرح الكاميرا هنا.
-    */
-
     ballElement.style.transform =
         `translate3d(
             ${ballX - BALL_RADIUS}px,
@@ -2819,11 +2679,6 @@ function drawAim(){
         `${length}px`;
 
 
-    /*
-       الإحداثيات عالمية.
-       لأن aimArrow داخل field.
-    */
-
     aimArrow.style.left =
         `${ballX}px`;
 
@@ -2831,6 +2686,14 @@ function drawAim(){
     aimArrow.style.top =
         `${ballY}px`;
 
+
+    /*
+       aimAngle:
+       0       = يمين
+       PI      = يسار
+       -PI/2   = فوق
+       PI/2    = تحت
+    */
 
     aimArrow.style.transform =
         `translate(-50%, -100%)
@@ -2848,11 +2711,6 @@ function drawAim(){
 ========================================================= */
 
 function drawField(){
-
-    /*
-       هنا تتحرك كل عناصر الملعب مع الكاميرا
-       معًا: الخطوط + اللاعبين + الكرة.
-    */
 
     field.style.transform =
         `translate3d(
@@ -3006,19 +2864,15 @@ movePad.addEventListener(
 
         e.preventDefault();
 
-
         joystickActive =
             true;
-
 
         joystickPointerId =
             e.pointerId;
 
-
         movePad.setPointerCapture(
             e.pointerId
         );
-
 
         updateJoystick(
             e.clientX,
@@ -3138,6 +2992,10 @@ function startCharging(){
     chargePower = 0;
 
 
+    /*
+       البداية دائمًا للأعلى
+    */
+
     aimAngle =
         -Math.PI / 2;
 
@@ -3147,6 +3005,9 @@ function startCharging(){
 
 
     aimY = 0;
+
+
+    kickDragDistance = 0;
 
 
     powerBox.style.display =
@@ -3208,6 +3069,9 @@ function cancelCharging(){
         null;
 
 
+    kickDragDistance = 0;
+
+
     powerBox.style.display =
         "none";
 
@@ -3235,59 +3099,66 @@ function updateAim(
         return;
 
 
-    const p =
-        teamPlayers[
-            activePlayerIndex
-        ];
-
-
-    if(!p)
-        return;
-
-
-    const rect =
-        game.getBoundingClientRect();
-
-
     /*
-       تحويل الشاشة إلى إحداثيات العالم
+       الاتجاه الآن يحسب من:
+       
+       نقطة بداية الإصبع
+              ↓
+       مكان الإصبع الحالي
+       
+       وليس من:
+       
+       الكرة → مكان الإصبع
     */
 
-    const worldTouchX =
-        clientX -
-        rect.left +
-        cameraX;
-
-
-    const worldTouchY =
-        clientY -
-        rect.top +
-        cameraY;
-
-
     let dx =
-        worldTouchX -
-        ballX;
+        clientX -
+        kickStartX;
 
 
     let dy =
-        worldTouchY -
-        ballY;
+        clientY -
+        kickStartY;
 
 
     const d =
         Math.hypot(dx,dy);
 
 
-    if(d < 8)
+    if(d < 6)
         return;
 
+
+    kickDragDistance =
+        d;
+
+
+    /*
+       atan2:
+       
+       فوق    = -PI/2
+       تحت    =  PI/2
+       يمين   =  0
+       يسار   =  PI
+    */
 
     aimAngle =
         Math.atan2(
             dy,
             dx
         );
+
+
+    /*
+       نحتفظ بآخر اتجاه أيضًا
+       للرسم فقط
+    */
+
+    aimX =
+        Math.cos(aimAngle);
+
+    aimY =
+        Math.sin(aimAngle);
 
 }
 
@@ -3423,6 +3294,9 @@ function kickBall(){
 
 /* =========================================================
    KICK EVENTS
+   الإصدار الجديد:
+   نستخدم window حتى يستمر السحب
+   حتى بعد خروج الإصبع من زر الركل.
 ========================================================= */
 
 kickControl.addEventListener(
@@ -3431,13 +3305,23 @@ kickControl.addEventListener(
 
         e.preventDefault();
 
-
         if(chargingActive)
             return;
 
 
         kickPointerId =
             e.pointerId;
+
+
+        /*
+           نقطة بداية السحب
+        */
+
+        kickStartX =
+            e.clientX;
+
+        kickStartY =
+            e.clientY;
 
 
         kickControl.setPointerCapture(
@@ -3451,7 +3335,11 @@ kickControl.addEventListener(
 );
 
 
-kickControl.addEventListener(
+/*
+   حركة السحب على مستوى الشاشة كلها
+*/
+
+window.addEventListener(
     "pointermove",
     e => {
 
@@ -3477,11 +3365,18 @@ kickControl.addEventListener(
             e.clientY
         );
 
+    },
+    {
+        passive:false
     }
 );
 
 
-kickControl.addEventListener(
+/*
+   رفع الإصبع = تسديد
+*/
+
+window.addEventListener(
     "pointerup",
     e => {
 
@@ -3495,6 +3390,9 @@ kickControl.addEventListener(
         }
 
 
+        e.preventDefault();
+
+
         if(chargingActive){
 
             kickBall();
@@ -3505,11 +3403,18 @@ kickControl.addEventListener(
         kickPointerId =
             null;
 
+    },
+    {
+        passive:false
     }
 );
 
 
-kickControl.addEventListener(
+/*
+   إلغاء السحب
+*/
+
+window.addEventListener(
     "pointercancel",
     e => {
 
@@ -3530,73 +3435,10 @@ kickControl.addEventListener(
 
 
 /* =========================================================
-   KICK EVENT على الشاشة
-========================================================= */
-
-game.addEventListener(
-    "pointermove",
-    e => {
-
-        if(!chargingActive)
-            return;
-
-
-        if(
-            e.pointerId !==
-            kickPointerId
-        ){
-
-            return;
-
-        }
-
-
-        updateAim(
-            e.clientX,
-            e.clientY
-        );
-
-    }
-);
-
-
-game.addEventListener(
-    "pointerup",
-    e => {
-
-        if(!chargingActive)
-            return;
-
-
-        if(
-            e.pointerId !==
-            kickPointerId
-        ){
-
-            return;
-
-        }
-
-
-        kickBall();
-
-
-        kickPointerId =
-            null;
-
-    }
-);
-
-
-/* =========================================================
    BALL PHYSICS
 ========================================================= */
 
 function updateBall(dt){
-
-    /*
-       الكرة مع لاعب
-    */
 
     if(ballOwner){
 
@@ -3617,10 +3459,6 @@ function updateBall(dt){
 
     }
 
-
-    /*
-       الكرة حرة
-    */
 
     ballX +=
         ballVX *
@@ -3666,10 +3504,6 @@ function updateBall(dt){
     }
 
 
-    /*
-       الجدار الأيسر
-    */
-
     if(
         ballX <
         BALL_RADIUS
@@ -3685,10 +3519,6 @@ function updateBall(dt){
 
     }
 
-
-    /*
-       الجدار الأيمن
-    */
 
     if(
         ballX >
@@ -3707,10 +3537,6 @@ function updateBall(dt){
 
     }
 
-
-    /*
-       المرمى العلوي
-    */
 
     if(
         ballY <
@@ -3743,10 +3569,6 @@ function updateBall(dt){
 
     }
 
-
-    /*
-       المرمى السفلي
-    */
 
     if(
         ballY >
@@ -3864,10 +3686,6 @@ function resetAfterGoal(){
     }
 
 
-    /*
-       الكرة تبدأ مع اللاعب المتحكم
-    */
-
     const p =
         teamPlayers[
             activePlayerIndex
@@ -3886,10 +3704,6 @@ function resetAfterGoal(){
         p.y -
         25;
 
-
-    /*
-       الكاميرا ترجع لمكان البداية
-    */
 
     cameraX =
         clamp(
@@ -3945,10 +3759,6 @@ function switchPlayer(){
         Infinity;
 
 
-    /*
-       ابحث عن أقرب لاعب للكرة
-    */
-
     for(
         let i = 0;
         i < teamPlayers.length;
@@ -4001,11 +3811,6 @@ function switchPlayer(){
     );
 
 
-    /*
-       إذا كان اللاعب قريبًا جدًا من الكرة،
-       يأخذها.
-    */
-
     if(
         bestDist <=
         PLAYER_PICKUP_DISTANCE
@@ -4057,6 +3862,15 @@ game.addEventListener(
             return;
 
 
+        /*
+           مهم:
+           منع Safari من اعتبار
+           الضغطتين Zoom.
+        */
+
+        e.preventDefault();
+
+
         const now =
             performance.now();
 
@@ -4074,6 +3888,62 @@ game.addEventListener(
         lastTapTime =
             now;
 
+    }
+);
+
+
+/* =========================================================
+   منع التكبير بالضغط المزدوج / Gesture
+========================================================= */
+
+document.addEventListener(
+    "dblclick",
+    e => {
+
+        e.preventDefault();
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+document.addEventListener(
+    "gesturestart",
+    e => {
+
+        e.preventDefault();
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+document.addEventListener(
+    "gesturechange",
+    e => {
+
+        e.preventDefault();
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+document.addEventListener(
+    "gestureend",
+    e => {
+
+        e.preventDefault();
+
+    },
+    {
+        passive:false
     }
 );
 
@@ -4364,72 +4234,32 @@ function updateGame(dt){
     updateMatchTimer(dt);
 
 
-    /*
-       اللاعب المتحكم
-    */
-
     updateControlledPlayer(dt);
 
-
-    /*
-       الذكاء الأزرق
-    */
 
     updateBlueAI(dt);
 
 
-    /*
-       الذكاء الأحمر
-    */
-
     updateRedAI(dt);
 
-
-    /*
-       ذكاء صاحب الكرة
-    */
 
     updateBallAI(dt);
 
 
-    /*
-       افتكاك
-    */
-
     tackle();
 
-
-    /*
-       شحن الركلة
-    */
 
     updateCharge(dt);
 
 
-    /*
-       فيزياء الكرة
-    */
-
     updateBall(dt);
 
-
-    /*
-       التقاط الكرة
-    */
 
     tryBallPickup();
 
 
-    /*
-       تبديل التحكم
-    */
-
     autoSwitchPlayer();
 
-
-    /*
-       إبعاد اللاعبين عن بعض
-    */
 
     separatePlayers(
         teamPlayers,
@@ -4443,16 +4273,8 @@ function updateGame(dt){
     );
 
 
-    /*
-       الكاميرا
-    */
-
     updateCamera();
 
-
-    /*
-       الرسم
-    */
 
     draw();
 
@@ -4505,10 +4327,6 @@ function initializeGame(){
     createTeams();
 
 
-    /*
-       الكرة تبدأ مع اللاعب
-    */
-
     ballOwner =
         teamPlayers[0];
 
@@ -4527,20 +4345,12 @@ function initializeGame(){
     ballVY = 0;
 
 
-    /*
-       اللاعب الأول متحكم
-    */
-
     activePlayerIndex =
         0;
 
 
     setActivePlayer(0);
 
-
-    /*
-       الكاميرا
-    */
 
     cameraX =
         clamp(
