@@ -658,7 +658,6 @@ body{
     <div class="goalCrossbar"></div>
 </div>
 
-
 <!-- النتيجة والوقت -->
 
 <div id="matchInfo">
@@ -733,7 +732,7 @@ body{
 <div id="ball">⚽</div>
 
 <div id="aim"></div>
-
+</div>
 
 <div id="powerBox">
     <div id="power"></div>
@@ -818,6 +817,11 @@ const hintElement=
 
 let gameWidth=game.clientWidth;
 let gameHeight=game.clientHeight;
+let worldWidth=gameWidth;
+let worldHeight=gameHeight;
+
+let cameraX=0;
+let cameraY=0;
 
 
 /* =================================================
@@ -1050,6 +1054,12 @@ const MANUAL_SWITCH_DOT=0.70;
 
 const MANUAL_SWITCH_COOLDOWN=500;
 const AUTO_SWITCH_COOLDOWN=300;
+/* =================================================
+   أبعاد ملعب العالم
+================================================= */
+
+const WORLD_WIDTH_SCALE=1;
+const WORLD_HEIGHT_SCALE=2;
 
 
 /* =================================================
@@ -1063,7 +1073,7 @@ const teamPlayers=[
         el:document.getElementById("player"),
         role:"forward",
         x:gameWidth*.50,
-        y:gameHeight*.62,
+        y:worldHeight*.62,
         anchorX:.50,
         anchorY:.62,
         speed:130
@@ -1074,7 +1084,7 @@ const teamPlayers=[
         el:document.getElementById("teammate1"),
         role:"wing",
         x:gameWidth*.15,
-        y:gameHeight*.58,
+        y:worldHeight*.58,
         anchorX:.15,
         anchorY:.58,
         speed:95
@@ -1085,7 +1095,7 @@ const teamPlayers=[
         el:document.getElementById("teammate2"),
         role:"wing",
         x:gameWidth*.85,
-        y:gameHeight*.58,
+        y:worldHeight*.58,
         anchorX:.85,
         anchorY:.58,
         speed:95
@@ -1096,7 +1106,7 @@ const teamPlayers=[
         el:document.getElementById("teammate3"),
         role:"defender",
         x:gameWidth*.50,
-        y:gameHeight*.75,
+        y:worldHeight*.75,
         anchorX:.50,
         anchorY:.75,
         speed:90
@@ -1108,7 +1118,7 @@ const teamPlayers=[
         role:"guard",
         isGuard:true,
         x:gameWidth*.50,
-        y:gameHeight*.94,
+        y:worldHeight*.95,
         anchorX:.50,
         anchorY:.94,
         speed:75
@@ -1128,7 +1138,7 @@ const opponents=[
         el:document.getElementById("opponent1"),
         role:"forward",
         x:gameWidth*.50,
-        y:gameHeight*.38,
+        y:worldHeight*.38,
         anchorX:.50,
         anchorY:.38,
         speed:85
@@ -1139,7 +1149,7 @@ const opponents=[
         el:document.getElementById("opponent2"),
         role:"wing",
         x:gameWidth*.15,
-        y:gameHeight*.42,
+        y:worldHeight*.42,
         anchorX:.15,
         anchorY:.42,
         speed:88
@@ -1150,7 +1160,7 @@ const opponents=[
         el:document.getElementById("opponent3"),
         role:"wing",
         x:gameWidth*.85,
-        y:gameHeight*.42,
+        y:worldHeight*.42,
         anchorX:.85,
         anchorY:.42,
         speed:88
@@ -1162,7 +1172,7 @@ const opponents=[
         role:"guard",
         isGuard:true,
         x:gameWidth*.50,
-        y:gameHeight*.06,
+        y:worldHeight*.06,
         anchorX:.50,
         anchorY:.06,
         speed:70
@@ -1173,7 +1183,7 @@ const opponents=[
         el:document.getElementById("opponent5"),
         role:"defender",
         x:gameWidth*.50,
-        y:gameHeight*.25,
+        y:worldHeight*.25,
         anchorX:.50,
         anchorY:.25,
         speed:82
@@ -1202,7 +1212,7 @@ const BLUE_GUARD_MAX_X=0.75;
 let activePlayerIndex=0;
 
 let ballX=gameWidth/2;
-let ballY=gameHeight/2-42;
+let ballY=worldHeight/2-42;
 
 let ballVX=0;
 let ballVY=0;
@@ -1299,6 +1309,46 @@ function distanceBetween(x1,y1,x2,y2){
 
 function getActivePlayer(){
     return teamPlayers[activePlayerIndex];
+}
+/* =================================================
+   الكاميرا
+================================================= */
+
+const CAMERA_SMOOTH=0.08;
+
+function updateCamera(){
+
+    const targetX=
+        ballX-(gameWidth/2);
+
+    const targetY=
+        ballY-(gameHeight/2);
+
+    const maxCameraX=
+        Math.max(0,worldWidth-gameWidth);
+
+    const maxCameraY=
+        Math.max(0,worldHeight-gameHeight);
+
+    const clampedX=
+        Math.max(
+            0,
+            Math.min(targetX,maxCameraX)
+        );
+
+    const clampedY=
+        Math.max(
+            0,
+            Math.min(targetY,maxCameraY)
+        );
+
+    cameraX+=
+        (clampedX-cameraX)*
+        CAMERA_SMOOTH;
+
+    cameraY+=
+        (clampedY-cameraY)*
+        CAMERA_SMOOTH;
 }
 
 
@@ -4393,6 +4443,7 @@ function update(now){
     }
 
 
+    updateCamera();
     draw();
 
 
