@@ -1126,7 +1126,9 @@ let ballOwner = null;
 let activePlayerIndex = 0;
 
 
-/* Joystick */
+/* =================================================
+   Joystick
+================================================= */
 
 let joystickX = 0;
 
@@ -1139,7 +1141,9 @@ let joystickPointerId = null;
 const JOYSTICK_MAX_DISTANCE = 48;
 
 
-/* الركل */
+/* =================================================
+   الركل
+================================================= */
 
 let aiming = false;
 
@@ -1150,24 +1154,6 @@ let aimX = worldWidth / 2;
 let aimY = 0;
 
 let kickPointerId = null;
-
-/* =================================================
-   متغيرات التحكم والركل
-================================================= */
-
-let aiming = false;
-let chargePower = 0;
-
-let aimX = worldWidth / 2;
-let aimY = 0;
-
-/* أسماء موحدة للعناصر */
-
-const ballElement = ball;
-const aimArrow = aim;
-
-const powerTextElement = powerText;
-const powerBoxElement = powerBox;
 
 
 /* =================================================
@@ -1774,17 +1760,9 @@ function draw(){
         `${worldHeight/2-cameraY}px`;
 
 
-    /*
-       الهدف العلوي
-    */
-
     topGoal.style.top =
         `${-cameraY}px`;
 
-
-    /*
-       الهدف السفلي
-    */
 
     bottomGoal.style.top =
         `${worldHeight-48-cameraY}px`;
@@ -1870,13 +1848,11 @@ function updateControlledPlayer(dt){
     p.controlled = true;
 
 
-    /*
-       Joystick يتحكم دائمًا
-       في اللاعب الحالي
-    */
+    const dx =
+        joystickX;
 
-    const dx = joystickX;
-    const dy = joystickY;
+    const dy =
+        joystickY;
 
 
     p.moveX = dx;
@@ -1913,10 +1889,6 @@ function getBlueAITarget(p){
         );
 
 
-    /*
-       الجناح
-    */
-
     if(p.role === "wing"){
 
         if(
@@ -1940,10 +1912,6 @@ function getBlueAITarget(p){
 
     }
 
-
-    /*
-       المهاجم
-    */
 
     if(p.role === "forward"){
 
@@ -1969,10 +1937,6 @@ function getBlueAITarget(p){
     }
 
 
-    /*
-       المدافع
-    */
-
     if(p.role === "defender"){
 
         if(
@@ -1996,10 +1960,6 @@ function getBlueAITarget(p){
 
     }
 
-
-    /*
-       الحارس
-    */
 
     if(p.role === "guard"){
 
@@ -2039,11 +1999,6 @@ function updateBlueAI(dt){
         const p =
             teamPlayers[i];
 
-
-        /*
-           اللاعب الذي يتحكم به المستخدم
-           لا يتحرك بواسطة AI.
-        */
 
         if(
             i === activePlayerIndex
@@ -2116,10 +2071,6 @@ function getRedAITarget(p){
         );
 
 
-    /*
-       الحارس
-    */
-
     if(p.role === "guard"){
 
         return {
@@ -2134,10 +2085,6 @@ function getRedAITarget(p){
 
     }
 
-
-    /*
-       المدافع
-    */
 
     if(p.role === "defender"){
 
@@ -2163,10 +2110,6 @@ function getRedAITarget(p){
     }
 
 
-    /*
-       الجناح
-    */
-
     if(p.role === "wing"){
 
         if(d < 210){
@@ -2186,10 +2129,6 @@ function getRedAITarget(p){
 
     }
 
-
-    /*
-       المهاجم
-    */
 
     if(p.role === "forward"){
 
@@ -2352,6 +2291,75 @@ function closestRedPlayer(){
 
 
     return best;
+
+}
+
+
+/* =================================================
+   جعل لاعب الأزرق صاحب الكرة هو اللاعب المتحكم
+================================================= */
+
+function setActiveBluePlayer(p){
+
+    if(!p)
+        return;
+
+
+    if(p.team !== "blue")
+        return;
+
+
+    const index =
+        teamPlayers.indexOf(p);
+
+
+    if(index < 0)
+        return;
+
+
+    activePlayerIndex =
+        index;
+
+
+    for(
+        let i=0;
+        i<teamPlayers.length;
+        i++
+    ){
+
+        teamPlayers[i].controlled =
+            i === activePlayerIndex;
+
+        teamPlayers[i].moveX = 0;
+        teamPlayers[i].moveY = 0;
+
+    }
+
+
+    /*
+       إلغاء أي تسديد قديم
+    */
+
+    aiming = false;
+
+    chargePower = 0;
+
+    powerElement.style.width =
+        "0%";
+
+    powerText.textContent =
+        "قوة الركلة";
+
+
+    /*
+       اتجاه ابتدائي للتصويب
+    */
+
+    aimX =
+        p.x;
+
+    aimY =
+        p.y - 120;
 
 }
 
@@ -2532,15 +2540,25 @@ function tryBallPickup(){
         : Infinity;
 
 
+    /*
+       إذا أخذ لاعب أزرق الكرة
+       تنتقل السيطرة إليه مباشرة.
+    */
+
     if(
         blueDistance <= 30 &&
         blueDistance <= redDistance
     ){
 
-        ballOwner=blue;
+        ballOwner =
+            blue;
 
         ballVX=0;
         ballVY=0;
+
+        setActiveBluePlayer(
+            blue
+        );
 
         return;
 
@@ -2551,7 +2569,8 @@ function tryBallPickup(){
         redDistance <= 29
     ){
 
-        ballOwner=red;
+        ballOwner =
+            red;
 
         ballVX=0;
         ballVY=0;
@@ -2570,9 +2589,7 @@ function updateBall(dt){
     if(ballOwner){
 
         const offset =
-            ballOwner.team === "blue"
-            ? -30
-            : -30;
+            -30;
 
 
         ballX =
@@ -2609,11 +2626,6 @@ function updateBall(dt){
     ballVY *= friction;
 
 
-    /*
-       إذا دخلت الكرة منطقة المرمى
-       نفحص الهدف أولاً.
-    */
-
     if(
         checkGoal()
     ){
@@ -2622,10 +2634,6 @@ function updateBall(dt){
 
     }
 
-
-    /*
-       الجدار الأيسر
-    */
 
     if(
         ballX-BALL_RADIUS < 0
@@ -2639,10 +2647,6 @@ function updateBall(dt){
 
     }
 
-
-    /*
-       الجدار الأيمن
-    */
 
     if(
         ballX+BALL_RADIUS >
@@ -2658,10 +2662,6 @@ function updateBall(dt){
     }
 
 
-    /*
-       أعلى الملعب
-    */
-
     if(
         ballY < 0
     ){
@@ -2673,10 +2673,6 @@ function updateBall(dt){
 
     }
 
-
-    /*
-       أسفل الملعب
-    */
 
     if(
         ballY > worldHeight
@@ -2788,9 +2784,6 @@ function kickBall(){
 
     powerText.textContent =
         "قوة الركلة";
-
-    powerBox.style.display =
-        "block";
 
 
     aiming=false;
@@ -3004,7 +2997,7 @@ function updateBallAI(){
 
 
     /*
-       إذا كان اللاعب الذي يتحكم به المستخدم
+       إذا كان اللاعب الحالي للمستخدم
        لا يتدخل AI.
     */
 
@@ -3025,10 +3018,6 @@ function updateBallAI(){
         : worldHeight-p.y;
 
 
-    /*
-       التسديد عند الاقتراب من المرمى
-    */
-
     if(
         targetGoalDistance < 250
     ){
@@ -3046,10 +3035,6 @@ function updateBallAI(){
     }
 
 
-    /*
-       تمرير أحياناً
-    */
-
     if(
         Math.random()<0.008
     ){
@@ -3060,10 +3045,6 @@ function updateBallAI(){
 
     }
 
-
-    /*
-       وإلا يستمر اللاعب بالتحرك نحو المرمى.
-    */
 
     let targetY =
         p.team === "blue"
@@ -3164,6 +3145,15 @@ function tackle(){
                 ballVX=0;
                 ballVY=0;
 
+                /*
+                   اللاعب الذي افتك الكرة
+                   يصبح اللاعب المتحكم.
+                */
+
+                setActiveBluePlayer(
+                    blue
+                );
+
             }
 
         }
@@ -3178,11 +3168,6 @@ function tackle(){
 ================================================= */
 
 function checkGoal(){
-
-    /*
-       الكرة وصلت أعلى الملعب
-       = هدف للأزرق
-    */
 
     if(
         ballY <= 8 &&
@@ -3207,11 +3192,6 @@ function checkGoal(){
 
     }
 
-
-    /*
-       الكرة وصلت أسفل الملعب
-       = هدف للأحمر
-    */
 
     if(
         ballY >= worldHeight-8 &&
@@ -3292,10 +3272,6 @@ function resetAfterGoal(scoringTeam){
     ballVY=0;
 
 
-    /*
-       إعادة الجميع إلى مراكزهم.
-    */
-
     for(
         const p of teamPlayers
     ){
@@ -3329,6 +3305,10 @@ function resetAfterGoal(scoringTeam){
                 activePlayerIndex
             ];
 
+        setActiveBluePlayer(
+            ballOwner
+        );
+
     }else{
 
         ballOwner =
@@ -3343,11 +3323,6 @@ function resetAfterGoal(scoringTeam){
     ballY =
         ballOwner.y-30;
 
-
-    /*
-       الكاميرا تتبع مكان الكرة الجديد
-       مباشرة.
-    */
 
     cameraX=0;
 
@@ -3764,11 +3739,6 @@ game.addEventListener(
     "pointerdown",
     e => {
 
-        /*
-           لا نبدل اللاعب إذا كان اللمس
-           على عناصر التحكم.
-        */
-
         if(
             e.target === movePad ||
             movePad.contains(e.target) ||
@@ -3808,6 +3778,7 @@ game.addEventListener(
 function switchPlayer(){
 
     let bestIndex = -1;
+
     let bestDistance = Infinity;
 
 
@@ -3846,11 +3817,6 @@ function switchPlayer(){
     }
 
 
-    /*
-       نسمح بالتبديل للاعب الأقرب
-       حتى لو كانت الكرة أبعد منه.
-    */
-
     if(bestIndex >= 0){
 
         activePlayerIndex =
@@ -3872,11 +3838,6 @@ function switchPlayer(){
         }
 
 
-        /*
-           إعادة تهيئة اتجاه التصويب
-           مع اللاعب الجديد
-        */
-
         const p =
             teamPlayers[
                 activePlayerIndex
@@ -3891,17 +3852,22 @@ function switchPlayer(){
 
 
         aiming = false;
+
         chargePower = 0;
 
 
-        powerBar.style.width =
+        /*
+           كان هنا powerBar
+           وهو غير موجود.
+           الاسم الصحيح هو powerElement.
+        */
+
+        powerElement.style.width =
             "0%";
 
 
-        if(powerText){
-            powerText.textContent =
-                "قوة الركلة";
-        }
+        powerText.textContent =
+            "قوة الركلة";
 
     }
 
@@ -4037,11 +4003,6 @@ function updateMatchTimer(now){
     matchLastTimestamp=now;
 
 
-    /*
-       حماية من القفزات عند العودة
-       من الخلفية.
-    */
-
     elapsed =
         Math.min(
             elapsed,
@@ -4098,6 +4059,8 @@ function endMatch(){
 
     chargePower=0;
 
+    kickPointerId=null;
+
 
     powerElement.style.width =
         "0%";
@@ -4148,6 +4111,28 @@ function resetMatch(){
 
 
     activePlayerIndex=0;
+
+
+    aiming=false;
+
+    chargePower=0;
+
+    kickPointerId=null;
+
+
+    powerElement.style.width =
+        "0%";
+
+
+    powerText.textContent =
+        "قوة الركلة";
+
+
+    aimArrow.style.display =
+        "none";
+
+
+    resetJoystick();
 
 
     /*
@@ -4266,9 +4251,15 @@ function resetMatch(){
     ballVY=0;
 
 
+    aimX =
+        ballOwner.x;
+
+    aimY =
+        ballOwner.y-120;
+
+
     /*
        الكاميرا تبدأ حول الكرة.
-       هذه النقطة مهمة جداً.
     */
 
     cameraX=
@@ -4528,6 +4519,13 @@ cameraY=
             worldHeight-viewHeight
         )
     );
+
+
+aimX =
+    teamPlayers[0].x;
+
+aimY =
+    teamPlayers[0].y-120;
 
 
 updateTimer();
