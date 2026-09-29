@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.0.4</title>
+<title>كرة القدم ⚽️ v4.0.5</title>
 
 <style>
 
@@ -769,41 +769,31 @@ html,body{
 
     <div id="opponent1"
          class="playerUnit red">
-
         🧍
-
     </div>
 
 
     <div id="opponent2"
          class="playerUnit red">
-
         🧍
-
     </div>
 
 
     <div id="opponent3"
          class="playerUnit red">
-
         🧍
-
     </div>
 
 
     <div id="opponent4"
          class="playerUnit red">
-
         🧍
-
     </div>
 
 
     <div id="opponent5"
          class="playerUnit red">
-
         🧍
-
     </div>
 
 
@@ -851,9 +841,7 @@ html,body{
 <div id="goalCelebration">
 
     <div id="goalCelebrationText">
-
         🎉 هدف!
-
     </div>
 
 </div>
@@ -1005,13 +993,12 @@ const TACKLE_DISTANCE =
 
 /* =========================================================
    RED AI
-   ذكاء الأحمر
-
-   ملاحظة:
-   لا توجد أي زيادة في سرعة اللاعبين.
-   هذه القيم تتحكم في سرعة اتخاذ القرار
-   وليس سرعة الحركة.
 ========================================================= */
+
+/*
+   هذه القيم خاصة بسرعة اتخاذ القرار
+   وليست سرعة اللاعب نفسه.
+*/
 
 const RED_DECISION_MIN =
     0.16;
@@ -1019,17 +1006,45 @@ const RED_DECISION_MIN =
 const RED_DECISION_MAX =
     0.34;
 
+
+/*
+   أقصى مسافة يبدأ منها الأحمر
+   بمطاردة الكرة.
+*/
+
 const RED_CHASE_DISTANCE =
     520;
+
+
+/*
+   عندما تكون الكرة مع الأزرق
+   ويكون الأحمر ضمن هذه المسافة
+   يبدأ الضغط المباشر.
+*/
 
 const RED_PRESS_DISTANCE =
     360;
 
+
+/*
+   مسافة محاولة افتكاك الكرة.
+*/
+
 const RED_TACKLE_DISTANCE =
     48;
 
+
+/*
+   احتمال افتكاك الكرة.
+*/
+
 const RED_TACKLE_CHANCE =
     0.13;
+
+
+/*
+   التسديد من مسافات مختلفة.
+*/
 
 const RED_SHOT_MIN_DISTANCE =
     150;
@@ -1037,17 +1052,36 @@ const RED_SHOT_MIN_DISTANCE =
 const RED_SHOT_MAX_DISTANCE =
     900;
 
+
+/*
+   وقت الانتظار بين تسديدات اللاعب
+   الأحمر نفسه.
+*/
+
 const RED_SHOT_COOLDOWN =
     0.75;
 
+
+/*
+   بعد هذه المسافة يمكن للأحمر
+   تجربة التسديدات البعيدة.
+*/
+
 const RED_LONG_SHOT_DISTANCE =
     520;
+
 
 const RED_SHOT_SPEED_MIN =
     650;
 
 const RED_SHOT_SPEED_MAX =
     1250;
+
+
+/*
+   مقدار الانحراف عن منتصف المرمى
+   في التسديدات المائلة.
+*/
 
 const RED_SHOT_TARGET_OFFSET =
     58;
@@ -1306,8 +1340,7 @@ function createPlayer(
         hasBall:false,
 
         /*
-           متغيرات خاصة بذكاء الأحمر.
-           لا تؤثر على سرعة الحركة.
+           متغيرات ذكاء الأحمر.
         */
 
         decisionTimer:
@@ -2074,11 +2107,6 @@ function chooseRedShotType(
         Math.random();
 
 
-    /*
-       من بعيد:
-       تسديدات متنوعة أكثر.
-    */
-
     if(
         distanceToGoal >
         RED_LONG_SHOT_DISTANCE
@@ -2104,10 +2132,6 @@ function chooseRedShotType(
 
     }
 
-
-    /*
-       من المسافات المتوسطة والقريبة.
-    */
 
     if(
         r < 0.32
@@ -2140,6 +2164,16 @@ function chooseRedShotType(
 
 /* =========================================================
    RED SHOOT
+   v4.0.5
+
+   مهم جدًا:
+   الأحمر يهاجم المرمى السفلي.
+
+   top goal    = y 0
+   bottom goal = y worldHeight
+
+   لذلك كل أهداف الأحمر هنا
+   تتجه إلى worldHeight.
 ========================================================= */
 
 function redShoot(
@@ -2164,11 +2198,16 @@ function redShoot(
     }
 
 
+    /*
+       مرمى الأحمر المستهدف:
+       المرمى السفلي.
+    */
+
     const goalX =
         worldWidth / 2;
 
     const goalY =
-        0;
+        worldHeight;
 
 
     const dxGoal =
@@ -2208,13 +2247,13 @@ function redShoot(
 
 
     /*
-       لا نسدد إذا كان اللاعب بعيدًا
-       جدًا عن منطقة اللعب الطبيعية.
+       لا نسدد من داخل منطقة
+       المرمى نفسها.
     */
 
     if(
         p.y >
-        worldHeight * 0.92
+        worldHeight * 0.96
     ){
 
         return false;
@@ -2229,16 +2268,22 @@ function redShoot(
         );
 
 
+    /*
+       نقطة الهدف الأساسية
+       خلف خط المرمى السفلي.
+    */
+
     let targetX =
         goalX;
 
     let targetY =
-        -45;
+        worldHeight +
+        45;
 
 
-    /*
-       التسديدة المباشرة
-    */
+    /* =====================================================
+       تسديدة مباشرة
+    ===================================================== */
 
     if(
         shotType ===
@@ -2253,14 +2298,15 @@ function redShoot(
             24;
 
         targetY =
-            -35;
+            worldHeight +
+            45;
 
     }
 
 
-    /*
-       مائلة لليسار
-    */
+    /* =====================================================
+       تسديدة مائلة إلى اليسار
+    ===================================================== */
 
     else if(
         shotType ===
@@ -2272,14 +2318,15 @@ function redShoot(
             RED_SHOT_TARGET_OFFSET;
 
         targetY =
-            -35;
+            worldHeight +
+            45;
 
     }
 
 
-    /*
-       مائلة لليمين
-    */
+    /* =====================================================
+       تسديدة مائلة إلى اليمين
+    ===================================================== */
 
     else if(
         shotType ===
@@ -2291,14 +2338,15 @@ function redShoot(
             RED_SHOT_TARGET_OFFSET;
 
         targetY =
-            -35;
+            worldHeight +
+            45;
 
     }
 
 
-    /*
+    /* =====================================================
        تسديدة بعيدة إلى اليسار
-    */
+    ===================================================== */
 
     else if(
         shotType ===
@@ -2310,14 +2358,15 @@ function redShoot(
             48;
 
         targetY =
-            -55;
+            worldHeight +
+            60;
 
     }
 
 
-    /*
+    /* =====================================================
        تسديدة بعيدة إلى اليمين
-    */
+    ===================================================== */
 
     else if(
         shotType ===
@@ -2329,14 +2378,15 @@ function redShoot(
             48;
 
         targetY =
-            -55;
+            worldHeight +
+            60;
 
     }
 
 
-    /*
+    /* =====================================================
        تسديدة بعيدة مباشرة
-    */
+    ===================================================== */
 
     else if(
         shotType ===
@@ -2351,14 +2401,15 @@ function redShoot(
             35;
 
         targetY =
-            -55;
+            worldHeight +
+            60;
 
     }
 
 
-    /*
+    /* =====================================================
        تسديدة قوية
-    */
+    ===================================================== */
 
     else if(
         shotType ===
@@ -2374,7 +2425,8 @@ function redShoot(
             );
 
         targetY =
-            -30;
+            worldHeight +
+            35;
 
     }
 
@@ -2411,12 +2463,6 @@ function redShoot(
         d;
 
 
-    /*
-       التسديد من بعيد يكون قويًا.
-       القريب يكون أقل حتى لا يصبح الأحمر
-       آلة أهداف.
-    */
-
     const distanceRatio =
         clamp(
             distanceToGoal /
@@ -2449,6 +2495,10 @@ function redShoot(
 
     }
 
+
+    /*
+       فك الاستحواذ.
+    */
 
     ballOwner =
         null;
@@ -2483,11 +2533,6 @@ function redShoot(
         p
     );
 
-
-    /*
-       بعد التسديد نريد من اللاعب
-       إعادة تقييم الموقف بسرعة.
-    */
 
     resetRedDecisionTimer(
         p
@@ -2541,11 +2586,6 @@ function redTryTackle(
 
     }
 
-
-    /*
-       كلما اقترب الأحمر من صاحب الكرة
-       زادت فرصة الافتكاك.
-    */
 
     const proximity =
         1 -
@@ -2656,7 +2696,6 @@ function findNearestRedToBall(){
 
 /* =========================================================
    RED AI
-   النظام الجديد لاتخاذ القرار
 ========================================================= */
 
 function updateRedAI(
@@ -2667,10 +2706,6 @@ function updateRedAI(
         const p of opponents
     ){
 
-        /*
-           تحديث المؤقتات.
-        */
-
         p.decisionTimer -=
             dt;
 
@@ -2678,19 +2713,13 @@ function updateRedAI(
             dt;
 
 
-        /*
-           إذا كان اللاعب الأحمر هو صاحب
-           الكرة، نعطيه نظامًا هجوميًا خاصًا.
-        */
+        /* =================================================
+           الأحمر يمتلك الكرة
+        ================================================= */
 
         if(
             ballOwner === p
         ){
-
-            /*
-               الكرة مع الأحمر:
-               يقرر بسرعة ماذا سيفعل.
-            */
 
             if(
                 p.decisionTimer <= 0
@@ -2701,11 +2730,16 @@ function updateRedAI(
                 );
 
 
+                /*
+                   مرمى الأحمر الحقيقي:
+                   أسفل الملعب.
+                */
+
                 const goalX =
                     worldWidth / 2;
 
                 const goalY =
-                    0;
+                    worldHeight;
 
 
                 const distToGoal =
@@ -2719,18 +2753,20 @@ function updateRedAI(
 
 
                 /*
-                   احتمال التسديد.
+                   احتمالية التسديد.
 
-                   من المسافة البعيدة:
-                   ما زال هناك احتمال للتسديد،
-                   لكنه أقل من المسافات المناسبة.
+                   من بعيد:
+                   يجرب أحيانًا.
 
-                   هذا يمنع الأحمر من الانتظار
-                   دائمًا حتى يصل إلى خط المرمى.
+                   من الوسط:
+                   يجرب أكثر.
+
+                   قريب من المرمى:
+                   يصبح أكثر ميلاً للتسديد.
                 */
 
                 let shotChance =
-                    0.08;
+                    0.10;
 
 
                 if(
@@ -2739,7 +2775,7 @@ function updateRedAI(
                 ){
 
                     shotChance =
-                        0.34;
+                        0.36;
 
                 }
 
@@ -2749,7 +2785,7 @@ function updateRedAI(
                 ){
 
                     shotChance =
-                        0.25;
+                        0.27;
 
                 }
 
@@ -2759,7 +2795,7 @@ function updateRedAI(
                 ){
 
                     shotChance =
-                        0.17;
+                        0.18;
 
                 }
 
@@ -2770,11 +2806,6 @@ function updateRedAI(
 
                 }
 
-
-                /*
-                   إذا كان قريبًا جدًا من المرمى
-                   تصبح فرصة التسديد أعلى.
-                */
 
                 if(
                     distToGoal <
@@ -2788,13 +2819,13 @@ function updateRedAI(
 
 
                 /*
-                   لا نسدد إذا كنا قريبين جدًا
-                   من الخط السفلي.
+                   لا نريد أن يطلق الأحمر
+                   الكرة من خلف خط مرماه.
                 */
 
                 if(
                     p.y >
-                    worldHeight * 0.92
+                    worldHeight * 0.96
                 ){
 
                     shotChance =
@@ -2821,35 +2852,37 @@ function updateRedAI(
 
 
                 /*
-                   إذا لم يسدد، يتجه نحو المرمى
-                   لكن ليس بسرعة إضافية.
+                   إذا لم يسدد،
+                   يتقدم باتجاه مرماه الخصم
+                   وهو المرمى العلوي للأزرق.
+
+                   لكن هنا يجب الانتباه:
+                   الأحمر نفسه يبدأ في الأعلى،
+                   والمرمى الذي يريد تسجيل الهدف
+                   فيه هو الأسفل.
+
+                   لذلك هدفه الهجومي = worldHeight.
                 */
 
                 const targetX =
-                    goalX;
+                    worldWidth / 2;
 
                 const targetY =
-                    Math.min(
-                        worldHeight *
-                        0.30,
+                    worldHeight -
+                    230;
 
-                        goalY +
-                        230
-                    );
-
-
-                /*
-                   أحيانًا يتحرك باتجاه
-                   زاوية مختلفة بدل الخط المستقيم.
-                */
 
                 let moveTargetX =
                     targetX;
 
-
                 let moveTargetY =
                     targetY;
 
+
+                /*
+                   حركة جانبية بسيطة
+                   لتجنب أن يكون سلوكه خطًا مستقيمًا.
+                */
 
                 if(
                     Math.random() <
@@ -2899,15 +2932,16 @@ function updateRedAI(
             else{
 
                 /*
-                   بين القرارات يستمر اللاعب
-                   في الحركة السابقة/الهجوم.
+                   بين القرارات يستمر
+                   بالتقدم نحو المرمى السفلي.
                 */
 
                 const goalX =
                     worldWidth / 2;
 
                 const goalY =
-                    0;
+                    worldHeight -
+                    240;
 
 
                 const dx =
@@ -2915,10 +2949,7 @@ function updateRedAI(
                     p.x;
 
                 const dy =
-                    (
-                        goalY +
-                        240
-                    ) -
+                    goalY -
                     p.y;
 
 
@@ -2950,9 +2981,9 @@ function updateRedAI(
         }
 
 
-        /*
-           الأحمر بدون كرة.
-        */
+        /* =================================================
+           الأحمر بدون كرة
+        ================================================= */
 
         const blueHasBall =
             ballOwner &&
@@ -2974,18 +3005,16 @@ function updateRedAI(
             );
 
 
-        /*
-           إذا كانت الكرة مع الأزرق:
-           الأحمر يضغط عليها.
-        */
+        /* =================================================
+           الكرة مع الأزرق
+        ================================================= */
 
         if(
             blueHasBall
         ){
 
             /*
-               أولًا محاولة افتكاك فورية
-               إذا كان قريبًا.
+               افتكاك فوري إذا كان قريبًا.
             */
 
             if(
@@ -3005,8 +3034,7 @@ function updateRedAI(
 
 
             /*
-               إذا كان قريبًا، يتجه مباشرة
-               نحو صاحب الكرة وليس إلى الـanchor.
+               ضغط مباشر.
             */
 
             if(
@@ -3053,8 +3081,7 @@ function updateRedAI(
 
 
             /*
-               إذا كانت الكرة أبعد، أقرب
-               لاعب أحمر يبدأ مطاردتها.
+               مطاردة الكرة إذا كانت في مدى بعيد.
             */
 
             if(
@@ -3098,11 +3125,9 @@ function updateRedAI(
         }
 
 
-        /*
-           الكرة حرة:
-           اللاعب الأقرب للكرة يحصل على
-           أولوية مطاردتها.
-        */
+        /* =================================================
+           الكرة حرة
+        ================================================= */
 
         if(
             freeBall &&
@@ -3154,11 +3179,9 @@ function updateRedAI(
         }
 
 
-        /*
-           إذا لم تكن هناك حالة ضغط مباشرة،
-           يعود اللاعب إلى دوره ولكن مع
-           تعديلات حسب وضع الكرة.
-        */
+        /* =================================================
+           العودة إلى التشكيل
+        ================================================= */
 
         let targetX =
             p.anchorX;
@@ -3243,11 +3266,6 @@ function updateRedAI(
         }
 
         else{
-
-            /*
-               لا توجد كرة مع الأزرق.
-               يحافظ الأحمر على تشكيله.
-            */
 
             if(
                 p.role ===
@@ -3374,11 +3392,8 @@ function updateBallAI(
 
 
     /*
-       الأحمر أصبح لديه نظام تسديد مستقل
-       داخل updateRedAI.
-
-       لذلك هنا لا نسحب منه الكرة
-       أو نجبره على التسديد بطريقة عشوائية.
+       الأحمر لديه الآن AI خاص به.
+       لا نتدخل في حركته هنا.
     */
 
     if(
@@ -3390,17 +3405,15 @@ function updateBallAI(
     }
 
 
-    /*
-       سلوك الأزرق القديم.
-    */
+    /* =====================================================
+       سلوك الأزرق
+    ===================================================== */
 
     const goalX =
         worldWidth / 2;
 
     const goalY =
-        p.team === "blue"
-        ? 0
-        : worldHeight;
+        0;
 
 
     const distToGoal =
@@ -3480,14 +3493,8 @@ function updateBallAI(
         null;
 
 
-    const enemies =
-        p.team === "blue"
-        ? opponents
-        : teamPlayers;
-
-
     for(
-        const e of enemies
+        const e of opponents
     ){
 
         const d =
@@ -3520,12 +3527,6 @@ function updateBallAI(
             0.06
         ){
 
-            const attackDir =
-                p.team === "blue"
-                ? -1
-                : 1;
-
-
             ballOwner =
                 null;
 
@@ -3534,15 +3535,15 @@ function updateBallAI(
                 p.x;
 
             ballY =
-                p.y +
-                attackDir * 30;
+                p.y -
+                30;
 
 
             ballVX =
                 0;
 
             ballVY =
-                attackDir * 450;
+                -450;
 
 
             return;
@@ -3924,12 +3925,6 @@ function autoSwitchPlayer(){
         }
 
 
-        const bestPlayer =
-            teamPlayers[
-                best.index
-            ];
-
-
         const bestDistance =
             best.distance;
 
@@ -4181,11 +4176,6 @@ function tryBallPickup(){
             performance.now();
 
 
-        /*
-           عندما يلتقط الأحمر الكرة،
-           نجعل قراره التالي قريبًا.
-        */
-
         resetRedDecisionTimer(
             nearestRed
         );
@@ -4211,21 +4201,14 @@ function tackle(){
 
 
     /*
-       الأحمر أصبح لديه نظام افتكاك
-       خاص به داخل updateRedAI.
-       لذلك لا نطبق هنا افتكاكًا ثانيًا
-       حتى لا تصبح النتيجة مبالغًا فيها.
+       الأزرق يظل لديه نظام الافتكاك
+       القديم.
     */
 
     if(
         ballOwner.team ===
         "blue"
     ){
-
-        /*
-           الأزرق ما زال لديه نظام الافتكاك
-           القديم من الأحمر.
-        */
 
         for(
             const e of opponents
@@ -4286,6 +4269,11 @@ function tackle(){
 
     }
 
+
+    /*
+       إذا كانت الكرة مع الأحمر،
+       الأزرق يستطيع افتكاكها.
+    */
 
     else{
 
@@ -4852,19 +4840,15 @@ movePad.addEventListener(
 
         e.preventDefault();
 
-
         joystickActive =
             true;
-
 
         joystickPointerId =
             e.pointerId;
 
-
         movePad.setPointerCapture(
             e.pointerId
         );
-
 
         updateJoystick(
             e.clientX,
@@ -4889,9 +4873,7 @@ movePad.addEventListener(
 
         }
 
-
         e.preventDefault();
-
 
         updateJoystick(
             e.clientX,
@@ -4915,7 +4897,6 @@ movePad.addEventListener(
 
         }
 
-
         resetJoystick();
 
     }
@@ -4934,7 +4915,6 @@ movePad.addEventListener(
             return;
 
         }
-
 
         resetJoystick();
 
@@ -6574,8 +6554,7 @@ function updateGame(
 
 
     /*
-       الأحمر أولاً يقرر،
-       ثم الفيزياء تتعامل مع الكرة.
+       الأحمر يقرر أولًا.
     */
 
     updateRedAI(
