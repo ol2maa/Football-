@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.0.5</title>
+<title>كرة القدم ⚽️ v4.0.6</title>
 
 <style>
 
@@ -54,16 +54,10 @@ html,body{
     touch-action:none;
 }
 
-
-/* =========================================================
-   الملعب
-========================================================= */
-
 #field{
     position:absolute;
     left:0;
     top:0;
-
     width:100%;
     height:100%;
 
@@ -79,14 +73,8 @@ html,body{
     overflow:hidden;
 
     transform:translate3d(0,0,0);
-
     will-change:transform;
 }
-
-
-/* =========================================================
-   خطوط الملعب
-========================================================= */
 
 .line{
     position:absolute;
@@ -108,7 +96,6 @@ html,body{
     height:170px;
 
     border:4px solid white;
-
     border-radius:50%;
 
     left:50%;
@@ -125,7 +112,6 @@ html,body{
     height:10px;
 
     background:white;
-
     border-radius:50%;
 
     left:50%;
@@ -135,19 +121,12 @@ html,body{
         translate(-50%,-50%);
 }
 
-
-/* =========================================================
-   المرمى
-========================================================= */
-
 .goalLine{
-
     position:absolute;
 
     left:50%;
 
     width:190px;
-
     height:14px;
 
     background:white;
@@ -155,7 +134,6 @@ html,body{
     transform:translateX(-50%);
 
     z-index:5;
-
     pointer-events:none;
 }
 
@@ -167,13 +145,7 @@ html,body{
     bottom:0;
 }
 
-
-/* =========================================================
-   اللاعبين
-========================================================= */
-
 .playerUnit{
-
     position:absolute;
 
     left:0;
@@ -185,12 +157,10 @@ html,body{
     border-radius:50%;
 
     display:flex;
-
     align-items:center;
     justify-content:center;
 
     font-size:24px;
-
     line-height:1;
 
     z-index:20;
@@ -199,7 +169,6 @@ html,body{
 }
 
 .playerUnit.blue{
-
     background:#1677ff;
 
     border:3px solid #fff;
@@ -209,7 +178,6 @@ html,body{
 }
 
 .playerUnit.red{
-
     background:#e52d38;
 
     border:3px solid #fff;
@@ -218,13 +186,7 @@ html,body{
         0 2px 5px #0008;
 }
 
-
-/* =========================================================
-   سهم اللاعب المتحكم
-========================================================= */
-
 .controlArrow{
-
     position:absolute;
 
     left:50%;
@@ -236,9 +198,7 @@ html,body{
     color:#ffd400;
 
     font-size:16px;
-
     font-weight:900;
-
     line-height:1;
 
     text-shadow:
@@ -252,7 +212,6 @@ html,body{
 }
 
 .playerUnit.controlled{
-
     box-shadow:
 
         0 0 0 3px #ffd400,
@@ -262,13 +221,7 @@ html,body{
         0 2px 5px #0008;
 }
 
-
-/* =========================================================
-   الكرة
-========================================================= */
-
 #ball{
-
     position:absolute;
 
     left:0;
@@ -280,13 +233,11 @@ html,body{
     border-radius:50%;
 
     background:white;
-
     border:2px solid #222;
 
     z-index:25;
 
     display:flex;
-
     align-items:center;
     justify-content:center;
 
@@ -295,20 +246,13 @@ html,body{
     will-change:transform;
 }
 
-
-/* =========================================================
-   سهم التصويب
-========================================================= */
-
 #aimArrow{
-
     position:absolute;
 
     left:0;
     top:0;
 
     width:5px;
-
     height:70px;
 
     background:#ffd400;
@@ -329,7 +273,6 @@ html,body{
 }
 
 #aimArrow::after{
-
     content:"";
 
     position:absolute;
@@ -350,13 +293,7 @@ html,body{
         16px solid #ffd400;
 }
 
-
-/* =========================================================
-   لوحة النتيجة
-========================================================= */
-
 #scoreBoard{
-
     position:fixed;
 
     top:
@@ -390,24 +327,15 @@ html,body{
 }
 
 #matchTime{
-
     font-size:14px;
-
     margin-top:2px;
 }
 
 #matchTime.warning{
-
     color:#ff3b30;
 }
 
-
-/* =========================================================
-   احتفال الهدف
-========================================================= */
-
 #goalCelebration{
-
     position:fixed;
 
     inset:0;
@@ -417,14 +345,12 @@ html,body{
     display:none;
 
     align-items:center;
-
     justify-content:center;
 
     pointer-events:none;
 }
 
 #goalCelebrationText{
-
     padding:
         20px 35px;
 
@@ -435,7 +361,6 @@ html,body{
     color:white;
 
     font-size:48px;
-
     font-weight:900;
 
     text-align:center;
@@ -456,7 +381,6 @@ html,body{
 @keyframes goalPop{
 
     0%{
-
         transform:
             scale(0.7);
 
@@ -464,7 +388,6 @@ html,body{
     }
 
     70%{
-
         transform:
             scale(1.15);
 
@@ -472,7 +395,6 @@ html,body{
     }
 
     100%{
-
         transform:
             scale(1);
 
@@ -481,13 +403,7 @@ html,body{
 
 }
 
-
-/* =========================================================
-   القوة
-========================================================= */
-
 #powerBox{
-
     position:fixed;
 
     left:50%;
@@ -498,11 +414,9 @@ html,body{
         translateX(-50%);
 
     width:150px;
-
     height:13px;
 
     border:2px solid white;
-
     border-radius:10px;
 
     overflow:hidden;
@@ -515,21 +429,12 @@ html,body{
 }
 
 #powerBar{
-
     width:0%;
-
     height:100%;
-
     background:#ffd400;
 }
 
-
-/* =========================================================
-   الجويستك
-========================================================= */
-
 #movePad{
-
     position:fixed;
 
     left:25px;
@@ -555,7 +460,6 @@ html,body{
 }
 
 #joystickCenter{
-
     position:absolute;
 
     left:50%;
@@ -576,13 +480,7 @@ html,body{
     will-change:transform;
 }
 
-
-/* =========================================================
-   زر الركل
-========================================================= */
-
 #kickControl{
-
     position:fixed;
 
     right:28px;
@@ -616,7 +514,6 @@ html,body{
 }
 
 #kickDot{
-
     width:25px;
     height:25px;
 
@@ -625,13 +522,7 @@ html,body{
     background:white;
 }
 
-
-/* =========================================================
-   نهاية المباراة
-========================================================= */
-
 #matchEnd{
-
     position:fixed;
 
     inset:0;
@@ -651,21 +542,16 @@ html,body{
 }
 
 #matchEnd h1{
-
     margin:0 0 15px;
-
     font-size:32px;
 }
 
 #finalScore{
-
     font-size:28px;
-
     margin-bottom:25px;
 }
 
 #newMatch{
-
     border:0;
 
     border-radius:15px;
@@ -673,18 +559,15 @@ html,body{
     padding:14px 28px;
 
     font-size:20px;
-
     font-weight:bold;
 
     background:#1677ff;
-
     color:white;
 }
 
 </style>
 
 </head>
-
 
 <body>
 
@@ -811,8 +694,6 @@ html,body{
 </div>
 
 
-<!-- لوحة النتيجة -->
-
 <div id="scoreBoard">
 
     🔵
@@ -836,8 +717,6 @@ html,body{
 </div>
 
 
-<!-- احتفال الهدف -->
-
 <div id="goalCelebration">
 
     <div id="goalCelebrationText">
@@ -847,16 +726,12 @@ html,body{
 </div>
 
 
-<!-- القوة -->
-
 <div id="powerBox">
 
     <div id="powerBar"></div>
 
 </div>
 
-
-<!-- الجويستك -->
 
 <div id="movePad">
 
@@ -865,16 +740,12 @@ html,body{
 </div>
 
 
-<!-- زر الركل -->
-
 <div id="kickControl">
 
     <div id="kickDot"></div>
 
 </div>
 
-
-<!-- نهاية المباراة -->
 
 <div id="matchEnd">
 
@@ -992,13 +863,58 @@ const TACKLE_DISTANCE =
 
 
 /* =========================================================
-   RED AI
+   PLAYER COLLISION
 ========================================================= */
 
 /*
-   هذه القيم خاصة بسرعة اتخاذ القرار
-   وليست سرعة اللاعب نفسه.
+   اللاعب جسم دائري قطره 38px.
+
+   لذلك يجب ألا يقل مركز لاعب
+   عن مركز اللاعب الآخر عن
+   مجموع نصف القطرين.
+
+   أضفنا هامشًا صغيرًا حتى لا
+   تتداخل الحدود البيضاء بصريًا.
 */
+
+const PLAYER_COLLISION_DISTANCE =
+    PLAYER_RADIUS * 2 + 1;
+
+
+/*
+   عدد مرات حل التصادم في نفس
+   الحركة الواحدة.
+
+   هذا يساعد عندما يكون اللاعب
+   محشورًا بين لاعبين.
+*/
+
+const PLAYER_COLLISION_ITERATIONS =
+    3;
+
+
+/*
+   نصف قطر افتراضي لقائم المرمى.
+*/
+
+const GOAL_POST_RADIUS =
+    8;
+
+
+/*
+   المسافة الدنيا بين مركز اللاعب
+   وقائم المرمى.
+*/
+
+const PLAYER_GOAL_POST_DISTANCE =
+    PLAYER_RADIUS +
+    GOAL_POST_RADIUS +
+    1;
+
+
+/* =========================================================
+   RED AI
+========================================================= */
 
 const RED_DECISION_MIN =
     0.16;
@@ -1006,45 +922,17 @@ const RED_DECISION_MIN =
 const RED_DECISION_MAX =
     0.34;
 
-
-/*
-   أقصى مسافة يبدأ منها الأحمر
-   بمطاردة الكرة.
-*/
-
 const RED_CHASE_DISTANCE =
     520;
-
-
-/*
-   عندما تكون الكرة مع الأزرق
-   ويكون الأحمر ضمن هذه المسافة
-   يبدأ الضغط المباشر.
-*/
 
 const RED_PRESS_DISTANCE =
     360;
 
-
-/*
-   مسافة محاولة افتكاك الكرة.
-*/
-
 const RED_TACKLE_DISTANCE =
     48;
 
-
-/*
-   احتمال افتكاك الكرة.
-*/
-
 const RED_TACKLE_CHANCE =
     0.13;
-
-
-/*
-   التسديد من مسافات مختلفة.
-*/
 
 const RED_SHOT_MIN_DISTANCE =
     150;
@@ -1052,36 +940,17 @@ const RED_SHOT_MIN_DISTANCE =
 const RED_SHOT_MAX_DISTANCE =
     900;
 
-
-/*
-   وقت الانتظار بين تسديدات اللاعب
-   الأحمر نفسه.
-*/
-
 const RED_SHOT_COOLDOWN =
     0.75;
 
-
-/*
-   بعد هذه المسافة يمكن للأحمر
-   تجربة التسديدات البعيدة.
-*/
-
 const RED_LONG_SHOT_DISTANCE =
     520;
-
 
 const RED_SHOT_SPEED_MIN =
     650;
 
 const RED_SHOT_SPEED_MAX =
     1250;
-
-
-/*
-   مقدار الانحراف عن منتصف المرمى
-   في التسديدات المائلة.
-*/
 
 const RED_SHOT_TARGET_OFFSET =
     58;
@@ -1339,10 +1208,6 @@ function createPlayer(
 
         hasBall:false,
 
-        /*
-           متغيرات ذكاء الأحمر.
-        */
-
         decisionTimer:
             Math.random() *
             0.25,
@@ -1511,6 +1376,20 @@ function distanceBetween(
         a.x - b.x,
         a.y - b.y
     );
+
+}
+
+
+/* =========================================================
+   GET ALL PLAYERS
+========================================================= */
+
+function getAllPlayers(){
+
+    return [
+        ...teamPlayers,
+        ...opponents
+    ];
 
 }
 
@@ -1688,6 +1567,348 @@ function getRoleBounds(p){
 
 
 /* =========================================================
+   GOAL POST COLLISION
+========================================================= */
+
+function resolveGoalPostCollision(
+    p,
+    x,
+    y
+){
+
+    const centerX =
+        worldWidth / 2;
+
+
+    const halfGoal =
+        GOAL_WIDTH / 2;
+
+
+    const posts = [
+
+        {
+            x:centerX - halfGoal,
+            y:0
+        },
+
+        {
+            x:centerX + halfGoal,
+            y:0
+        },
+
+        {
+            x:centerX - halfGoal,
+            y:worldHeight
+        },
+
+        {
+            x:centerX + halfGoal,
+            y:worldHeight
+        }
+
+    ];
+
+
+    for(
+        const post of posts
+    ){
+
+        let dx =
+            x -
+            post.x;
+
+        let dy =
+            y -
+            post.y;
+
+
+        let d =
+            Math.hypot(
+                dx,
+                dy
+            );
+
+
+        if(
+            d <
+            PLAYER_GOAL_POST_DISTANCE
+        ){
+
+            if(
+                d < 0.001
+            ){
+
+                dx =
+                    1;
+
+                dy =
+                    0;
+
+                d =
+                    1;
+
+            }
+
+
+            dx /=
+                d;
+
+            dy /=
+                d;
+
+
+            const push =
+                PLAYER_GOAL_POST_DISTANCE -
+                d;
+
+
+            x +=
+                dx *
+                push;
+
+            y +=
+                dy *
+                push;
+
+        }
+
+    }
+
+
+    return {
+
+        x,
+        y
+
+    };
+
+}
+
+
+/* =========================================================
+   PLAYER COLLISION RESOLUTION
+========================================================= */
+
+/*
+   هذا هو الجزء الجديد الأساسي.
+
+   لا نسمح للاعب المتحرك بأن يدخل
+   داخل دائرة لاعب آخر.
+
+   إذا اصطدم به مباشرة:
+   يتوقف.
+
+   وإذا كانت الحركة مائلة:
+   يتم دفعه إلى حافة اللاعب
+   فيستطيع الاستمرار حوله.
+*/
+
+function resolvePlayerCollisions(
+    p,
+    x,
+    y
+){
+
+    const players =
+        getAllPlayers();
+
+
+    for(
+        let iteration = 0;
+        iteration <
+        PLAYER_COLLISION_ITERATIONS;
+        iteration++
+    ){
+
+        let changed =
+            false;
+
+
+        for(
+            const other of players
+        ){
+
+            if(
+                other === p
+            ){
+
+                continue;
+
+            }
+
+
+            let dx =
+                x -
+                other.x;
+
+            let dy =
+                y -
+                other.y;
+
+
+            let d =
+                Math.hypot(
+                    dx,
+                    dy
+                );
+
+
+            if(
+                d <
+                PLAYER_COLLISION_DISTANCE
+            ){
+
+                if(
+                    d < 0.001
+                ){
+
+                    /*
+                       في حالة التطابق التام
+                       نستخدم اتجاه حركة اللاعب.
+                    */
+
+                    dx =
+                        p.moveX;
+
+                    dy =
+                        p.moveY;
+
+
+                    if(
+                        Math.hypot(
+                            dx,
+                            dy
+                        ) < 0.001
+                    ){
+
+                        dx =
+                            p.x -
+                            other.x;
+
+                        dy =
+                            p.y -
+                            other.y;
+
+                    }
+
+
+                    if(
+                        Math.hypot(
+                            dx,
+                            dy
+                        ) < 0.001
+                    ){
+
+                        dx =
+                            1;
+
+                        dy =
+                            0;
+
+                    }
+
+
+                    d =
+                        Math.hypot(
+                            dx,
+                            dy
+                        );
+
+                }
+
+
+                dx /=
+                    d;
+
+                dy /=
+                    d;
+
+
+                const push =
+                    PLAYER_COLLISION_DISTANCE -
+                    d;
+
+
+                x +=
+                    dx *
+                    push;
+
+                y +=
+                    dy *
+                    push;
+
+
+                changed =
+                    true;
+
+            }
+
+        }
+
+
+        if(
+            !changed
+        ){
+
+            break;
+
+        }
+
+    }
+
+
+    /*
+       بعد حل اللاعبين نحل القوائم.
+    */
+
+    const postResult =
+        resolveGoalPostCollision(
+            p,
+            x,
+            y
+        );
+
+
+    x =
+        postResult.x;
+
+    y =
+        postResult.y;
+
+
+    /*
+       لا نسمح بخروج اللاعب من الملعب.
+    */
+
+    x =
+        clamp(
+            x,
+            PLAYER_RADIUS,
+            worldWidth -
+            PLAYER_RADIUS
+        );
+
+
+    y =
+        clamp(
+            y,
+            PLAYER_RADIUS,
+            worldHeight -
+            PLAYER_RADIUS
+        );
+
+
+    return {
+
+        x,
+        y
+
+    };
+
+}
+
+
+/* =========================================================
    MOVE PLAYER
 ========================================================= */
 
@@ -1718,36 +1939,6 @@ function movePlayer(
     }
 
 
-    p.x +=
-        dx *
-        p.speed *
-        dt;
-
-
-    p.y +=
-        dy *
-        p.speed *
-        dt;
-
-
-    p.x =
-        clamp(
-            p.x,
-            PLAYER_RADIUS,
-            worldWidth -
-            PLAYER_RADIUS
-        );
-
-
-    p.y =
-        clamp(
-            p.y,
-            PLAYER_RADIUS,
-            worldHeight -
-            PLAYER_RADIUS
-        );
-
-
     if(
         Math.abs(dx) > 0.01 ||
         Math.abs(dy) > 0.01
@@ -1760,6 +1951,53 @@ function movePlayer(
             );
 
     }
+
+
+    p.moveX =
+        dx;
+
+    p.moveY =
+        dy;
+
+
+    /*
+       نحسب المكان المطلوب أولًا.
+    */
+
+    let targetX =
+        p.x +
+        dx *
+        p.speed *
+        dt;
+
+
+    let targetY =
+        p.y +
+        dy *
+        p.speed *
+        dt;
+
+
+    /*
+       ثم نمرره عبر نظام الاصطدام.
+    */
+
+    const resolved =
+        resolvePlayerCollisions(
+            p,
+            targetX,
+            targetY
+        );
+
+
+    p.x =
+        resolved.x;
+
+    p.y =
+        resolved.y;
+
+
+    return true;
 
 }
 
@@ -2164,16 +2402,6 @@ function chooseRedShotType(
 
 /* =========================================================
    RED SHOOT
-   v4.0.5
-
-   مهم جدًا:
-   الأحمر يهاجم المرمى السفلي.
-
-   top goal    = y 0
-   bottom goal = y worldHeight
-
-   لذلك كل أهداف الأحمر هنا
-   تتجه إلى worldHeight.
 ========================================================= */
 
 function redShoot(
@@ -2197,11 +2425,6 @@ function redShoot(
 
     }
 
-
-    /*
-       مرمى الأحمر المستهدف:
-       المرمى السفلي.
-    */
 
     const goalX =
         worldWidth / 2;
@@ -2246,11 +2469,6 @@ function redShoot(
     }
 
 
-    /*
-       لا نسدد من داخل منطقة
-       المرمى نفسها.
-    */
-
     if(
         p.y >
         worldHeight * 0.96
@@ -2268,11 +2486,6 @@ function redShoot(
         );
 
 
-    /*
-       نقطة الهدف الأساسية
-       خلف خط المرمى السفلي.
-    */
-
     let targetX =
         goalX;
 
@@ -2280,10 +2493,6 @@ function redShoot(
         worldHeight +
         45;
 
-
-    /* =====================================================
-       تسديدة مباشرة
-    ===================================================== */
 
     if(
         shotType ===
@@ -2304,10 +2513,6 @@ function redShoot(
     }
 
 
-    /* =====================================================
-       تسديدة مائلة إلى اليسار
-    ===================================================== */
-
     else if(
         shotType ===
         "diagonal-left"
@@ -2323,10 +2528,6 @@ function redShoot(
 
     }
 
-
-    /* =====================================================
-       تسديدة مائلة إلى اليمين
-    ===================================================== */
 
     else if(
         shotType ===
@@ -2344,10 +2545,6 @@ function redShoot(
     }
 
 
-    /* =====================================================
-       تسديدة بعيدة إلى اليسار
-    ===================================================== */
-
     else if(
         shotType ===
         "long-left"
@@ -2364,10 +2561,6 @@ function redShoot(
     }
 
 
-    /* =====================================================
-       تسديدة بعيدة إلى اليمين
-    ===================================================== */
-
     else if(
         shotType ===
         "long-right"
@@ -2383,10 +2576,6 @@ function redShoot(
 
     }
 
-
-    /* =====================================================
-       تسديدة بعيدة مباشرة
-    ===================================================== */
 
     else if(
         shotType ===
@@ -2406,10 +2595,6 @@ function redShoot(
 
     }
 
-
-    /* =====================================================
-       تسديدة قوية
-    ===================================================== */
 
     else if(
         shotType ===
@@ -2495,10 +2680,6 @@ function redShoot(
 
     }
 
-
-    /*
-       فك الاستحواذ.
-    */
 
     ballOwner =
         null;
@@ -2713,10 +2894,6 @@ function updateRedAI(
             dt;
 
 
-        /* =================================================
-           الأحمر يمتلك الكرة
-        ================================================= */
-
         if(
             ballOwner === p
         ){
@@ -2729,11 +2906,6 @@ function updateRedAI(
                     p
                 );
 
-
-                /*
-                   مرمى الأحمر الحقيقي:
-                   أسفل الملعب.
-                */
 
                 const goalX =
                     worldWidth / 2;
@@ -2751,19 +2923,6 @@ function updateRedAI(
                         p.y
                     );
 
-
-                /*
-                   احتمالية التسديد.
-
-                   من بعيد:
-                   يجرب أحيانًا.
-
-                   من الوسط:
-                   يجرب أكثر.
-
-                   قريب من المرمى:
-                   يصبح أكثر ميلاً للتسديد.
-                */
 
                 let shotChance =
                     0.10;
@@ -2818,11 +2977,6 @@ function updateRedAI(
                 }
 
 
-                /*
-                   لا نريد أن يطلق الأحمر
-                   الكرة من خلف خط مرماه.
-                */
-
                 if(
                     p.y >
                     worldHeight * 0.96
@@ -2851,19 +3005,6 @@ function updateRedAI(
                 }
 
 
-                /*
-                   إذا لم يسدد،
-                   يتقدم باتجاه مرماه الخصم
-                   وهو المرمى العلوي للأزرق.
-
-                   لكن هنا يجب الانتباه:
-                   الأحمر نفسه يبدأ في الأعلى،
-                   والمرمى الذي يريد تسجيل الهدف
-                   فيه هو الأسفل.
-
-                   لذلك هدفه الهجومي = worldHeight.
-                */
-
                 const targetX =
                     worldWidth / 2;
 
@@ -2878,11 +3019,6 @@ function updateRedAI(
                 let moveTargetY =
                     targetY;
 
-
-                /*
-                   حركة جانبية بسيطة
-                   لتجنب أن يكون سلوكه خطًا مستقيمًا.
-                */
 
                 if(
                     Math.random() <
@@ -2931,11 +3067,6 @@ function updateRedAI(
 
             else{
 
-                /*
-                   بين القرارات يستمر
-                   بالتقدم نحو المرمى السفلي.
-                */
-
                 const goalX =
                     worldWidth / 2;
 
@@ -2981,10 +3112,6 @@ function updateRedAI(
         }
 
 
-        /* =================================================
-           الأحمر بدون كرة
-        ================================================= */
-
         const blueHasBall =
             ballOwner &&
             ballOwner.team ===
@@ -3005,17 +3132,9 @@ function updateRedAI(
             );
 
 
-        /* =================================================
-           الكرة مع الأزرق
-        ================================================= */
-
         if(
             blueHasBall
         ){
-
-            /*
-               افتكاك فوري إذا كان قريبًا.
-            */
 
             if(
                 distToBall <=
@@ -3032,10 +3151,6 @@ function updateRedAI(
 
             }
 
-
-            /*
-               ضغط مباشر.
-            */
 
             if(
                 distToBall <
@@ -3080,10 +3195,6 @@ function updateRedAI(
             }
 
 
-            /*
-               مطاردة الكرة إذا كانت في مدى بعيد.
-            */
-
             if(
                 distToBall <
                 RED_CHASE_DISTANCE
@@ -3124,10 +3235,6 @@ function updateRedAI(
 
         }
 
-
-        /* =================================================
-           الكرة حرة
-        ================================================= */
 
         if(
             freeBall &&
@@ -3178,10 +3285,6 @@ function updateRedAI(
 
         }
 
-
-        /* =================================================
-           العودة إلى التشكيل
-        ================================================= */
 
         let targetX =
             p.anchorX;
@@ -3391,11 +3494,6 @@ function updateBallAI(
     }
 
 
-    /*
-       الأحمر لديه الآن AI خاص به.
-       لا نتدخل في حركته هنا.
-    */
-
     if(
         p.team === "red"
     ){
@@ -3404,10 +3502,6 @@ function updateBallAI(
 
     }
 
-
-    /* =====================================================
-       سلوك الأزرق
-    ===================================================== */
 
     const goalX =
         worldWidth / 2;
@@ -3900,7 +3994,8 @@ function autoSwitchPlayer(){
 
     if(
         ballOwner &&
-        ballOwner.team === "red"
+        ballOwner.team ===
+            "red"
     ){
 
         return;
@@ -4200,11 +4295,6 @@ function tackle(){
     }
 
 
-    /*
-       الأزرق يظل لديه نظام الافتكاك
-       القديم.
-    */
-
     if(
         ballOwner.team ===
         "blue"
@@ -4269,11 +4359,6 @@ function tackle(){
 
     }
 
-
-    /*
-       إذا كانت الكرة مع الأحمر،
-       الأزرق يستطيع افتكاكها.
-    */
 
     else{
 
@@ -5429,10 +5514,6 @@ function updateBall(
     dt
 ){
 
-    /*
-       الكرة مع لاعب
-    */
-
     if(
         ballOwner
     ){
@@ -5456,10 +5537,6 @@ function updateBall(
 
     }
 
-
-    /*
-       الكرة الحرة
-    */
 
     ballX +=
         ballVX *
@@ -5507,10 +5584,6 @@ function updateBall(
     }
 
 
-    /*
-       الجدار الأيسر
-    */
-
     if(
         ballX <
         BALL_RADIUS
@@ -5526,10 +5599,6 @@ function updateBall(
 
     }
 
-
-    /*
-       الجدار الأيمن
-    */
 
     if(
         ballX >
@@ -6586,15 +6655,20 @@ function updateGame(
     autoSwitchPlayer();
 
 
+    /*
+       هذا الآن مجرد نظام أمان إضافي.
+       الاصطدام الأساسي يحدث داخل movePlayer.
+    */
+
     separatePlayers(
         teamPlayers,
-        55
+        PLAYER_COLLISION_DISTANCE
     );
 
 
     separatePlayers(
         opponents,
-        55
+        PLAYER_COLLISION_DISTANCE
     );
 
 
