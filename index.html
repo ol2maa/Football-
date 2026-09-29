@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.0.6</title>
+<title>كرة القدم ⚽️ v4.0.7</title>
 
 <style>
 
@@ -520,6 +520,13 @@ html,body{
     border-radius:50%;
 
     background:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:22px;
+    line-height:1;
 }
 
 #matchEnd{
@@ -742,7 +749,8 @@ html,body{
 
 <div id="kickControl">
 
-    <div id="kickDot"></div>
+    <div id="kickDot">
+    </div>
 
 </div>
 
@@ -858,58 +866,112 @@ const JOYSTICK_MAX_DISTANCE =
 const PLAYER_PICKUP_DISTANCE =
     30;
 
-const TACKLE_DISTANCE =
-    40;
-
 
 /* =========================================================
    PLAYER COLLISION
 ========================================================= */
 
-/*
-   اللاعب جسم دائري قطره 38px.
-
-   لذلك يجب ألا يقل مركز لاعب
-   عن مركز اللاعب الآخر عن
-   مجموع نصف القطرين.
-
-   أضفنا هامشًا صغيرًا حتى لا
-   تتداخل الحدود البيضاء بصريًا.
-*/
-
 const PLAYER_COLLISION_DISTANCE =
     PLAYER_RADIUS * 2 + 1;
-
-
-/*
-   عدد مرات حل التصادم في نفس
-   الحركة الواحدة.
-
-   هذا يساعد عندما يكون اللاعب
-   محشورًا بين لاعبين.
-*/
 
 const PLAYER_COLLISION_ITERATIONS =
     3;
 
-
-/*
-   نصف قطر افتراضي لقائم المرمى.
-*/
-
 const GOAL_POST_RADIUS =
     8;
-
-
-/*
-   المسافة الدنيا بين مركز اللاعب
-   وقائم المرمى.
-*/
 
 const PLAYER_GOAL_POST_DISTANCE =
     PLAYER_RADIUS +
     GOAL_POST_RADIUS +
     1;
+
+
+/* =========================================================
+   BLUE TACKLE
+========================================================= */
+
+/*
+   أقصى مسافة يمكن منها تنفيذ
+   الافتكاك.
+
+   لأن تصادم اللاعبين يمنع
+   دخول اللاعب داخل الآخر،
+   اخترنا مسافة أكبر قليلًا من
+   مسافة التصادم.
+*/
+
+const BLUE_TACKLE_DISTANCE =
+    55;
+
+
+/*
+   اللاعب يجب أن يكون مواجهًا
+   للكرة بدرجة معقولة.
+
+   القيمة 0.35 تسمح بزاوية
+   واسعة نسبيًا بدل أن يكون
+   اللاعب مواجهًا بشكل مثالي.
+*/
+
+const BLUE_TACKLE_DOT =
+    0.35;
+
+
+/*
+   مدة انتظار قصيرة بين
+   محاولات الافتكاك.
+*/
+
+const BLUE_TACKLE_COOLDOWN =
+    420;
+
+
+/*
+   اندفاع بسيط عند محاولة
+   الافتكاك.
+*/
+
+const BLUE_TACKLE_LUNGE =
+    7;
+
+
+/*
+   المسافة التي عندها نبدأ
+   التبديل التلقائي للاعب
+   الأقرب لحامل الكرة الأحمر.
+*/
+
+const BLUE_DEFEND_CONTROL_DISTANCE =
+    100;
+
+
+/*
+   إذا كان اللاعب الأقرب أقرب
+   بهذا المقدار من اللاعب الحالي
+   يتم التبديل.
+*/
+
+const BLUE_DEFEND_SWITCH_ADVANTAGE =
+    18;
+
+
+/*
+   إذا اقترب اللاعب جدًا من
+   حامل الكرة يمكن للتبديل
+   تجاوز قفل التبديل اليدوي.
+*/
+
+const BLUE_DEFEND_EMERGENCY_DISTANCE =
+    62;
+
+
+/*
+   زمن حماية اللاعب الحالي
+   بعد التبديل اليدوي.
+*/
+
+const BLUE_DEFEND_MANUAL_LOCK =
+    1200;
 
 
 /* =========================================================
@@ -1003,6 +1065,9 @@ let manualControlLockUntil =
     0;
 
 let lastOwnerChangeTime =
+    0;
+
+let lastBlueTackleTime =
     0;
 
 
@@ -1106,7 +1171,7 @@ let joystickY =
 
 
 /* =========================================================
-   KICK
+   KICK / TACKLE
 ========================================================= */
 
 let chargingActive =
@@ -1689,20 +1754,6 @@ function resolveGoalPostCollision(
    PLAYER COLLISION RESOLUTION
 ========================================================= */
 
-/*
-   هذا هو الجزء الجديد الأساسي.
-
-   لا نسمح للاعب المتحرك بأن يدخل
-   داخل دائرة لاعب آخر.
-
-   إذا اصطدم به مباشرة:
-   يتوقف.
-
-   وإذا كانت الحركة مائلة:
-   يتم دفعه إلى حافة اللاعب
-   فيستطيع الاستمرار حوله.
-*/
-
 function resolvePlayerCollisions(
     p,
     x,
@@ -1761,11 +1812,6 @@ function resolvePlayerCollisions(
                 if(
                     d < 0.001
                 ){
-
-                    /*
-                       في حالة التطابق التام
-                       نستخدم اتجاه حركة اللاعب.
-                    */
 
                     dx =
                         p.moveX;
@@ -1857,10 +1903,6 @@ function resolvePlayerCollisions(
     }
 
 
-    /*
-       بعد حل اللاعبين نحل القوائم.
-    */
-
     const postResult =
         resolveGoalPostCollision(
             p,
@@ -1875,10 +1917,6 @@ function resolvePlayerCollisions(
     y =
         postResult.y;
 
-
-    /*
-       لا نسمح بخروج اللاعب من الملعب.
-    */
 
     x =
         clamp(
@@ -1960,10 +1998,6 @@ function movePlayer(
         dy;
 
 
-    /*
-       نحسب المكان المطلوب أولًا.
-    */
-
     let targetX =
         p.x +
         dx *
@@ -1977,10 +2011,6 @@ function movePlayer(
         p.speed *
         dt;
 
-
-    /*
-       ثم نمرره عبر نظام الاصطدام.
-    */
 
     const resolved =
         resolvePlayerCollisions(
@@ -2512,7 +2542,6 @@ function redShoot(
 
     }
 
-
     else if(
         shotType ===
         "diagonal-left"
@@ -2527,7 +2556,6 @@ function redShoot(
             45;
 
     }
-
 
     else if(
         shotType ===
@@ -2544,7 +2572,6 @@ function redShoot(
 
     }
 
-
     else if(
         shotType ===
         "long-left"
@@ -2560,7 +2587,6 @@ function redShoot(
 
     }
 
-
     else if(
         shotType ===
         "long-right"
@@ -2575,7 +2601,6 @@ function redShoot(
             60;
 
     }
-
 
     else if(
         shotType ===
@@ -2594,7 +2619,6 @@ function redShoot(
             60;
 
     }
-
 
     else if(
         shotType ===
@@ -3852,6 +3876,88 @@ function findBestPlayerForBall(){
 
 
 /* =========================================================
+   FIND BEST BLUE DEFENDER
+   WHEN RED HAS THE BALL
+========================================================= */
+
+function findBestBlueDefender(){
+
+    if(
+        !ballOwner ||
+        ballOwner.team !==
+        "red"
+    ){
+
+        return {
+
+            index:-1,
+
+            distance:Infinity
+
+        };
+
+    }
+
+
+    const red =
+        ballOwner;
+
+
+    let bestIndex =
+        -1;
+
+    let bestDistance =
+        Infinity;
+
+
+    for(
+        let i = 0;
+        i < teamPlayers.length;
+        i++
+    ){
+
+        const p =
+            teamPlayers[i];
+
+
+        const d =
+            Math.hypot(
+                p.x -
+                red.x,
+
+                p.y -
+                red.y
+            );
+
+
+        if(
+            d <
+            bestDistance
+        ){
+
+            bestDistance =
+                d;
+
+            bestIndex =
+                i;
+
+        }
+
+    }
+
+
+    return {
+
+        index:bestIndex,
+
+        distance:bestDistance
+
+    };
+
+}
+
+
+/* =========================================================
    AUTO SWITCH
 ========================================================= */
 
@@ -3897,15 +4003,158 @@ function autoSwitchPlayer(){
     }
 
 
-    const activeDistance =
-        Math.hypot(
-            activePlayer.x -
-                ballX,
+    /*
+       =====================================================
+       الحالة الجديدة:
+       الأحمر معه الكرة.
 
-            activePlayer.y -
-                ballY
-        );
+       نبحث عن أقرب لاعب أزرق
+       لحامل الكرة، وليس فقط
+       أقرب لاعب لمكان الكرة.
+       =====================================================
+    */
 
+    if(
+        ballOwner &&
+        ballOwner.team ===
+        "red"
+    ){
+
+        const best =
+            findBestBlueDefender();
+
+
+        if(
+            best.index < 0
+        ){
+
+            return;
+
+        }
+
+
+        const bestPlayer =
+            teamPlayers[
+                best.index
+            ];
+
+
+        const activeDistance =
+            Math.hypot(
+                activePlayer.x -
+                ballOwner.x,
+
+                activePlayer.y -
+                ballOwner.y
+            );
+
+
+        const bestDistance =
+            best.distance;
+
+
+        /*
+           إذا اللاعب الحالي هو
+           أصلًا الأقرب فلا نبدل.
+        */
+
+        if(
+            best.index ===
+            activePlayerIndex
+        ){
+
+            return;
+
+        }
+
+
+        /*
+           لا نريد أن يتحول التحكم
+           للاعب بعيد جدًا.
+        */
+
+        if(
+            bestDistance >
+            BLUE_DEFEND_CONTROL_DISTANCE
+        ){
+
+            return;
+
+        }
+
+
+        const emergency =
+            bestDistance <=
+            BLUE_DEFEND_EMERGENCY_DISTANCE;
+
+
+        /*
+           بعد التبديل اليدوي نترك
+           مهلة بسيطة، لكن إذا وصل
+           لاعب آخر قريب جدًا من
+           حامل الكرة يسمح بالتبديل.
+        */
+
+        if(
+            now <
+            manualControlLockUntil &&
+            !emergency
+        ){
+
+            return;
+
+        }
+
+
+        const clearlyBetter =
+            bestDistance +
+            BLUE_DEFEND_SWITCH_ADVANTAGE <
+            activeDistance;
+
+
+        /*
+           إذا كان اللاعب الحالي بعيدًا
+           جدًا، لا نحتاج فرقًا كبيرًا.
+        */
+
+        const activeFar =
+            activeDistance >
+            BLUE_DEFEND_CONTROL_DISTANCE;
+
+
+        if(
+            !clearlyBetter &&
+            !activeFar &&
+            !emergency
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            setActivePlayer(
+                best.index,
+                false
+            )
+        ){
+
+            lastAutoSwitchTime =
+                now;
+
+        }
+
+
+        return;
+
+    }
+
+
+    /*
+       إذا الأزرق معه الكرة:
+       ننتقل لصاحب الكرة عند الحاجة.
+    */
 
     if(
         ballOwner &&
@@ -3992,20 +4241,25 @@ function autoSwitchPlayer(){
     }
 
 
-    if(
-        ballOwner &&
-        ballOwner.team ===
-            "red"
-    ){
-
-        return;
-
-    }
-
+    /*
+       إذا الأحمر معه الكرة تعاملنا
+       معه بالأعلى، لذلك نصل هنا
+       فقط عندما لا توجد ملكية حاليًا.
+    */
 
     if(
         !ballOwner
     ){
+
+        const activeDistance =
+            Math.hypot(
+                activePlayer.x -
+                    ballX,
+
+                activePlayer.y -
+                    ballY
+            );
+
 
         const best =
             findBestPlayerForBall();
@@ -4112,6 +4366,312 @@ function autoSwitchPlayer(){
         }
 
     }
+
+}
+
+
+/* =========================================================
+   BLUE TACKLE
+========================================================= */
+
+/*
+   هذا هو الافتكاك اليدوي للاعب الأزرق.
+
+   نفس زر التسديد يستخدم كالتالي:
+
+   🔵 معه الكرة
+   = تسديد
+
+   🔴 معه الكرة
+   = افتكاك
+*/
+
+function attemptBlueTackle(){
+
+    if(
+        !matchRunning ||
+        matchEnded
+    ){
+
+        return false;
+
+    }
+
+
+    const p =
+        teamPlayers[
+            activePlayerIndex
+        ];
+
+
+    if(
+        !p
+    ){
+
+        return false;
+
+    }
+
+
+    /*
+       يجب أن تكون الكرة مع الأحمر.
+    */
+
+    if(
+        !ballOwner ||
+        ballOwner.team !==
+        "red"
+    ){
+
+        return false;
+
+    }
+
+
+    const now =
+        performance.now();
+
+
+    /*
+       منع الضغط المتكرر بسرعة.
+    */
+
+    if(
+        now -
+        lastBlueTackleTime <
+        BLUE_TACKLE_COOLDOWN
+    ){
+
+        return false;
+
+    }
+
+
+    const owner =
+        ballOwner;
+
+
+    const dx =
+        owner.x -
+        p.x;
+
+    const dy =
+        owner.y -
+        p.y;
+
+
+    const distance =
+        Math.hypot(
+            dx,
+            dy
+        );
+
+
+    /*
+       بعيد عن الكرة.
+    */
+
+    if(
+        distance >
+        BLUE_TACKLE_DISTANCE
+    ){
+
+        return false;
+
+    }
+
+
+    /*
+       اتجاه اللاعب الحالي.
+    */
+
+    const directionX =
+        Math.cos(
+            p.direction
+        );
+
+    const directionY =
+        Math.sin(
+            p.direction
+        );
+
+
+    /*
+       اتجاه اللاعب نحو حامل الكرة.
+    */
+
+    let targetX =
+        dx;
+
+    let targetY =
+        dy;
+
+
+    if(
+        distance > 0.001
+    ){
+
+        targetX /=
+            distance;
+
+        targetY /=
+            distance;
+
+    }
+
+
+    /*
+       Dot product لمعرفة هل
+       اللاعب مواجه للكرة.
+    */
+
+    const facing =
+        directionX *
+        targetX +
+        directionY *
+        targetY;
+
+
+    if(
+        facing <
+        BLUE_TACKLE_DOT
+    ){
+
+        /*
+           محاولة فاشلة.
+           لا تنتقل الكرة.
+        */
+
+        lastBlueTackleTime =
+            now;
+
+        return false;
+
+    }
+
+
+    /*
+       اندفاع صغير للأمام.
+    */
+
+    const lungeX =
+        directionX *
+        BLUE_TACKLE_LUNGE;
+
+    const lungeY =
+        directionY *
+        BLUE_TACKLE_LUNGE;
+
+
+    const resolved =
+        resolvePlayerCollisions(
+            p,
+            p.x + lungeX,
+            p.y + lungeY
+        );
+
+
+    p.x =
+        resolved.x;
+
+    p.y =
+        resolved.y;
+
+
+    /*
+       بعد الاندفاع نحسب المسافة
+       مرة أخرى.
+    */
+
+    const finalDistance =
+        Math.hypot(
+            owner.x -
+            p.x,
+
+            owner.y -
+            p.y
+        );
+
+
+    /*
+       إذا بقي اللاعب قريبًا
+       من حامل الكرة، تنجح
+       محاولة الافتكاك.
+    */
+
+    if(
+        finalDistance <=
+        BLUE_TACKLE_DISTANCE + 8
+    ){
+
+        ballOwner =
+            p;
+
+        ballVX =
+            0;
+
+        ballVY =
+            0;
+
+
+        ballX =
+            p.x;
+
+        ballY =
+            p.y -
+            25;
+
+
+        lastOwnerChangeTime =
+            now;
+
+        lastBlueTackleTime =
+            now;
+
+
+        p.currentAction =
+            "won-ball";
+
+
+        p.hasBall =
+            true;
+
+
+        /*
+           تأكيد أن هذا اللاعب
+           هو المتحكم.
+        */
+
+        const index =
+            teamPlayers.indexOf(
+                p
+            );
+
+
+        if(
+            index >= 0 &&
+            index !==
+            activePlayerIndex
+        ){
+
+            setActivePlayer(
+                index,
+                false
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    lastBlueTackleTime =
+        now;
+
+
+    return false;
 
 }
 
@@ -4281,7 +4841,7 @@ function tryBallPickup(){
 
 
 /* =========================================================
-   TACKLE
+   OLD TACKLE SAFETY SYSTEM
 ========================================================= */
 
 function tackle(){
@@ -4316,7 +4876,7 @@ function tackle(){
 
             if(
                 d <
-                TACKLE_DISTANCE
+                RED_TACKLE_DISTANCE
             ){
 
                 const chance =
@@ -4324,7 +4884,7 @@ function tackle(){
                     (
                         1 -
                         d /
-                        TACKLE_DISTANCE
+                        RED_TACKLE_DISTANCE
                     );
 
 
@@ -4359,63 +4919,15 @@ function tackle(){
 
     }
 
-
     else{
 
-        for(
-            const e of teamPlayers
-        ){
+        /*
+           هنا لا نستخدم الافتكاك
+           العشوائي للاعب الأزرق
+           لأن الافتكاك أصبح يدويًا.
+        */
 
-            const d =
-                Math.hypot(
-                    e.x -
-                        ballOwner.x,
-
-                    e.y -
-                        ballOwner.y
-                );
-
-
-            if(
-                d <
-                TACKLE_DISTANCE
-            ){
-
-                const chance =
-                    0.07 *
-                    (
-                        1 -
-                        d /
-                        TACKLE_DISTANCE
-                    );
-
-
-                if(
-                    Math.random() <
-                    chance
-                ){
-
-                    ballOwner =
-                        e;
-
-                    ballVX =
-                        0;
-
-                    ballVY =
-                        0;
-
-
-                    lastOwnerChangeTime =
-                        performance.now();
-
-
-                    return;
-
-                }
-
-            }
-
-        }
+        return;
 
     }
 
@@ -4499,6 +5011,129 @@ function separatePlayers(
                 const push =
                     (
                         minDistance -
+                        d
+                    ) / 2;
+
+
+                dx /=
+                    d;
+
+                dy /=
+                    d;
+
+
+                if(
+                    !isAFixed
+                ){
+
+                    a.x -=
+                        dx * push;
+
+                    a.y -=
+                        dy * push;
+
+                }
+
+
+                if(
+                    !isBFixed
+                ){
+
+                    b.x +=
+                        dx * push;
+
+                    b.y +=
+                        dy * push;
+
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   SEPARATE ALL PLAYERS
+========================================================= */
+
+function separateAllPlayers(){
+
+    const players =
+        getAllPlayers();
+
+
+    for(
+        let i = 0;
+        i < players.length;
+        i++
+    ){
+
+        for(
+            let j = i + 1;
+            j < players.length;
+            j++
+        ){
+
+            const a =
+                players[i];
+
+            const b =
+                players[j];
+
+
+            const isAFixed =
+                a ===
+                teamPlayers[
+                    activePlayerIndex
+                ];
+
+
+            const isBFixed =
+                b ===
+                teamPlayers[
+                    activePlayerIndex
+                ];
+
+
+            let dx =
+                b.x - a.x;
+
+            let dy =
+                b.y - a.y;
+
+
+            let d =
+                Math.hypot(
+                    dx,
+                    dy
+                );
+
+
+            if(
+                d === 0
+            ){
+
+                dx = 1;
+
+                dy = 0;
+
+                d = 1;
+
+            }
+
+
+            if(
+                d <
+                PLAYER_COLLISION_DISTANCE
+            ){
+
+                const push =
+                    (
+                        PLAYER_COLLISION_DISTANCE -
                         d
                     ) / 2;
 
@@ -5359,7 +5994,7 @@ function kickBall(){
 
 
 /* =========================================================
-   KICK EVENTS
+   KICK / TACKLE BUTTON
 ========================================================= */
 
 kickControl.addEventListener(
@@ -5377,6 +6012,29 @@ kickControl.addEventListener(
 
         }
 
+
+        /*
+           إذا كانت الكرة مع الأحمر،
+           نفس الزر يصبح زر افتكاك.
+        */
+
+        if(
+            ballOwner &&
+            ballOwner.team ===
+            "red"
+        ){
+
+            attemptBlueTackle();
+
+            return;
+
+        }
+
+
+        /*
+           إذا كانت الكرة مع الأزرق،
+           الزر يعمل كزر تسديد.
+        */
 
         kickPointerId =
             e.pointerId;
@@ -6008,6 +6666,10 @@ function resetAfterGoal(){
         performance.now();
 
 
+    lastBlueTackleTime =
+        0;
+
+
     manualSelectedPlayerIndex =
         activePlayerIndex;
 
@@ -6488,6 +7150,9 @@ newMatch.addEventListener(
         lastOwnerChangeTime =
             0;
 
+        lastBlueTackleTime =
+            0;
+
 
         createTeams();
 
@@ -6636,6 +7301,11 @@ function updateGame(
     );
 
 
+    /*
+       افتكاك الأحمر للكرة
+       يبقى جزءًا من الذكاء الاصطناعي.
+    */
+
     tackle();
 
 
@@ -6652,24 +7322,26 @@ function updateGame(
     tryBallPickup();
 
 
+    /*
+       مهم جدًا:
+
+       الآن autoSwitchPlayer()
+       يعمل أيضًا عندما تكون
+       الكرة مع الأحمر.
+
+       لذلك عندما يقترب أحد
+       لاعبي الأزرق من حامل
+       الكرة، ينتقل التحكم إليه.
+    */
+
     autoSwitchPlayer();
 
 
     /*
-       هذا الآن مجرد نظام أمان إضافي.
-       الاصطدام الأساسي يحدث داخل movePlayer.
+       نظام أمان للتصادم.
     */
 
-    separatePlayers(
-        teamPlayers,
-        PLAYER_COLLISION_DISTANCE
-    );
-
-
-    separatePlayers(
-        opponents,
-        PLAYER_COLLISION_DISTANCE
-    );
+    separateAllPlayers();
 
 
     updateCamera();
@@ -6760,6 +7432,10 @@ function initializeGame(){
 
     lastOwnerChangeTime =
         performance.now();
+
+
+    lastBlueTackleTime =
+        0;
 
 
     setActivePlayer(
