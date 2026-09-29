@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.0.3</title>
+<title>كرة القدم ⚽️ v4.0.4</title>
 
 <style>
 
@@ -1004,6 +1004,56 @@ const TACKLE_DISTANCE =
 
 
 /* =========================================================
+   RED AI
+   ذكاء الأحمر
+
+   ملاحظة:
+   لا توجد أي زيادة في سرعة اللاعبين.
+   هذه القيم تتحكم في سرعة اتخاذ القرار
+   وليس سرعة الحركة.
+========================================================= */
+
+const RED_DECISION_MIN =
+    0.16;
+
+const RED_DECISION_MAX =
+    0.34;
+
+const RED_CHASE_DISTANCE =
+    520;
+
+const RED_PRESS_DISTANCE =
+    360;
+
+const RED_TACKLE_DISTANCE =
+    48;
+
+const RED_TACKLE_CHANCE =
+    0.13;
+
+const RED_SHOT_MIN_DISTANCE =
+    150;
+
+const RED_SHOT_MAX_DISTANCE =
+    900;
+
+const RED_SHOT_COOLDOWN =
+    0.75;
+
+const RED_LONG_SHOT_DISTANCE =
+    520;
+
+const RED_SHOT_SPEED_MIN =
+    650;
+
+const RED_SHOT_SPEED_MAX =
+    1250;
+
+const RED_SHOT_TARGET_OFFSET =
+    58;
+
+
+/* =========================================================
    GOAL
 ========================================================= */
 
@@ -1253,7 +1303,26 @@ function createPlayer(
 
         vy:0,
 
-        hasBall:false
+        hasBall:false,
+
+        /*
+           متغيرات خاصة بذكاء الأحمر.
+           لا تؤثر على سرعة الحركة.
+        */
+
+        decisionTimer:
+            Math.random() *
+            0.25,
+
+        shotCooldown:
+            Math.random() *
+            0.5,
+
+        currentAction:
+            "position",
+
+        shotType:
+            "direct"
 
     };
 
@@ -1434,15 +1503,6 @@ function getRoleBounds(p){
         PLAYER_RADIUS;
 
 
-    /*
-       هذه الحدود أصبحت مرجعًا
-       لمركز اللاعب وليست بوابة
-       تجبر اللاعب على الانتقال
-       فجأة.
-
-       اللاعب المتحكم لديه حرية كاملة.
-    */
-
     if(
         p.team === "blue" &&
         p ===
@@ -1596,20 +1656,6 @@ function getRoleBounds(p){
 
 /* =========================================================
    MOVE PLAYER
-   v4.0.3
-
-   مهم:
-   لم نعد نستخدم حدود الدور كـ clamp
-   أثناء الحركة.
-
-   السبب:
-   إذا كان المدافع متحكمًا فيه وصعد
-   للهجوم، ثم فقد التحكم، فإن clamp
-   القديم كان ينقله فورًا إلى الدفاع.
-
-   الآن نستخدم حدود الملعب فقط.
-   الـAI نفسه يعيد اللاعب تدريجيًا
-   إلى الـanchor الخاص بدوره.
 ========================================================= */
 
 function movePlayer(
@@ -1650,13 +1696,6 @@ function movePlayer(
         p.speed *
         dt;
 
-
-    /*
-       حدود الملعب فقط.
-
-       لا يوجد هنا clamp حسب الدور.
-       لذلك لا يوجد انتقال مفاجئ.
-    */
 
     p.x =
         clamp(
@@ -1988,7 +2027,636 @@ function updateBlueAI(
 
 
 /* =========================================================
+   RED DECISION TIMER
+========================================================= */
+
+function resetRedDecisionTimer(
+    p
+){
+
+    p.decisionTimer =
+        RED_DECISION_MIN +
+        Math.random() *
+        (
+            RED_DECISION_MAX -
+            RED_DECISION_MIN
+        );
+
+}
+
+
+/* =========================================================
+   RED SHOT COOLDOWN
+========================================================= */
+
+function resetRedShotCooldown(
+    p
+){
+
+    p.shotCooldown =
+        RED_SHOT_COOLDOWN +
+        Math.random() *
+        0.35;
+
+}
+
+
+/* =========================================================
+   RED SHOT TYPE
+========================================================= */
+
+function chooseRedShotType(
+    p,
+    distanceToGoal
+){
+
+    const r =
+        Math.random();
+
+
+    /*
+       من بعيد:
+       تسديدات متنوعة أكثر.
+    */
+
+    if(
+        distanceToGoal >
+        RED_LONG_SHOT_DISTANCE
+    ){
+
+        if(
+            r < 0.34
+        ){
+
+            return "long-left";
+
+        }
+
+        if(
+            r < 0.68
+        ){
+
+            return "long-right";
+
+        }
+
+        return "long-direct";
+
+    }
+
+
+    /*
+       من المسافات المتوسطة والقريبة.
+    */
+
+    if(
+        r < 0.32
+    ){
+
+        return "direct";
+
+    }
+
+    if(
+        r < 0.57
+    ){
+
+        return "diagonal-left";
+
+    }
+
+    if(
+        r < 0.82
+    ){
+
+        return "diagonal-right";
+
+    }
+
+    return "power";
+
+}
+
+
+/* =========================================================
+   RED SHOOT
+========================================================= */
+
+function redShoot(
+    p
+){
+
+    if(
+        ballOwner !== p
+    ){
+
+        return false;
+
+    }
+
+
+    if(
+        p.shotCooldown > 0
+    ){
+
+        return false;
+
+    }
+
+
+    const goalX =
+        worldWidth / 2;
+
+    const goalY =
+        0;
+
+
+    const dxGoal =
+        goalX -
+        p.x;
+
+    const dyGoal =
+        goalY -
+        p.y;
+
+
+    const distanceToGoal =
+        Math.hypot(
+            dxGoal,
+            dyGoal
+        );
+
+
+    if(
+        distanceToGoal <
+        RED_SHOT_MIN_DISTANCE
+    ){
+
+        return false;
+
+    }
+
+
+    if(
+        distanceToGoal >
+        RED_SHOT_MAX_DISTANCE
+    ){
+
+        return false;
+
+    }
+
+
+    /*
+       لا نسدد إذا كان اللاعب بعيدًا
+       جدًا عن منطقة اللعب الطبيعية.
+    */
+
+    if(
+        p.y >
+        worldHeight * 0.92
+    ){
+
+        return false;
+
+    }
+
+
+    const shotType =
+        chooseRedShotType(
+            p,
+            distanceToGoal
+        );
+
+
+    let targetX =
+        goalX;
+
+    let targetY =
+        -45;
+
+
+    /*
+       التسديدة المباشرة
+    */
+
+    if(
+        shotType ===
+        "direct"
+    ){
+
+        targetX =
+            goalX +
+            (
+                Math.random() - 0.5
+            ) *
+            24;
+
+        targetY =
+            -35;
+
+    }
+
+
+    /*
+       مائلة لليسار
+    */
+
+    else if(
+        shotType ===
+        "diagonal-left"
+    ){
+
+        targetX =
+            goalX -
+            RED_SHOT_TARGET_OFFSET;
+
+        targetY =
+            -35;
+
+    }
+
+
+    /*
+       مائلة لليمين
+    */
+
+    else if(
+        shotType ===
+        "diagonal-right"
+    ){
+
+        targetX =
+            goalX +
+            RED_SHOT_TARGET_OFFSET;
+
+        targetY =
+            -35;
+
+    }
+
+
+    /*
+       تسديدة بعيدة إلى اليسار
+    */
+
+    else if(
+        shotType ===
+        "long-left"
+    ){
+
+        targetX =
+            goalX -
+            48;
+
+        targetY =
+            -55;
+
+    }
+
+
+    /*
+       تسديدة بعيدة إلى اليمين
+    */
+
+    else if(
+        shotType ===
+        "long-right"
+    ){
+
+        targetX =
+            goalX +
+            48;
+
+        targetY =
+            -55;
+
+    }
+
+
+    /*
+       تسديدة بعيدة مباشرة
+    */
+
+    else if(
+        shotType ===
+        "long-direct"
+    ){
+
+        targetX =
+            goalX +
+            (
+                Math.random() - 0.5
+            ) *
+            35;
+
+        targetY =
+            -55;
+
+    }
+
+
+    /*
+       تسديدة قوية
+    */
+
+    else if(
+        shotType ===
+        "power"
+    ){
+
+        targetX =
+            goalX +
+            (
+                Math.random() < 0.5
+                ? -42
+                : 42
+            );
+
+        targetY =
+            -30;
+
+    }
+
+
+    let dx =
+        targetX -
+        p.x;
+
+    let dy =
+        targetY -
+        p.y;
+
+
+    const d =
+        Math.hypot(
+            dx,
+            dy
+        );
+
+
+    if(
+        d < 1
+    ){
+
+        return false;
+
+    }
+
+
+    dx /=
+        d;
+
+    dy /=
+        d;
+
+
+    /*
+       التسديد من بعيد يكون قويًا.
+       القريب يكون أقل حتى لا يصبح الأحمر
+       آلة أهداف.
+    */
+
+    const distanceRatio =
+        clamp(
+            distanceToGoal /
+            RED_SHOT_MAX_DISTANCE,
+            0,
+            1
+        );
+
+
+    let speed =
+        RED_SHOT_SPEED_MIN +
+        (
+            RED_SHOT_SPEED_MAX -
+            RED_SHOT_SPEED_MIN
+        ) *
+        (
+            0.45 +
+            distanceRatio *
+            0.55
+        );
+
+
+    if(
+        shotType ===
+        "power"
+    ){
+
+        speed *=
+            1.08;
+
+    }
+
+
+    ballOwner =
+        null;
+
+
+    ballX =
+        p.x +
+        dx * 30;
+
+    ballY =
+        p.y +
+        dy * 30;
+
+
+    ballVX =
+        dx *
+        speed;
+
+    ballVY =
+        dy *
+        speed;
+
+
+    p.shotType =
+        shotType;
+
+    p.currentAction =
+        "shot";
+
+
+    resetRedShotCooldown(
+        p
+    );
+
+
+    /*
+       بعد التسديد نريد من اللاعب
+       إعادة تقييم الموقف بسرعة.
+    */
+
+    resetRedDecisionTimer(
+        p
+    );
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   RED TACKLE ATTEMPT
+========================================================= */
+
+function redTryTackle(
+    p
+){
+
+    if(
+        !ballOwner ||
+        ballOwner.team !==
+        "blue"
+    ){
+
+        return false;
+
+    }
+
+
+    const owner =
+        ballOwner;
+
+
+    const d =
+        Math.hypot(
+            owner.x -
+            p.x,
+
+            owner.y -
+            p.y
+        );
+
+
+    if(
+        d >
+        RED_TACKLE_DISTANCE
+    ){
+
+        return false;
+
+    }
+
+
+    /*
+       كلما اقترب الأحمر من صاحب الكرة
+       زادت فرصة الافتكاك.
+    */
+
+    const proximity =
+        1 -
+        d /
+        RED_TACKLE_DISTANCE;
+
+
+    const chance =
+        RED_TACKLE_CHANCE *
+        (
+            0.55 +
+            proximity *
+            0.75
+        );
+
+
+    if(
+        Math.random() <
+        chance
+    ){
+
+        ballOwner =
+            p;
+
+        ballVX =
+            0;
+
+        ballVY =
+            0;
+
+
+        lastOwnerChangeTime =
+            performance.now();
+
+
+        p.currentAction =
+            "won-ball";
+
+
+        resetRedDecisionTimer(
+            p
+        );
+
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   FIND NEAREST RED TO BALL
+========================================================= */
+
+function findNearestRedToBall(){
+
+    let nearest =
+        null;
+
+    let nearestDistance =
+        Infinity;
+
+
+    for(
+        const p of opponents
+    ){
+
+        const d =
+            Math.hypot(
+                p.x -
+                ballX,
+
+                p.y -
+                ballY
+            );
+
+
+        if(
+            d <
+            nearestDistance
+        ){
+
+            nearestDistance =
+                d;
+
+            nearest =
+                p;
+
+        }
+
+    }
+
+
+    return {
+
+        player:nearest,
+
+        distance:nearestDistance
+
+    };
+
+}
+
+
+/* =========================================================
    RED AI
+   النظام الجديد لاتخاذ القرار
 ========================================================= */
 
 function updateRedAI(
@@ -1999,54 +2667,498 @@ function updateRedAI(
         const p of opponents
     ){
 
+        /*
+           تحديث المؤقتات.
+        */
+
+        p.decisionTimer -=
+            dt;
+
+        p.shotCooldown -=
+            dt;
+
+
+        /*
+           إذا كان اللاعب الأحمر هو صاحب
+           الكرة، نعطيه نظامًا هجوميًا خاصًا.
+        */
+
         if(
             ballOwner === p
         ){
 
-            continue;
-
-        }
-
-
-        const distToBall =
-            Math.hypot(
-                ballX - p.x,
-                ballY - p.y
-            );
-
-
-        if(
-            distToBall < 70
-        ){
+            /*
+               الكرة مع الأحمر:
+               يقرر بسرعة ماذا سيفعل.
+            */
 
             if(
-                distToBall > 0
+                p.decisionTimer <= 0
             ){
 
-                movePlayer(
-                    p,
-
-                    (ballX - p.x) /
-                        distToBall,
-
-                    (ballY - p.y) /
-                        distToBall,
-
-                    dt
+                resetRedDecisionTimer(
+                    p
                 );
+
+
+                const goalX =
+                    worldWidth / 2;
+
+                const goalY =
+                    0;
+
+
+                const distToGoal =
+                    Math.hypot(
+                        goalX -
+                        p.x,
+
+                        goalY -
+                        p.y
+                    );
+
+
+                /*
+                   احتمال التسديد.
+
+                   من المسافة البعيدة:
+                   ما زال هناك احتمال للتسديد،
+                   لكنه أقل من المسافات المناسبة.
+
+                   هذا يمنع الأحمر من الانتظار
+                   دائمًا حتى يصل إلى خط المرمى.
+                */
+
+                let shotChance =
+                    0.08;
+
+
+                if(
+                    distToGoal <
+                    300
+                ){
+
+                    shotChance =
+                        0.34;
+
+                }
+
+                else if(
+                    distToGoal <
+                    450
+                ){
+
+                    shotChance =
+                        0.25;
+
+                }
+
+                else if(
+                    distToGoal <
+                    650
+                ){
+
+                    shotChance =
+                        0.17;
+
+                }
+
+                else{
+
+                    shotChance =
+                        0.10;
+
+                }
+
+
+                /*
+                   إذا كان قريبًا جدًا من المرمى
+                   تصبح فرصة التسديد أعلى.
+                */
+
+                if(
+                    distToGoal <
+                    220
+                ){
+
+                    shotChance =
+                        0.52;
+
+                }
+
+
+                /*
+                   لا نسدد إذا كنا قريبين جدًا
+                   من الخط السفلي.
+                */
+
+                if(
+                    p.y >
+                    worldHeight * 0.92
+                ){
+
+                    shotChance =
+                        0;
+
+                }
+
+
+                if(
+                    Math.random() <
+                    shotChance &&
+                    p.shotCooldown <= 0
+                ){
+
+                    if(
+                        redShoot(p)
+                    ){
+
+                        continue;
+
+                    }
+
+                }
+
+
+                /*
+                   إذا لم يسدد، يتجه نحو المرمى
+                   لكن ليس بسرعة إضافية.
+                */
+
+                const targetX =
+                    goalX;
+
+                const targetY =
+                    Math.min(
+                        worldHeight *
+                        0.30,
+
+                        goalY +
+                        230
+                    );
+
+
+                /*
+                   أحيانًا يتحرك باتجاه
+                   زاوية مختلفة بدل الخط المستقيم.
+                */
+
+                let moveTargetX =
+                    targetX;
+
+
+                let moveTargetY =
+                    targetY;
+
+
+                if(
+                    Math.random() <
+                    0.30
+                ){
+
+                    moveTargetX +=
+                        (
+                            Math.random() -
+                            0.5
+                        ) *
+                        180;
+
+                }
+
+
+                const dx =
+                    moveTargetX -
+                    p.x;
+
+                const dy =
+                    moveTargetY -
+                    p.y;
+
+                const d =
+                    Math.hypot(
+                        dx,
+                        dy
+                    );
+
+
+                if(
+                    d > 8
+                ){
+
+                    movePlayer(
+                        p,
+                        dx / d,
+                        dy / d,
+                        dt
+                    );
+
+                }
 
             }
 
+            else{
+
+                /*
+                   بين القرارات يستمر اللاعب
+                   في الحركة السابقة/الهجوم.
+                */
+
+                const goalX =
+                    worldWidth / 2;
+
+                const goalY =
+                    0;
+
+
+                const dx =
+                    goalX -
+                    p.x;
+
+                const dy =
+                    (
+                        goalY +
+                        240
+                    ) -
+                    p.y;
+
+
+                const d =
+                    Math.hypot(
+                        dx,
+                        dy
+                    );
+
+
+                if(
+                    d > 8
+                ){
+
+                    movePlayer(
+                        p,
+                        dx / d,
+                        dy / d,
+                        dt
+                    );
+
+                }
+
+            }
+
+
             continue;
 
         }
 
+
+        /*
+           الأحمر بدون كرة.
+        */
 
         const blueHasBall =
             ballOwner &&
             ballOwner.team ===
                 "blue";
 
+
+        const freeBall =
+            !ballOwner;
+
+
+        const distToBall =
+            Math.hypot(
+                ballX -
+                p.x,
+
+                ballY -
+                p.y
+            );
+
+
+        /*
+           إذا كانت الكرة مع الأزرق:
+           الأحمر يضغط عليها.
+        */
+
+        if(
+            blueHasBall
+        ){
+
+            /*
+               أولًا محاولة افتكاك فورية
+               إذا كان قريبًا.
+            */
+
+            if(
+                distToBall <=
+                RED_TACKLE_DISTANCE
+            ){
+
+                if(
+                    redTryTackle(p)
+                ){
+
+                    continue;
+
+                }
+
+            }
+
+
+            /*
+               إذا كان قريبًا، يتجه مباشرة
+               نحو صاحب الكرة وليس إلى الـanchor.
+            */
+
+            if(
+                distToBall <
+                RED_PRESS_DISTANCE
+            ){
+
+                const owner =
+                    ballOwner;
+
+
+                const dx =
+                    owner.x -
+                    p.x;
+
+                const dy =
+                    owner.y -
+                    p.y;
+
+                const d =
+                    Math.hypot(
+                        dx,
+                        dy
+                    );
+
+
+                if(
+                    d > 2
+                ){
+
+                    movePlayer(
+                        p,
+                        dx / d,
+                        dy / d,
+                        dt
+                    );
+
+                }
+
+
+                continue;
+
+            }
+
+
+            /*
+               إذا كانت الكرة أبعد، أقرب
+               لاعب أحمر يبدأ مطاردتها.
+            */
+
+            if(
+                distToBall <
+                RED_CHASE_DISTANCE
+            ){
+
+                const dx =
+                    ballX -
+                    p.x;
+
+                const dy =
+                    ballY -
+                    p.y;
+
+                const d =
+                    Math.hypot(
+                        dx,
+                        dy
+                    );
+
+
+                if(
+                    d > 8
+                ){
+
+                    movePlayer(
+                        p,
+                        dx / d,
+                        dy / d,
+                        dt
+                    );
+
+                }
+
+
+                continue;
+
+            }
+
+        }
+
+
+        /*
+           الكرة حرة:
+           اللاعب الأقرب للكرة يحصل على
+           أولوية مطاردتها.
+        */
+
+        if(
+            freeBall &&
+            distToBall <
+            RED_CHASE_DISTANCE
+        ){
+
+            const nearest =
+                findNearestRedToBall();
+
+
+            if(
+                nearest.player === p
+            ){
+
+                const dx =
+                    ballX -
+                    p.x;
+
+                const dy =
+                    ballY -
+                    p.y;
+
+                const d =
+                    Math.hypot(
+                        dx,
+                        dy
+                    );
+
+
+                if(
+                    d > 8
+                ){
+
+                    movePlayer(
+                        p,
+                        dx / d,
+                        dy / d,
+                        dt
+                    );
+
+                }
+
+
+                continue;
+
+            }
+
+        }
+
+
+        /*
+           إذا لم تكن هناك حالة ضغط مباشرة،
+           يعود اللاعب إلى دوره ولكن مع
+           تعديلات حسب وضع الكرة.
+        */
 
         let targetX =
             p.anchorX;
@@ -2064,17 +3176,16 @@ function updateRedAI(
                 "defender"
             ){
 
-                if(
-                    distToBall < 260
-                ){
+                targetX =
+                    clamp(
+                        ballX,
+                        worldWidth * 0.20,
+                        worldWidth * 0.80
+                    );
 
-                    targetX =
-                        ballX;
-
-                    targetY =
-                        ballY;
-
-                }
+                targetY =
+                    worldHeight *
+                    0.30;
 
             }
 
@@ -2084,7 +3195,12 @@ function updateRedAI(
             ){
 
                 targetX =
-                    p.anchorX;
+                    p.anchorX +
+                    (
+                        ballX -
+                        worldWidth / 2
+                    ) *
+                    0.20;
 
                 targetY =
                     worldHeight *
@@ -2097,28 +3213,12 @@ function updateRedAI(
                 "forward"
             ){
 
-                if(
-                    distToBall < 220
-                ){
+                targetX =
+                    worldWidth / 2;
 
-                    targetX =
-                        ballX;
-
-                    targetY =
-                        ballY;
-
-                }
-
-                else{
-
-                    targetX =
-                        worldWidth / 2;
-
-                    targetY =
-                        worldHeight *
-                        0.70;
-
-                }
+                targetY =
+                    worldHeight *
+                    0.68;
 
             }
 
@@ -2144,6 +3244,11 @@ function updateRedAI(
 
         else{
 
+            /*
+               لا توجد كرة مع الأزرق.
+               يحافظ الأحمر على تشكيله.
+            */
+
             if(
                 p.role ===
                 "wing"
@@ -2154,7 +3259,7 @@ function updateRedAI(
 
                 targetY =
                     worldHeight *
-                    0.65;
+                    0.45;
 
             }
 
@@ -2168,7 +3273,7 @@ function updateRedAI(
 
                 targetY =
                     worldHeight *
-                    0.80;
+                    0.68;
 
             }
 
@@ -2268,6 +3373,27 @@ function updateBallAI(
     }
 
 
+    /*
+       الأحمر أصبح لديه نظام تسديد مستقل
+       داخل updateRedAI.
+
+       لذلك هنا لا نسحب منه الكرة
+       أو نجبره على التسديد بطريقة عشوائية.
+    */
+
+    if(
+        p.team === "red"
+    ){
+
+        return;
+
+    }
+
+
+    /*
+       سلوك الأزرق القديم.
+    */
+
     const goalX =
         worldWidth / 2;
 
@@ -2290,11 +3416,7 @@ function updateBallAI(
 
         if(
             Math.random() <
-            (
-                p.team === "red"
-                ? 0.06
-                : 0.04
-            )
+            0.04
         ){
 
             let dx =
@@ -2395,11 +3517,7 @@ function updateBallAI(
 
         if(
             Math.random() <
-            (
-                p.team === "red"
-                ? 0.10
-                : 0.06
-            )
+            0.06
         ){
 
             const attackDir =
@@ -2694,10 +3812,6 @@ function autoSwitchPlayer(){
         );
 
 
-    /* =====================================================
-       الكرة مع لاعب أزرق
-    ===================================================== */
-
     if(
         ballOwner &&
         ballOwner.team === "blue"
@@ -2783,10 +3897,6 @@ function autoSwitchPlayer(){
     }
 
 
-    /* =====================================================
-       الكرة مع الأحمر
-    ===================================================== */
-
     if(
         ballOwner &&
         ballOwner.team === "red"
@@ -2796,10 +3906,6 @@ function autoSwitchPlayer(){
 
     }
 
-
-    /* =====================================================
-       الكرة حرة
-    ===================================================== */
 
     if(
         !ballOwner
@@ -3074,6 +4180,16 @@ function tryBallPickup(){
         lastOwnerChangeTime =
             performance.now();
 
+
+        /*
+           عندما يلتقط الأحمر الكرة،
+           نجعل قراره التالي قريبًا.
+        */
+
+        resetRedDecisionTimer(
+            nearestRed
+        );
+
     }
 
 }
@@ -3094,10 +4210,22 @@ function tackle(){
     }
 
 
+    /*
+       الأحمر أصبح لديه نظام افتكاك
+       خاص به داخل updateRedAI.
+       لذلك لا نطبق هنا افتكاكًا ثانيًا
+       حتى لا تصبح النتيجة مبالغًا فيها.
+    */
+
     if(
         ballOwner.team ===
         "blue"
     ){
+
+        /*
+           الأزرق ما زال لديه نظام الافتكاك
+           القديم من الأحمر.
+        */
 
         for(
             const e of opponents
@@ -3143,6 +4271,10 @@ function tackle(){
 
                     lastOwnerChangeTime =
                         performance.now();
+
+                    resetRedDecisionTimer(
+                        e
+                    );
 
                     return;
 
@@ -4780,6 +5912,14 @@ function resetAfterGoal(){
         p.y =
             p.anchorY;
 
+        resetRedDecisionTimer(
+            p
+        );
+
+        resetRedShotCooldown(
+            p
+        );
+
     }
 
 
@@ -5432,6 +6572,11 @@ function updateGame(
         dt
     );
 
+
+    /*
+       الأحمر أولاً يقرر،
+       ثم الفيزياء تتعامل مع الكرة.
+    */
 
     updateRedAI(
         dt
