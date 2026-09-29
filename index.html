@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.0.9</title>
+<title>كرة القدم ⚽️ v4.1.0</title>
 
 <style>
 
@@ -58,12 +58,6 @@ touch-action:none;
 position:absolute;
 left:0;
 top:0;
-
-/*
-   الملعب أكبر من الشاشة.
-   الحجم الفعلي يتم تحديده
-   بواسطة JavaScript.
-*/
 
 width:1200px;
 height:2200px;
@@ -553,15 +547,14 @@ const MATCH_DURATION=180;
 
 /*
    ========================================================
-   WORLD SIZE v4.0.9
+   WORLD SIZE v4.1.0
    ========================================================
 
-   الملعب أصبح أكبر بكثير من الشاشة.
-
-   الشاشة تعرض جزءًا فقط من الملعب،
-   والكاميرا تتحرك داخل هذا العالم.
-
+   الملعب كبير:
    1200 × 2200
+
+   تم رفع سرعة اللاعبين لأن زيادة مساحة
+   الملعب جعلت السرعات القديمة تبدو بطيئة.
 */
 
 const WORLD_WIDTH=1200;
@@ -581,6 +574,54 @@ const GOAL_WIDTH=190;
 const JOYSTICK_MAX_DISTANCE=48;
 
 const PLAYER_PICKUP_DISTANCE=30;
+
+
+/* =========================================================
+   PLAYER SPEEDS v4.1.0
+========================================================= */
+
+/*
+   BLUE
+
+   Forward:
+   130 → 165
+
+   Wing:
+   95 → 125
+
+   Defender:
+   90 → 115
+
+   Guard:
+   75 → 95
+*/
+
+const BLUE_FORWARD_SPEED=165;
+const BLUE_WING_SPEED=125;
+const BLUE_DEFENDER_SPEED=115;
+const BLUE_GUARD_SPEED=95;
+
+
+/*
+   RED
+
+   Forward:
+   90 → 115
+
+   Wing:
+   90 → 115
+
+   Defender:
+   85 → 110
+
+   Guard:
+   80 → 100
+*/
+
+const RED_FORWARD_SPEED=115;
+const RED_WING_SPEED=115;
+const RED_DEFENDER_SPEED=110;
+const RED_GUARD_SPEED=100;
 
 
 /* =========================================================
@@ -683,14 +724,6 @@ let lastBlueTackleTime=0;
 /* =========================================================
    WORLD
 ========================================================= */
-
-/*
-   مهم:
-   worldWidth و worldHeight لم يعودا يساويان
-   حجم الشاشة.
-
-   هما حجم عالم اللعبة الحقيقي.
-*/
 
 let viewWidth=game.clientWidth;
 let viewHeight=game.clientHeight;
@@ -865,7 +898,7 @@ createPlayer(
 "blue",
 worldWidth/2,
 worldHeight*0.62,
-130,
+BLUE_FORWARD_SPEED,
 "forward"
 ),
 
@@ -874,7 +907,7 @@ createPlayer(
 "blue",
 worldWidth*0.15,
 worldHeight*0.58,
-95,
+BLUE_WING_SPEED,
 "wing"
 ),
 
@@ -883,7 +916,7 @@ createPlayer(
 "blue",
 worldWidth*0.85,
 worldHeight*0.58,
-95,
+BLUE_WING_SPEED,
 "wing"
 ),
 
@@ -892,7 +925,7 @@ createPlayer(
 "blue",
 worldWidth*0.30,
 worldHeight*0.75,
-90,
+BLUE_DEFENDER_SPEED,
 "defender"
 ),
 
@@ -901,7 +934,7 @@ createPlayer(
 "blue",
 worldWidth*0.50,
 worldHeight*0.95,
-75,
+BLUE_GUARD_SPEED,
 "guard"
 )
 
@@ -915,7 +948,7 @@ createPlayer(
 "red",
 worldWidth/2,
 worldHeight*0.38,
-90,
+RED_FORWARD_SPEED,
 "forward"
 ),
 
@@ -924,7 +957,7 @@ createPlayer(
 "red",
 worldWidth*0.15,
 worldHeight*0.42,
-90,
+RED_WING_SPEED,
 "wing"
 ),
 
@@ -933,7 +966,7 @@ createPlayer(
 "red",
 worldWidth*0.85,
 worldHeight*0.42,
-90,
+RED_WING_SPEED,
 "wing"
 ),
 
@@ -942,7 +975,7 @@ createPlayer(
 "red",
 worldWidth*0.30,
 worldHeight*0.22,
-85,
+RED_DEFENDER_SPEED,
 "defender"
 ),
 
@@ -951,7 +984,7 @@ createPlayer(
 "red",
 worldWidth*0.50,
 worldHeight*0.10,
-80,
+RED_GUARD_SPEED,
 "guard"
 )
 
@@ -4724,20 +4757,6 @@ function resizeGame(){
 viewWidth=game.clientWidth;
 viewHeight=game.clientHeight;
 
-
-/*
-   لا نغير worldWidth/worldHeight هنا.
-
-   هذه النقطة مهمة جدًا.
-
-   حجم الشاشة يتغير عندما يظهر/يختفي
-   شريط Safari، لكن عالم اللعبة
-   يبقى 1200 × 2200.
-
-   لذلك لن تعود حدود الملعب
-   إلى حافة الشاشة.
-*/
-
 worldWidth=WORLD_WIDTH;
 worldHeight=WORLD_HEIGHT;
 
@@ -4889,13 +4908,6 @@ window.addEventListener(
 
 resizeGame();
 
-
-/*
-   اللاعب والكرة لا يعاد وضعهما
-   عند تغيير حجم الشاشة.
-
-   فقط الكاميرا تعيد حساب حدودها.
-*/
 
 ballX=
 clamp(
