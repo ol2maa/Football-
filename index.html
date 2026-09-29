@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.0.8</title>
+<title>كرة القدم ⚽️ v4.0.9</title>
 
 <style>
 
@@ -58,8 +58,16 @@ touch-action:none;
 position:absolute;
 left:0;
 top:0;
-width:100%;
-height:100%;
+
+/*
+   الملعب أكبر من الشاشة.
+   الحجم الفعلي يتم تحديده
+   بواسطة JavaScript.
+*/
+
+width:1200px;
+height:2200px;
+
 background:
 repeating-linear-gradient(
 to bottom,
@@ -68,6 +76,7 @@ to bottom,
 #15833a 80px,
 #15833a 160px
 );
+
 overflow:hidden;
 transform:translate3d(0,0,0);
 will-change:transform;
@@ -269,18 +278,22 @@ animation:goalPop .35s ease-out forwards;
 }
 
 @keyframes goalPop{
+
 0%{
 transform:scale(.7);
 opacity:0;
 }
+
 70%{
 transform:scale(1.15);
 opacity:1;
 }
+
 100%{
 transform:scale(1);
 opacity:1;
 }
+
 }
 
 #powerBox{
@@ -537,6 +550,24 @@ const goalCelebration=document.getElementById("goalCelebration");
 const CAMERA_SMOOTH=0.055;
 const MATCH_DURATION=180;
 
+
+/*
+   ========================================================
+   WORLD SIZE v4.0.9
+   ========================================================
+
+   الملعب أصبح أكبر بكثير من الشاشة.
+
+   الشاشة تعرض جزءًا فقط من الملعب،
+   والكاميرا تتحرك داخل هذا العالم.
+
+   1200 × 2200
+*/
+
+const WORLD_WIDTH=1200;
+const WORLD_HEIGHT=2200;
+
+
 const PLAYER_RADIUS=19;
 const BALL_RADIUS=11;
 
@@ -573,49 +604,14 @@ GOAL_POST_RADIUS+
    BLUE TACKLE
 ========================================================= */
 
-/*
-   أقصى مسافة لبدء محاولة الافتكاك.
-*/
-
 const BLUE_TACKLE_DISTANCE=55;
-
-
-/*
-   مسافة التلامس المطلوبة فعليًا
-   لنجاح الافتكاك.
-
-   لا يكفي أن يكون اللاعب قريبًا.
-   يجب أن يصل فعليًا إلى الخصم.
-*/
 
 const BLUE_TACKLE_CONTACT_DISTANCE=
 PLAYER_COLLISION_DISTANCE+6;
 
-
-/*
-   زاوية مواجهة الخصم.
-
-   0.45 تسمح بزاوية جيدة
-   ولكن تمنع الافتكاك من الخلف
-   أو من الجانب البعيد.
-*/
-
 const BLUE_TACKLE_DOT=0.45;
 
-
-/*
-   وقت الانتظار بين محاولات الافتكاك.
-*/
-
 const BLUE_TACKLE_COOLDOWN=420;
-
-
-/*
-   اندفاعة الافتكاك.
-
-   اللاعب يتحرك للأمام بهذه
-   المسافة عند الضغط على الزر.
-*/
 
 const BLUE_TACKLE_LUNGE=12;
 
@@ -688,11 +684,19 @@ let lastBlueTackleTime=0;
    WORLD
 ========================================================= */
 
+/*
+   مهم:
+   worldWidth و worldHeight لم يعودا يساويان
+   حجم الشاشة.
+
+   هما حجم عالم اللعبة الحقيقي.
+*/
+
 let viewWidth=game.clientWidth;
 let viewHeight=game.clientHeight;
 
-let worldWidth=viewWidth;
-let worldHeight=viewHeight*2;
+let worldWidth=WORLD_WIDTH;
+let worldHeight=WORLD_HEIGHT;
 
 let cameraX=0;
 let cameraY=0;
@@ -2817,22 +2821,6 @@ lastAutoSwitchTime=now;
    BLUE TACKLE v4.0.8
 ========================================================= */
 
-/*
-   الافتكاك اليدوي.
-
-   لا يكفي أن يكون اللاعب قريبًا.
-
-   يجب أن:
-
-   1. تكون الكرة مع لاعب أحمر.
-   2. يكون اللاعب الأزرق داخل مدى الافتكاك.
-   3. يكون مواجهًا لحامل الكرة.
-   4. يقوم باندفاعة قصيرة.
-   5. يصل فعليًا إلى منطقة التلامس.
-
-   إذا تحقق ذلك تنتقل الكرة إليه.
-*/
-
 function attemptBlueTackle(){
 
 if(
@@ -2850,11 +2838,6 @@ if(!p)
 return false;
 
 
-/*
-   لا يمكن افتكاك الكرة إذا لم
-   تكن مع الأحمر.
-*/
-
 if(
 !ballOwner ||
 ballOwner.team!=="red"
@@ -2868,10 +2851,6 @@ return false;
 const now=performance.now();
 
 
-/*
-   Cooldown.
-*/
-
 if(
 now-lastBlueTackleTime<
 BLUE_TACKLE_COOLDOWN
@@ -2884,10 +2863,6 @@ return false;
 
 const owner=ballOwner;
 
-
-/*
-   المسافة الحالية.
-*/
 
 const dx=
 owner.x-p.x;
@@ -2909,21 +2884,12 @@ return false;
 }
 
 
-/*
-   اتجاه اللاعب.
-*/
-
 const directionX=
 Math.cos(p.direction);
 
 const directionY=
 Math.sin(p.direction);
 
-
-/*
-   الاتجاه من اللاعب
-   إلى حامل الكرة.
-*/
 
 let targetX=dx;
 let targetY=dy;
@@ -2937,18 +2903,10 @@ targetY/=distance;
 }
 
 
-/*
-   هل اللاعب مواجه للخصم؟
-*/
-
 const facing=
 directionX*targetX+
 directionY*targetY;
 
-
-/*
-   محاولة من زاوية خاطئة.
-*/
 
 if(
 facing<
@@ -2962,21 +2920,9 @@ return false;
 }
 
 
-/*
-   تسجيل موضع الخصم قبل الاندفاع.
-*/
-
 const ownerBeforeX=owner.x;
 const ownerBeforeY=owner.y;
 
-
-/*
-   اندفاعة إلى الأمام.
-
-   resolvePlayerCollisions()
-   سيمنع اللاعب من اختراق
-   جسم اللاعب الأحمر.
-*/
 
 const lungeX=
 directionX*
@@ -2999,10 +2945,6 @@ p.x=resolved.x;
 p.y=resolved.y;
 
 
-/*
-   حساب المسافة بعد الاندفاع.
-*/
-
 const finalDistance=
 Math.hypot(
 ownerBeforeX-p.x,
@@ -3010,19 +2952,10 @@ ownerBeforeY-p.y
 );
 
 
-/*
-   الافتكاك ينجح فقط إذا وصل
-   اللاعب فعليًا إلى الخصم.
-*/
-
 if(
 finalDistance<=
 BLUE_TACKLE_CONTACT_DISTANCE
 ){
-
-/*
-   نقل الملكية.
-*/
 
 ballOwner=p;
 
@@ -3033,26 +2966,13 @@ ballX=p.x;
 ballY=p.y-25;
 
 
-/*
-   تسجيل تغيير الملكية.
-*/
-
 lastOwnerChangeTime=now;
 lastBlueTackleTime=now;
 
 
-/*
-   حالة اللاعب.
-*/
-
 p.currentAction="won-ball";
 p.hasBall=true;
 
-
-/*
-   التأكد من أن اللاعب الذي
-   نفذ الافتكاك هو المتحكم.
-*/
 
 const index=
 teamPlayers.indexOf(p);
@@ -3075,10 +2995,6 @@ return true;
 
 }
 
-
-/*
-   لم يصل إلى مسافة التلامس.
-*/
 
 lastBlueTackleTime=now;
 
@@ -3951,11 +3867,6 @@ if(chargingActive)
 return;
 
 
-/*
-   الأحمر معه الكرة:
-   الزر = افتكاك.
-*/
-
 if(
 ballOwner &&
 ballOwner.team==="red"
@@ -3967,11 +3878,6 @@ return;
 
 }
 
-
-/*
-   الأزرق معه الكرة:
-   الزر = تسديد.
-*/
 
 kickPointerId=e.pointerId;
 
@@ -4818,8 +4724,23 @@ function resizeGame(){
 viewWidth=game.clientWidth;
 viewHeight=game.clientHeight;
 
-worldWidth=viewWidth;
-worldHeight=viewHeight*2;
+
+/*
+   لا نغير worldWidth/worldHeight هنا.
+
+   هذه النقطة مهمة جدًا.
+
+   حجم الشاشة يتغير عندما يظهر/يختفي
+   شريط Safari، لكن عالم اللعبة
+   يبقى 1200 × 2200.
+
+   لذلك لن تعود حدود الملعب
+   إلى حافة الشاشة.
+*/
+
+worldWidth=WORLD_WIDTH;
+worldHeight=WORLD_HEIGHT;
+
 
 field.style.width=
 `${worldWidth}px`;
@@ -4968,6 +4889,13 @@ window.addEventListener(
 
 resizeGame();
 
+
+/*
+   اللاعب والكرة لا يعاد وضعهما
+   عند تغيير حجم الشاشة.
+
+   فقط الكاميرا تعيد حساب حدودها.
+*/
 
 ballX=
 clamp(
