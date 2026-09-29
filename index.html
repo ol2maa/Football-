@@ -1015,19 +1015,6 @@ const GOAL_EXIT_DISTANCE =
    PLAYER SWITCH
 ========================================================= */
 
-/*
-   v4.0.2
-
-   نظام التبديل الجديد:
-
-   1. التبديل اليدوي له الأولوية.
-   2. بعد التبديل اليدوي نحمي اللاعب المختار
-      لفترة قصيرة من تبديل الـAI.
-   3. إذا أصبحت الكرة مع لاعب أزرق آخر،
-      يمكن انتقال التحكم إليه تلقائيًا
-      بعد انتهاء الحماية.
-*/
-
 const AUTO_SWITCH_COOLDOWN =
     500;
 
@@ -1039,6 +1026,17 @@ const MANUAL_CONTROL_LOCK =
 
 const AUTO_OWNER_SWITCH_DELAY =
     500;
+
+
+/*
+   عندما تكون الكرة حرة:
+   لا ننتظر لمس اللاعب للكرة.
+   إذا كان لاعب أزرق ضمن هذه المسافة
+   من الكرة، يحصل على التحكم.
+*/
+
+const AUTO_CONTROL_DISTANCE =
+    250;
 
 
 let lastAutoSwitchTime =
@@ -1199,11 +1197,6 @@ let activePlayerIndex =
 
 let lastTapTime =
     0;
-
-
-/*
-   اللاعب الذي اختاره المستخدم يدويًا.
-*/
 
 let manualSelectedPlayerIndex =
     0;
@@ -1691,10 +1684,6 @@ function updateControlledPlayer(
     if(!p)
         return;
 
-
-    /*
-       اللاعب الحالي فقط هو المتحكم.
-    */
 
     p.controlled =
         true;
@@ -2496,7 +2485,7 @@ function setActivePlayer(
 
 
     /*
-       إزالة التحكم من جميع لاعبي الأزرق.
+       إزالة التحكم من الجميع.
     */
 
     for(
@@ -2517,10 +2506,6 @@ function setActivePlayer(
     }
 
 
-    /*
-       تعيين اللاعب الجديد.
-    */
-
     activePlayerIndex =
         index;
 
@@ -2528,11 +2513,6 @@ function setActivePlayer(
     newPlayer.controlled =
         true;
 
-
-    /*
-       إذا كان التبديل يدويًا،
-       نحفظ اختيار المستخدم.
-    */
 
     if(
         manual
@@ -2610,10 +2590,6 @@ function findBestPlayerForBall(){
             );
 
 
-        /*
-           للاختيار التلقائي فقط.
-        */
-
         if(
             d >
             300
@@ -2672,7 +2648,7 @@ function findBestPlayerForBall(){
 
 
 /* =========================================================
-   AUTO SWITCH
+   AUTO SWITCH - FIXED
 ========================================================= */
 
 function autoSwitchPlayer(){
@@ -2691,10 +2667,6 @@ function autoSwitchPlayer(){
         performance.now();
 
 
-    /*
-       منع التبديل السريع.
-    */
-
     if(
         now -
         lastAutoSwitchTime <
@@ -2706,14 +2678,13 @@ function autoSwitchPlayer(){
     }
 
 
-    /*
-       إذا كانت الكرة مع لاعب أزرق آخر.
-    */
+    /* =====================================================
+       الكرة مع لاعب أزرق
+    ===================================================== */
 
     if(
         ballOwner &&
-        ballOwner.team ===
-            "blue"
+        ballOwner.team === "blue"
     ){
 
         const ownerIndex =
@@ -2731,10 +2702,6 @@ function autoSwitchPlayer(){
         }
 
 
-        /*
-           اللاعب الحالي هو صاحب الكرة.
-        */
-
         if(
             ownerIndex ===
             activePlayerIndex
@@ -2746,7 +2713,7 @@ function autoSwitchPlayer(){
 
 
         /*
-           حماية التبديل اليدوي.
+           التبديل اليدوي له الأولوية.
         */
 
         if(
@@ -2759,11 +2726,6 @@ function autoSwitchPlayer(){
         }
 
 
-        /*
-           نعطي اللاعب فرصة قصيرة
-           بعد استلام الكرة.
-        */
-
         if(
             now -
             lastOwnerChangeTime <
@@ -2774,10 +2736,6 @@ function autoSwitchPlayer(){
 
         }
 
-
-        /*
-           انتقال التحكم إلى صاحب الكرة.
-        */
 
         if(
             setActivePlayer(
@@ -2797,17 +2755,36 @@ function autoSwitchPlayer(){
     }
 
 
-    /*
-       إذا كانت الكرة حرة.
-    */
+    /* =====================================================
+       الكرة مع الأحمر
+    ===================================================== */
+
+    if(
+        ballOwner &&
+        ballOwner.team === "red"
+    ){
+
+        /*
+           لا نغير اللاعب المتحكم لمجرد
+           أن الأحمر استحوذ على الكرة.
+        */
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       الكرة حرة
+    ===================================================== */
 
     if(
         !ballOwner
     ){
 
         /*
-           لا نلغي التبديل اليدوي
-           أثناء فترة الحماية.
+           إذا المستخدم بدّل يدويًا للتو،
+           نحترم اختياره.
         */
 
         if(
@@ -2820,8 +2797,58 @@ function autoSwitchPlayer(){
         }
 
 
-        const bestIndex =
-            findBestPlayerForBall();
+        let bestIndex =
+            -1;
+
+        let bestDistance =
+            Infinity;
+
+
+        /*
+           البحث عن أقرب لاعب أزرق.
+        */
+
+        for(
+            let i = 0;
+            i < teamPlayers.length;
+            i++
+        ){
+
+            if(
+                i ===
+                activePlayerIndex
+            ){
+
+                continue;
+
+            }
+
+
+            const p =
+                teamPlayers[i];
+
+
+            const d =
+                Math.hypot(
+                    p.x - ballX,
+                    p.y - ballY
+                );
+
+
+            if(
+                d <
+                bestDistance
+            ){
+
+                bestDistance =
+                    d;
+
+                bestIndex =
+                    i;
+
+            }
+
+        }
 
 
         if(
@@ -2833,40 +2860,27 @@ function autoSwitchPlayer(){
         }
 
 
-        const p =
-            teamPlayers[
-                bestIndex
-            ];
+        /*
+           لا ننتظر وصول اللاعب للكرة.
 
-
-        const d =
-            Math.hypot(
-                p.x - ballX,
-                p.y - ballY
-            );
-
+           إذا كان ضمن 250px،
+           يصبح هو المتحكم.
+        */
 
         if(
-            d <=
-            PLAYER_PICKUP_DISTANCE + 12
+            bestDistance <=
+            AUTO_CONTROL_DISTANCE
         ){
 
             if(
-                bestIndex !==
-                activePlayerIndex
+                setActivePlayer(
+                    bestIndex,
+                    false
+                )
             ){
 
-                if(
-                    setActivePlayer(
-                        bestIndex,
-                        false
-                    )
-                ){
-
-                    lastAutoSwitchTime =
-                        now;
-
-                }
+                lastAutoSwitchTime =
+                    now;
 
             }
 
@@ -2878,7 +2892,7 @@ function autoSwitchPlayer(){
 
 
 /* =========================================================
-   BALL PICKUP
+   BALL PICKUP - FIXED
 ========================================================= */
 
 function tryBallPickup(){
@@ -2892,10 +2906,16 @@ function tryBallPickup(){
     }
 
 
-    let nearest =
+    /*
+       أولاً الأزرق.
+       إذا لاعب أزرق وصل للكرة،
+       يأخذها قبل الأحمر.
+    */
+
+    let nearestBlue =
         null;
 
-    let bestDistance =
+    let nearestBlueDistance =
         Infinity;
 
 
@@ -2914,18 +2934,88 @@ function tryBallPickup(){
             d <
             PLAYER_PICKUP_DISTANCE &&
             d <
-            bestDistance
+            nearestBlueDistance
         ){
 
-            bestDistance =
+            nearestBlueDistance =
                 d;
 
-            nearest =
+            nearestBlue =
                 p;
 
         }
 
     }
+
+
+    if(
+        nearestBlue
+    ){
+
+        ballOwner =
+            nearestBlue;
+
+        ballVX =
+            0;
+
+        ballVY =
+            0;
+
+
+        lastOwnerChangeTime =
+            performance.now();
+
+
+        const index =
+            teamPlayers.indexOf(
+                nearestBlue
+            );
+
+
+        /*
+           إذا كان لاعبًا أزرق آخر،
+           ينتقل إليه التحكم.
+        */
+
+        if(
+            index >= 0 &&
+            index !==
+                activePlayerIndex
+        ){
+
+            if(
+                performance.now() >=
+                manualControlLockUntil
+            ){
+
+                setActivePlayer(
+                    index,
+                    false
+                );
+
+                lastAutoSwitchTime =
+                    performance.now();
+
+            }
+
+        }
+
+
+        return;
+
+    }
+
+
+    /*
+       إذا لم يوجد أزرق قريب،
+       نبحث عن الأحمر.
+    */
+
+    let nearestRed =
+        null;
+
+    let nearestRedDistance =
+        Infinity;
 
 
     for(
@@ -2943,13 +3033,13 @@ function tryBallPickup(){
             d <
             PLAYER_PICKUP_DISTANCE &&
             d <
-            bestDistance
+            nearestRedDistance
         ){
 
-            bestDistance =
+            nearestRedDistance =
                 d;
 
-            nearest =
+            nearestRed =
                 p;
 
         }
@@ -2958,11 +3048,11 @@ function tryBallPickup(){
 
 
     if(
-        nearest
+        nearestRed
     ){
 
         ballOwner =
-            nearest;
+            nearestRed;
 
         ballVX =
             0;
@@ -2973,37 +3063,6 @@ function tryBallPickup(){
 
         lastOwnerChangeTime =
             performance.now();
-
-
-        /*
-           إذا كان اللاعب الذي التقط الكرة
-           هو اللاعب الذي اختاره المستخدم،
-           نمدد الحماية قليلًا.
-        */
-
-        if(
-            nearest.team ===
-            "blue"
-        ){
-
-            const index =
-                teamPlayers.indexOf(
-                    nearest
-                );
-
-
-            if(
-                index ===
-                manualSelectedPlayerIndex
-            ){
-
-                manualControlLockUntil =
-                    performance.now() +
-                    MANUAL_CONTROL_LOCK;
-
-            }
-
-        }
 
     }
 
@@ -4750,11 +4809,6 @@ function resetAfterGoal(){
         performance.now();
 
 
-    /*
-       بعد الهدف نحافظ على نفس اللاعب
-       الذي كان تحت تحكم المستخدم.
-    */
-
     manualSelectedPlayerIndex =
         activePlayerIndex;
 
@@ -4800,10 +4854,6 @@ function switchPlayer(){
         performance.now();
 
 
-    /*
-       منع التبديل السريع.
-    */
-
     if(
         now -
         lastManualSwitchTime <
@@ -4814,11 +4864,6 @@ function switchPlayer(){
 
     }
 
-
-    /*
-       إنشاء قائمة بكل لاعبي الأزرق
-       باستثناء اللاعب الحالي.
-    */
 
     let candidates =
         [];
@@ -4871,10 +4916,6 @@ function switchPlayer(){
     }
 
 
-    /*
-       الأقرب للكرة أولًا.
-    */
-
     candidates.sort(
         (a,b) =>
             a.distance -
@@ -4886,12 +4927,6 @@ function switchPlayer(){
         candidates[0];
 
 
-    /*
-       إذا كان الأقرب قريبًا جدًا من اللاعب
-       الحالي، نختار التالي حتى يكون
-       التبديل واضحًا للمستخدم.
-    */
-
     if(
         selected.distance < 35 &&
         candidates.length > 1
@@ -4902,10 +4937,6 @@ function switchPlayer(){
 
     }
 
-
-    /*
-       تنفيذ التبديل اليدوي.
-    */
 
     if(
         setActivePlayer(
