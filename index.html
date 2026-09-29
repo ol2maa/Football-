@@ -1015,28 +1015,84 @@ const GOAL_EXIT_DISTANCE =
    PLAYER SWITCH
 ========================================================= */
 
+/*
+   زمن صغير يمنع تبديلات متكررة
+   في نفس اللحظة.
+*/
+
 const AUTO_SWITCH_COOLDOWN =
-    500;
+    250;
+
+
+/*
+   زمن حماية الاختيار اليدوي.
+
+   بعد التبديل اليدوي لا يسمح
+   للذكاء الاصطناعي بسحب التحكم
+   مباشرة.
+
+   لكن توجد حالة طوارئ إذا أصبح
+   لاعب آخر قريبًا جدًا من الكرة.
+*/
 
 const MANUAL_SWITCH_COOLDOWN =
     450;
 
 const MANUAL_CONTROL_LOCK =
-    1800;
-
-const AUTO_OWNER_SWITCH_DELAY =
-    500;
+    1200;
 
 
 /*
-   عندما تكون الكرة حرة:
-   لا ننتظر لمس اللاعب للكرة.
-   إذا كان لاعب أزرق ضمن هذه المسافة
-   من الكرة، يحصل على التحكم.
+   بعد تغير صاحب الكرة ننتظر
+   فترة قصيرة جدًا قبل إعادة
+   تقييم التحكم إذا لزم الأمر.
+*/
+
+const AUTO_OWNER_SWITCH_DELAY =
+    250;
+
+
+/*
+   المسافة القصوى التي نسمح فيها
+   للاعب جديد بالحصول على التحكم
+   عندما تكون الكرة حرة.
 */
 
 const AUTO_CONTROL_DISTANCE =
-    250;
+    300;
+
+
+/*
+   هذا أهم متغير في منع التذبذب.
+
+   اللاعب الجديد يجب أن يكون
+   أقرب للكرة بهذا الفارق على الأقل
+   حتى ينتزع التحكم من اللاعب الحالي.
+*/
+
+const AUTO_SWITCH_ADVANTAGE =
+    35;
+
+
+/*
+   إذا أصبح لاعب أزرق قريبًا جدًا
+   من الكرة، نسمح بالتبديل حتى لو
+   كان هناك قفل يدوي.
+
+   هذا يمنع حالة الصورة الثانية.
+*/
+
+const AUTO_EMERGENCY_DISTANCE =
+    60;
+
+
+/*
+   مقدار التفوق المطلوب في حالة
+   التبديل الطارئ.
+*/
+
+const AUTO_EMERGENCY_ADVANTAGE =
+    20;
 
 
 let lastAutoSwitchTime =
@@ -2559,7 +2615,7 @@ function findBestPlayerForBall(){
     let bestIndex =
         -1;
 
-    let bestScore =
+    let bestDistance =
         Infinity;
 
 
@@ -2591,48 +2647,12 @@ function findBestPlayerForBall(){
 
 
         if(
-            d >
-            300
-        ){
-
-            continue;
-
-        }
-
-
-        let score =
-            d;
-
-
-        if(
             d <
-            80
+            bestDistance
         ){
 
-            score -=
-                25;
-
-        }
-
-
-        if(
-            d <
-            40
-        ){
-
-            score -=
-                20;
-
-        }
-
-
-        if(
-            score <
-            bestScore
-        ){
-
-            bestScore =
-                score;
+            bestDistance =
+                d;
 
             bestIndex =
                 i;
@@ -2642,13 +2662,19 @@ function findBestPlayerForBall(){
     }
 
 
-    return bestIndex;
+    return {
+
+        index:bestIndex,
+
+        distance:bestDistance
+
+    };
 
 }
 
 
 /* =========================================================
-   AUTO SWITCH - FIXED
+   AUTO SWITCH - NEW STABLE SYSTEM
 ========================================================= */
 
 function autoSwitchPlayer(){
@@ -2678,8 +2704,33 @@ function autoSwitchPlayer(){
     }
 
 
+    const activePlayer =
+        teamPlayers[
+            activePlayerIndex
+        ];
+
+
+    if(
+        !activePlayer
+    ){
+
+        return;
+
+    }
+
+
+    const activeDistance =
+        Math.hypot(
+            activePlayer.x -
+                ballX,
+
+            activePlayer.y -
+                ballY
+        );
+
+
     /* =====================================================
-       الكرة مع لاعب أزرق
+       1. الكرة مع لاعب أزرق
     ===================================================== */
 
     if(
@@ -2713,12 +2764,33 @@ function autoSwitchPlayer(){
 
 
         /*
-           التبديل اليدوي له الأولوية.
+           إذا اللاعب الآخر يملك الكرة فعليًا،
+           نريد أن يكون التحكم معه.
+
+           هذا الاستثناء مهم حتى لا يبقى
+           اللاعب القديم متحكمًا بينما
+           زميله يملك الكرة.
         */
+
+        const ownerDistance =
+            Math.hypot(
+                ballOwner.x -
+                    ballX,
+
+                ballOwner.y -
+                    ballY
+            );
+
+
+        const emergencyOwner =
+            ownerDistance <=
+            AUTO_EMERGENCY_DISTANCE;
+
 
         if(
             now <
-            manualControlLockUntil
+            manualControlLockUntil &&
+            !emergencyOwner
         ){
 
             return;
@@ -2756,7 +2828,7 @@ function autoSwitchPlayer(){
 
 
     /* =====================================================
-       الكرة مع الأحمر
+       2. الكرة مع الأحمر
     ===================================================== */
 
     if(
@@ -2765,8 +2837,12 @@ function autoSwitchPlayer(){
     ){
 
         /*
-           لا نغير اللاعب المتحكم لمجرد
-           أن الأحمر استحوذ على الكرة.
+           لا نغير المتحكم لمجرد أن
+           الأحمر يملك الكرة.
+
+           اللاعب الحالي يبقى تحت
+           سيطرة المستخدم حتى يصبح
+           هناك سبب حقيقي للتبديل.
         */
 
         return;
@@ -2775,16 +2851,81 @@ function autoSwitchPlayer(){
 
 
     /* =====================================================
-       الكرة حرة
+       3. الكرة حرة
     ===================================================== */
 
     if(
         !ballOwner
     ){
 
+        const best =
+            findBestPlayerForBall();
+
+
+        if(
+            best.index < 0
+        ){
+
+            return;
+
+        }
+
+
+        const bestPlayer =
+            teamPlayers[
+                best.index
+            ];
+
+
+        const bestDistance =
+            best.distance;
+
+
+        /*
+           اللاعب الحالي هو الأقرب.
+
+           في هذه الحالة لا نغير التحكم.
+           هذا هو الإصلاح الأساسي للتذبذب
+           بين المدافع والحارس.
+        */
+
+        if(
+            bestDistance >=
+            activeDistance
+        ){
+
+            return;
+
+        }
+
+
+        /*
+           إذا كان اللاعب الآخر قريبًا جدًا
+           من الكرة، نعطيه أولوية.
+        */
+
+        const emergencyClose =
+            bestDistance <=
+            AUTO_EMERGENCY_DISTANCE;
+
+
+        /*
+           هل اللاعب الآخر أقرب بشكل واضح؟
+        */
+
+        const clearlyCloser =
+            bestDistance +
+            AUTO_SWITCH_ADVANTAGE <
+            activeDistance;
+
+
         /*
            إذا المستخدم بدّل يدويًا للتو،
            نحترم اختياره.
+
+           لكن إذا لاعب آخر أصبح قريبًا
+           جدًا من الكرة وأقرب بوضوح،
+           نسمح بالتبديل الضروري.
         */
 
         if(
@@ -2792,67 +2933,54 @@ function autoSwitchPlayer(){
             manualControlLockUntil
         ){
 
-            return;
-
-        }
-
-
-        let bestIndex =
-            -1;
-
-        let bestDistance =
-            Infinity;
-
-
-        /*
-           البحث عن أقرب لاعب أزرق.
-        */
-
-        for(
-            let i = 0;
-            i < teamPlayers.length;
-            i++
-        ){
-
-            if(
-                i ===
-                activePlayerIndex
-            ){
-
-                continue;
-
-            }
-
-
-            const p =
-                teamPlayers[i];
-
-
-            const d =
-                Math.hypot(
-                    p.x - ballX,
-                    p.y - ballY
+            const emergencyAllowed =
+                emergencyClose &&
+                (
+                    bestDistance +
+                    AUTO_EMERGENCY_ADVANTAGE <
+                    activeDistance
                 );
 
 
             if(
-                d <
-                bestDistance
+                !emergencyAllowed
             ){
 
-                bestDistance =
-                    d;
-
-                bestIndex =
-                    i;
+                return;
 
             }
 
         }
 
 
+        /*
+           إذا اللاعب الحالي بعيد جدًا
+           عن الكرة، ولاعب آخر داخل
+           منطقة السيطرة، يمكن التبديل.
+        */
+
+        const activeTooFar =
+            activeDistance >
+            AUTO_CONTROL_DISTANCE;
+
+
+        const bestInsideRange =
+            bestDistance <=
+            AUTO_CONTROL_DISTANCE;
+
+
         if(
-            bestIndex < 0
+            !clearlyCloser &&
+            !activeTooFar
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !bestInsideRange
         ){
 
             return;
@@ -2861,28 +2989,19 @@ function autoSwitchPlayer(){
 
 
         /*
-           لا ننتظر وصول اللاعب للكرة.
-
-           إذا كان ضمن 250px،
-           يصبح هو المتحكم.
+           اللاعب الأفضل أصبح واضحًا.
+           ننقل التحكم إليه.
         */
 
         if(
-            bestDistance <=
-            AUTO_CONTROL_DISTANCE
+            setActivePlayer(
+                best.index,
+                false
+            )
         ){
 
-            if(
-                setActivePlayer(
-                    bestIndex,
-                    false
-                )
-            ){
-
-                lastAutoSwitchTime =
-                    now;
-
-            }
+            lastAutoSwitchTime =
+                now;
 
         }
 
@@ -2892,7 +3011,7 @@ function autoSwitchPlayer(){
 
 
 /* =========================================================
-   BALL PICKUP - FIXED
+   BALL PICKUP - STABLE
 ========================================================= */
 
 function tryBallPickup(){
@@ -2907,9 +3026,7 @@ function tryBallPickup(){
 
 
     /*
-       أولاً الأزرق.
-       إذا لاعب أزرق وصل للكرة،
-       يأخذها قبل الأحمر.
+       أولاً نبحث عن أقرب لاعب أزرق.
     */
 
     let nearestBlue =
@@ -2973,8 +3090,12 @@ function tryBallPickup(){
 
 
         /*
-           إذا كان لاعبًا أزرق آخر،
-           ينتقل إليه التحكم.
+           عندما يلمس لاعب أزرق الكرة
+           فعليًا، يصبح هو المتحكم.
+
+           لا نسمح للقفل اليدوي بمنع
+           هذا الانتقال، لأن اللاعب
+           أصبح صاحب الكرة فعلًا.
         */
 
         if(
@@ -2984,14 +3105,11 @@ function tryBallPickup(){
         ){
 
             if(
-                performance.now() >=
-                manualControlLockUntil
-            ){
-
                 setActivePlayer(
                     index,
                     false
-                );
+                )
+            ){
 
                 lastAutoSwitchTime =
                     performance.now();
@@ -4923,19 +5041,16 @@ function switchPlayer(){
     );
 
 
-    let selected =
+    /*
+       التبديل اليدوي يختار فعلًا
+       أقرب لاعب للكرة.
+
+       لم نعد نتجاوز اللاعب إذا كان
+       على بعد أقل من 35 بكسل.
+    */
+
+    const selected =
         candidates[0];
-
-
-    if(
-        selected.distance < 35 &&
-        candidates.length > 1
-    ){
-
-        selected =
-            candidates[1];
-
-    }
 
 
     if(
