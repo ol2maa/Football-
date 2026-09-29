@@ -22,7 +22,7 @@ content="black-translucent">
 <meta name="format-detection"
 content="telephone=no">
 
-<title>كرة القدم ⚽️ v4.4</title>
+<title>كرة القدم ⚽️ v4.0.2</title>
 
 <style>
 
@@ -138,7 +138,6 @@ html,body{
 
 /* =========================================================
    المرمى
-   تم زيادة السماكة إلى 14px
 ========================================================= */
 
 .goalLine{
@@ -699,7 +698,6 @@ html,body{
 
     <div class="centerDot"></div>
 
-
     <div class="goalLine topGoal"></div>
 
     <div class="goalLine bottomGoal"></div>
@@ -1005,17 +1003,16 @@ const TACKLE_DISTANCE =
     40;
 
 
-/*
-   مسافة إضافية بسيطة للتأكد أن الكرة
-   تجاوزت خط المرمى بالكامل.
-*/
+/* =========================================================
+   GOAL
+========================================================= */
 
 const GOAL_EXIT_DISTANCE =
     BALL_RADIUS;
 
 
 /* =========================================================
-   CAMERA / SWITCH
+   CAMERA / PLAYER SWITCH
 ========================================================= */
 
 const AUTO_SWITCH_COOLDOWN =
@@ -1024,10 +1021,41 @@ const AUTO_SWITCH_COOLDOWN =
 const MANUAL_SWITCH_COOLDOWN =
     500;
 
+
+/*
+   v4.0.2
+
+   بعد التبديل اليدوي نعطي اللاعب
+   الذي اختاره المستخدم أولوية واضحة.
+
+   خلال هذه المدة لا يسمح للـAI
+   بخطف التحكم منه.
+*/
+
+const MANUAL_CONTROL_LOCK =
+    1200;
+
+
+/*
+   عندما تصبح الكرة مع لاعب أزرق آخر،
+   لا ننقل التحكم إليه في نفس اللحظة.
+   نعطي اللاعب الحالي فرصة قصيرة.
+*/
+
+const AUTO_OWNER_SWITCH_DELAY =
+    500;
+
+
 let lastAutoSwitchTime =
     0;
 
 let lastManualSwitchTime =
+    0;
+
+let manualControlLockUntil =
+    0;
+
+let lastOwnerChangeTime =
     0;
 
 
@@ -1408,6 +1436,10 @@ function getRoleBounds(p){
         worldHeight -
         PLAYER_RADIUS;
 
+
+    /*
+       اللاعب المتحكم لديه حرية كاملة.
+    */
 
     if(
         p.team === "blue" &&
@@ -2435,7 +2467,7 @@ function setActivePlayer(
         teamPlayers.length
     ){
 
-        return;
+        return false;
 
     }
 
@@ -2476,6 +2508,127 @@ function setActivePlayer(
     aimY =
         0;
 
+
+    return true;
+
+}
+
+
+/* =========================================================
+   FIND BEST PLAYER FOR BALL
+========================================================= */
+
+function findBestPlayerForBall(){
+
+    let bestIndex =
+        -1;
+
+    let bestScore =
+        Infinity;
+
+
+    for(
+        let i = 0;
+        i < teamPlayers.length;
+        i++
+    ){
+
+        if(
+            i ===
+            activePlayerIndex
+        ){
+
+            continue;
+
+        }
+
+
+        const p =
+            teamPlayers[i];
+
+
+        const d =
+            Math.hypot(
+                p.x - ballX,
+                p.y - ballY
+            );
+
+
+        /*
+           نعطي اللاعبين الأقرب للكرة
+           أولوية واضحة.
+
+           اللاعب الذي يبعد أكثر من 300
+           لا يعتبر مرشحًا مثاليًا للتبديل.
+        */
+
+        if(
+            d >
+            300
+        ){
+
+            continue;
+
+        }
+
+
+        /*
+           الدرجة الأساسية هي المسافة.
+
+           لا نستخدم الدور وحده لتحديد
+           اللاعب لأن اللاعب الأقرب هو
+           غالبًا الأنسب في اللحظة الحالية.
+        */
+
+        let score =
+            d;
+
+
+        /*
+           إذا كانت الكرة قريبة جدًا من اللاعب،
+           نعطيه أفضلية إضافية.
+        */
+
+        if(
+            d <
+            80
+        ){
+
+            score -=
+                25;
+
+        }
+
+
+        if(
+            d <
+            40
+        ){
+
+            score -=
+                20;
+
+        }
+
+
+        if(
+            score <
+            bestScore
+        ){
+
+            bestScore =
+                score;
+
+            bestIndex =
+                i;
+
+        }
+
+    }
+
+
+    return bestIndex;
+
 }
 
 
@@ -2499,6 +2652,22 @@ function autoSwitchPlayer(){
         performance.now();
 
 
+    /*
+       بعد تبديل المستخدم يدويًا،
+       لا نسمح للـAI بتغيير اللاعب
+       خلال فترة الحماية.
+    */
+
+    if(
+        now <
+        manualControlLockUntil
+    ){
+
+        return;
+
+    }
+
+
     if(
         now -
         lastAutoSwitchTime <
@@ -2509,6 +2678,11 @@ function autoSwitchPlayer(){
 
     }
 
+
+    /*
+       إذا أصبحت الكرة مع لاعب أزرق آخر،
+       فهذا هو الوقت الطبيعي لنقل التحكم.
+    */
 
     if(
         ballOwner &&
@@ -2528,10 +2702,15 @@ function autoSwitchPlayer(){
                 activePlayerIndex
         ){
 
+            /*
+               لا ننقل التحكم فورًا في نفس
+               لحظة استلام الكرة.
+            */
+
             if(
                 now -
-                lastManualSwitchTime >
-                MANUAL_SWITCH_COOLDOWN
+                lastOwnerChangeTime >=
+                AUTO_OWNER_SWITCH_DELAY
             ){
 
                 setActivePlayer(
@@ -2550,25 +2729,28 @@ function autoSwitchPlayer(){
     }
 
 
+    /*
+       إذا كانت الكرة حرة،
+       ننتظر حتى يصبح لاعب أزرق
+       قريبًا منها.
+    */
+
     if(
         !ballOwner
     ){
 
-        let bestIndex =
-            -1;
-
-        let bestDistance =
-            Infinity;
+        const bestIndex =
+            findBestPlayerForBall();
 
 
-        for(
-            let i = 0;
-            i < teamPlayers.length;
-            i++
+        if(
+            bestIndex >= 0
         ){
 
             const p =
-                teamPlayers[i];
+                teamPlayers[
+                    bestIndex
+                ];
 
 
             const d =
@@ -2579,36 +2761,19 @@ function autoSwitchPlayer(){
 
 
             if(
-                d <
-                bestDistance
+                d <=
+                PLAYER_PICKUP_DISTANCE +
+                18
             ){
 
-                bestDistance =
-                    d;
+                setActivePlayer(
+                    bestIndex
+                );
 
-                bestIndex =
-                    i;
+                lastAutoSwitchTime =
+                    now;
 
             }
-
-        }
-
-
-        if(
-            bestIndex >= 0 &&
-            bestDistance <=
-                PLAYER_PICKUP_DISTANCE +
-                18 &&
-            bestIndex !==
-                activePlayerIndex
-        ){
-
-            setActivePlayer(
-                bestIndex
-            );
-
-            lastAutoSwitchTime =
-                now;
 
         }
 
@@ -2711,28 +2876,19 @@ function tryBallPickup(){
             0;
 
 
-        if(
-            nearest.team ===
-            "blue"
-        ){
-
-            const index =
-                teamPlayers.indexOf(
-                    nearest
-                );
+        lastOwnerChangeTime =
+            performance.now();
 
 
-            if(
-                index >= 0
-            ){
+        /*
+           إذا كان اللاعب الأزرق الذي التقط
+           الكرة هو اللاعب المتحكم أصلًا،
+           لا نغير شيئًا.
 
-                setActivePlayer(
-                    index
-                );
-
-            }
-
-        }
+           وإذا كان لاعبًا أزرق آخر،
+           فإن autoSwitchPlayer سيقرر انتقال
+           التحكم بعد المهلة المناسبة.
+        */
 
     }
 
@@ -2801,6 +2957,9 @@ function tackle(){
                     ballVY =
                         0;
 
+                    lastOwnerChangeTime =
+                        performance.now();
+
                     return;
 
                 }
@@ -2857,21 +3016,8 @@ function tackle(){
                         0;
 
 
-                    const index =
-                        teamPlayers.indexOf(
-                            e
-                        );
-
-
-                    if(
-                        index >= 0
-                    ){
-
-                        setActivePlayer(
-                            index
-                        );
-
-                    }
+                    lastOwnerChangeTime =
+                        performance.now();
 
 
                     return;
@@ -4109,11 +4255,7 @@ function updateBall(
 
     /* =====================================================
        المرمى العلوي
-       لا يوجد هدف بمجرد لمس الخط.
-       
-       يجب أن تتجاوز الكرة الخط بالكامل.
-       مركز الكرة يجب أن يصبح أقل من -11px.
-    ====================================================== */
+    ===================================================== */
 
     if(
         ballY <
@@ -4140,12 +4282,6 @@ function updateBall(
 
         else{
 
-            /*
-               الكرة خرجت من الملعب
-               ولكن خارج المرمى،
-               لذلك ترتد.
-            */
-
             ballY =
                 BALL_RADIUS;
 
@@ -4158,13 +4294,6 @@ function updateBall(
 
     }
 
-
-    /*
-       حماية إضافية عند خط المرمى العلوي.
-
-       إذا كانت الكرة تلمس الخط ولكن لم
-       تتجاوزه بالكامل، لا يوجد هدف.
-    */
 
     if(
         ballY <=
@@ -4201,11 +4330,6 @@ function updateBall(
 
     /* =====================================================
        المرمى السفلي
-       
-       يجب أن تتجاوز الكرة الخط بالكامل.
-       مركز الكرة يجب أن يصبح أكبر من:
-       
-       worldHeight + 11
     ===================================================== */
 
     if(
@@ -4234,11 +4358,6 @@ function updateBall(
 
         else{
 
-            /*
-               خرجت من الملعب خارج المرمى.
-               ترتد إلى الداخل.
-            */
-
             ballY =
                 worldHeight -
                 BALL_RADIUS;
@@ -4252,10 +4371,6 @@ function updateBall(
 
     }
 
-
-    /*
-       حماية إضافية عند خط المرمى السفلي.
-    */
 
     if(
         ballY >=
@@ -4316,11 +4431,6 @@ function scoreBlue(){
     blueScoreElement.textContent =
         blueScore;
 
-
-    /*
-       إيقاف حركة الكرة فور تسجيل الهدف
-       حتى تبقى خارج المرمى أثناء الاحتفال.
-    */
 
     ballVX =
         0;
@@ -4388,15 +4498,6 @@ function showGoalCelebration(){
     goalCelebrationActive =
         true;
 
-
-    /*
-       إيقاف المباراة مؤقتًا.
-
-       مهم:
-       لا نحرك الكاميرا هنا.
-       لذلك تبقى الكاميرا على المرمى الذي دخلت
-       منه الكرة.
-    */
 
     matchRunning =
         false;
@@ -4472,10 +4573,6 @@ function resetAfterGoal(){
     cancelCharging();
 
 
-    /*
-       إعادة اللاعبين إلى أماكنهم
-    */
-
     for(
         const p of teamPlayers
     ){
@@ -4502,10 +4599,6 @@ function resetAfterGoal(){
     }
 
 
-    /*
-       اللاعب المتحكم يبدأ في المنتصف
-    */
-
     const p =
         teamPlayers[
             activePlayerIndex
@@ -4519,10 +4612,6 @@ function resetAfterGoal(){
         worldHeight / 2 +
         25;
 
-
-    /*
-       الكرة في المنتصف
-    */
 
     ballOwner =
         p;
@@ -4542,9 +4631,9 @@ function resetAfterGoal(){
         0;
 
 
-    /*
-       إعادة اتجاه التصويب
-    */
+    lastOwnerChangeTime =
+        performance.now();
+
 
     aimAngle =
         -Math.PI / 2;
@@ -4555,19 +4644,6 @@ function resetAfterGoal(){
 
     aimY =
         0;
-
-
-    /*
-       مهم جدًا:
-
-       لا نضع الكاميرا مباشرة في المنتصف.
-
-       الكاميرا تبقى عند مكان المرمى
-       الذي حصل فيه الهدف، وبعد بدء اللعب
-       تتحرك تدريجيًا مع الكرة.
-
-       هذا يمنع القفزة المفاجئة إلى نصف الملعب.
-    */
 
 
     draw();
@@ -4581,63 +4657,37 @@ function resetAfterGoal(){
 
 function switchPlayer(){
 
+    if(
+        !matchRunning ||
+        matchEnded
+    ){
+
+        return;
+
+    }
+
+
     const now =
         performance.now();
 
 
-    lastManualSwitchTime =
-        now;
+    /*
+       منع التبديل السريع جدًا.
+    */
 
-
-    let bestIndex =
-        -1;
-
-
-    let bestDist =
-        Infinity;
-
-
-    for(
-        let i = 0;
-        i < teamPlayers.length;
-        i++
+    if(
+        now -
+        lastManualSwitchTime <
+        MANUAL_SWITCH_COOLDOWN
     ){
 
-        if(
-            i ===
-            activePlayerIndex
-        ){
-
-            continue;
-
-        }
-
-
-        const p =
-            teamPlayers[i];
-
-
-        const d =
-            Math.hypot(
-                p.x - ballX,
-                p.y - ballY
-            );
-
-
-        if(
-            d <
-            bestDist
-        ){
-
-            bestDist =
-                d;
-
-            bestIndex =
-                i;
-
-        }
+        return;
 
     }
+
+
+    const bestIndex =
+        findBestPlayerForBall();
 
 
     if(
@@ -4649,31 +4699,34 @@ function switchPlayer(){
     }
 
 
-    setActivePlayer(
-        bestIndex
-    );
+    /*
+       هذا هو التبديل اليدوي الحقيقي.
 
+       بمجرد اختيار اللاعب،
+       نعطيه حماية من الـAI.
+    */
 
     if(
-        bestDist <=
-        PLAYER_PICKUP_DISTANCE
+        setActivePlayer(
+            bestIndex
+        )
     ){
 
-        ballOwner =
-            teamPlayers[
-                bestIndex
-            ];
+        lastManualSwitchTime =
+            now;
 
-        ballVX =
-            0;
+        manualControlLockUntil =
+            now +
+            MANUAL_CONTROL_LOCK;
 
-        ballVY =
-            0;
+
+        lastAutoSwitchTime =
+            now;
+
+
+        draw();
 
     }
-
-
-    draw();
 
 }
 
@@ -4996,6 +5049,19 @@ newMatch.addEventListener(
             0;
 
 
+        lastManualSwitchTime =
+            0;
+
+        lastAutoSwitchTime =
+            0;
+
+        manualControlLockUntil =
+            0;
+
+        lastOwnerChangeTime =
+            0;
+
+
         createTeams();
 
 
@@ -5248,6 +5314,10 @@ function initializeGame(){
 
     activePlayerIndex =
         0;
+
+
+    lastOwnerChangeTime =
+        performance.now();
 
 
     setActivePlayer(
