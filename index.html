@@ -1571,17 +1571,92 @@ targetY=worldHeight*0.78;
 
 else if(p.role==="midfielder"){
 
+const owner=ballOwner;
+
+if(owner && owner.team==="blue"){
+
+const ownerX=owner.x;
+const ownerY=owner.y;
+
+
+/* =========================================
+‎   لاعب 5 يفتح زاوية تمرير أمام حامل الكرة
+========================================= */
+
+let side=1;
+
+
+/*
+‎   إذا حامل الكرة على اليسار
+‎   لاعب 5 يفتح جهة اليمين
+
+‎   وإذا حامل الكرة على اليمين
+‎   لاعب 5 يفتح جهة اليسار
+*/
+
+if(ownerX < worldWidth/2){
+
+side=1;
+
+}
+else{
+
+side=-1;
+
+}
+
+
+/* =========================================
+‎   المسافة عن حامل الكرة
+========================================= */
+
+const PASS_OFFSET_X=150;
+const PASS_OFFSET_Y=170;
+
+
+/* =========================================
+‎   الهدف:
+‎   فوق حامل الكرة + مائل يمين/يسار
+========================================= */
+
+targetX=
+ownerX+
+side*PASS_OFFSET_X;
+
+targetY=
+ownerY-
+PASS_OFFSET_Y;
+
+
+/* =========================================
+‎   إبقاء لاعب 5 داخل منطقة الوسط
+========================================= */
+
 targetX=clamp(
-ballX,
-worldWidth*0.30,
-worldWidth*0.70
+targetX,
+worldWidth*0.15,
+worldWidth*0.85
 );
 
 targetY=clamp(
-ballY-80,
-worldHeight*0.30,
-worldHeight*0.60
+targetY,
+worldHeight*0.18,
+worldHeight*0.62
 );
+
+}
+
+else{
+
+/*
+‎   لا أحد من الأزرق معه الكرة
+‎   يرجع لاعب 5 إلى مركزه
+*/
+
+targetX=worldWidth/2;
+targetY=worldHeight*0.50;
+
+}
 
 }
 
