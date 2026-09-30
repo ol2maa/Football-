@@ -942,12 +942,12 @@ BLUE_GUARD_SPEED,
 "guard"
 ),
 createPlayer(
-"teammate5",
-"blue",
-worldWidth*0.50,
-worldHeight*0.50,
-BLUE_GUARD_SPEED,
-"guard"
+    "teammate5",
+    "blue",
+    worldWidth * 0.50,
+    worldHeight * 0.50,
+    BLUE_MIDFIELDER_SPEED,
+    "midfielder"
 )
 
 ];
@@ -1487,6 +1487,12 @@ targetX=ballX;
 targetY=ballY;
 
 }
+
+}
+else if(p.role==="midfielder"){
+
+targetX=worldWidth/2;
+targetY=worldHeight*0.50;
 
 }
 
