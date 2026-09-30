@@ -1490,10 +1490,20 @@ targetY=ballY;
 }
 
 }
+
 else if(p.role==="midfielder"){
 
-targetX=worldWidth/2;
-targetY=worldHeight*0.50;
+targetX=clamp(
+ballX,
+worldWidth*0.30,
+worldWidth*0.70
+);
+
+targetY=clamp(
+ballY,
+worldHeight*0.35,
+worldHeight*0.65
+);
 
 }
 
@@ -1556,6 +1566,22 @@ else if(p.role==="defender"){
 
 targetX=worldWidth/2;
 targetY=worldHeight*0.78;
+
+}
+
+else if(p.role==="midfielder"){
+
+targetX=clamp(
+ballX,
+worldWidth*0.30,
+worldWidth*0.70
+);
+
+targetY=clamp(
+ballY-80,
+worldHeight*0.30,
+worldHeight*0.60
+);
 
 }
 
