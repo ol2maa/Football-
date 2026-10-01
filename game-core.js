@@ -1,1 +1,2877 @@
+/* =========================================================
+   GAME SETUP
+========================================================= */
 
+const game=document.getElementById("game");
+const field=document.getElementById("field");
+const ballElement=document.getElementById("ball");
+const aimArrow=document.getElementById("aimArrow");
+const movePad=document.getElementById("movePad");
+const joystickCenter=document.getElementById("joystickCenter");
+const kickControl=document.getElementById("kickControl");
+const powerBox=document.getElementById("powerBox");
+const powerBar=document.getElementById("powerBar");
+const blueScoreElement=document.getElementById("blueScore");
+const redScoreElement=document.getElementById("redScore");
+const matchTimeElement=document.getElementById("matchTime");
+const matchEnd=document.getElementById("matchEnd");
+const finalScore=document.getElementById("finalScore");
+const newMatch=document.getElementById("newMatch");
+const goalCelebration=document.getElementById("goalCelebration");
+
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
+
+const CAMERA_SMOOTH=0.075;
+const MATCH_DURATION=180;
+
+
+/* =========================================================
+   WORLD SIZE
+========================================================= */
+
+const WORLD_WIDTH=1200;
+const WORLD_HEIGHT=2200;
+
+
+const PLAYER_RADIUS=19;
+const BALL_RADIUS=11;
+
+const FRICTION=0.985;
+
+const MAX_POWER=100;
+const POWER_SPEED=90;
+
+const GOAL_WIDTH=190;
+
+const JOYSTICK_MAX_DISTANCE=48;
+
+const PLAYER_PICKUP_DISTANCE=30;
+
+
+/* =========================================================
+   PLAYER SPEEDS
+========================================================= */
+
+const BLUE_FORWARD_SPEED=150;
+const BLUE_WING_SPEED=150;
+const BLUE_DEFENDER_SPEED=150;
+const BLUE_GUARD_SPEED=150;
+
+
+const RED_FORWARD_SPEED=115;
+const RED_WING_SPEED=115;
+const RED_DEFENDER_SPEED=110;
+const RED_GUARD_SPEED=300;
+
+
+/* =========================================================
+   PLAYER COLLISION
+========================================================= */
+
+const PLAYER_COLLISION_DISTANCE=
+PLAYER_RADIUS*2+1;
+
+const PLAYER_COLLISION_ITERATIONS=3;
+
+const GOAL_POST_RADIUS=8;
+
+const PLAYER_GOAL_POST_DISTANCE=
+PLAYER_RADIUS+
+GOAL_POST_RADIUS+
+1;
+
+
+
+/* =========================================================
+   GOAL
+========================================================= */
+
+const GOAL_EXIT_DISTANCE=BALL_RADIUS;
+
+
+/* =========================================================
+   PLAYER SWITCH
+========================================================= */
+
+const AUTO_SWITCH_COOLDOWN=250;
+const MANUAL_SWITCH_COOLDOWN=450;
+const MANUAL_CONTROL_LOCK=1200;
+const AUTO_OWNER_SWITCH_DELAY=250;
+const AUTO_CONTROL_DISTANCE=300;
+const AUTO_SWITCH_ADVANTAGE=35;
+const AUTO_EMERGENCY_DISTANCE=60;
+const AUTO_EMERGENCY_ADVANTAGE=20;
+
+
+let lastAutoSwitchTime=0;
+let lastManualSwitchTime=0;
+let manualControlLockUntil=0;
+let lastOwnerChangeTime=0;
+
+
+/* =========================================================
+   WORLD
+========================================================= */
+
+let viewWidth=game.clientWidth;
+let viewHeight=game.clientHeight;
+
+let worldWidth=WORLD_WIDTH;
+let worldHeight=WORLD_HEIGHT;
+
+let cameraX=0;
+let cameraY=0;
+
+
+/* =========================================================
+   BALL
+========================================================= */
+
+let ballX=worldWidth/2;
+let ballY=worldHeight/2;
+
+let ballVX=0;
+let ballVY=0;
+
+let ballOwner=null;
+
+
+/* =========================================================
+   SCORE
+========================================================= */
+
+let blueScore=0;
+let redScore=0;
+
+
+/* =========================================================
+   MATCH
+========================================================= */
+
+let matchTimeRemaining=MATCH_DURATION;
+
+let matchRunning=true;
+let matchEnded=false;
+
+let lastTimestamp=performance.now();
+
+
+/* =========================================================
+   GOAL
+========================================================= */
+
+let goalCelebrationActive=false;
+let goalResetTimer=null;
+
+
+/* =========================================================
+   JOYSTICK
+========================================================= */
+
+let joystickActive=false;
+let joystickPointerId=null;
+
+let joystickX=0;
+let joystickY=0;
+
+
+/* =========================================================
+   KICK
+========================================================= */
+
+let chargingActive=false;
+let chargePower=0;
+
+let kickPointerId=null;
+
+
+/* =========================================================
+   AIM
+========================================================= */
+
+let aimAngle=-Math.PI/2;
+
+let aimX=worldWidth/2;
+let aimY=0;
+
+let kickStartX=0;
+let kickStartY=0;
+
+let kickDragDistance=0;
+
+
+/* =========================================================
+   PLAYER SWITCH
+========================================================= */
+
+let activePlayerIndex=0;
+
+let lastTapTime=0;
+
+let manualSelectedPlayerIndex=0;
+
+
+/* =========================================================
+   PLAYER FACTORY
+========================================================= */
+
+function createPlayer(
+id,
+team,
+x,
+y,
+speed,
+role
+){
+
+const el=document.getElementById(id);
+
+return{
+
+id:id,
+team:team,
+
+x:x,
+y:y,
+
+anchorX:x,
+anchorY:y,
+
+speed:speed,
+role:role,
+
+el:el,
+
+controlled:false,
+
+moveX:0,
+moveY:0,
+
+direction:-Math.PI/2,
+
+vx:0,
+vy:0,
+
+hasBall:false,
+
+decisionTimer:
+Math.random()*0.25,
+
+shotCooldown:
+Math.random()*0.5,
+
+passCooldown:
+Math.random()*0.5,
+
+currentAction:"position",
+
+shotType:"direct"
+
+};
+
+}
+
+
+/* =========================================================
+   TEAMS
+========================================================= */
+
+let teamPlayers=[];
+let opponents=[];
+
+
+function createTeams(){
+
+teamPlayers=[
+
+createPlayer(
+"player",
+"blue",
+worldWidth/2,
+worldHeight*0.62,
+BLUE_FORWARD_SPEED,
+"forward"
+),
+
+createPlayer(
+"teammate1",
+"blue",
+worldWidth*0.15,
+worldHeight*0.58,
+BLUE_WING_SPEED,
+"wing"
+),
+
+createPlayer(
+"teammate2",
+"blue",
+worldWidth*0.85,
+worldHeight*0.58,
+BLUE_WING_SPEED,
+"wing"
+),
+
+createPlayer(
+"teammate3",
+"blue",
+worldWidth*0.30,
+worldHeight*0.75,
+BLUE_DEFENDER_SPEED,
+"defender"
+),
+
+createPlayer(
+"teammate4",
+"blue",
+worldWidth*0.50,
+worldHeight*0.95,
+BLUE_GUARD_SPEED,
+"guard"
+),
+
+createPlayer(
+"teammate5",
+"blue",
+worldWidth*0.50,
+worldHeight*0.50,
+BLUE_DEFENDER_SPEED,
+"midfielder"
+)
+
+];
+
+
+opponents=[
+
+createPlayer(
+"opponent1",
+"red",
+worldWidth/2,
+worldHeight*0.38,
+RED_FORWARD_SPEED,
+"forward"
+),
+
+createPlayer(
+"opponent2",
+"red",
+worldWidth*0.15,
+worldHeight*0.42,
+RED_WING_SPEED,
+"wing"
+),
+
+createPlayer(
+"opponent3",
+"red",
+worldWidth*0.85,
+worldHeight*0.42,
+RED_WING_SPEED,
+"wing"
+),
+
+createPlayer(
+"opponent4",
+"red",
+worldWidth*0.30,
+worldHeight*0.22,
+RED_DEFENDER_SPEED,
+"defender"
+),
+
+createPlayer(
+"opponent5",
+"red",
+worldWidth*0.50,
+worldHeight*0.10,
+RED_GUARD_SPEED,
+"guard"
+)
+
+];
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function clamp(value,min,max){
+
+return Math.max(
+min,
+Math.min(max,value)
+);
+
+}
+
+
+function distanceBetween(a,b){
+
+return Math.hypot(
+a.x-b.x,
+a.y-b.y
+);
+
+}
+
+
+function getAllPlayers(){
+
+return[
+...teamPlayers,
+...opponents
+];
+
+}
+
+
+/* =========================================================
+   ROLE BOUNDS
+========================================================= */
+
+function getRoleBounds(p){
+
+let minX=PLAYER_RADIUS;
+let maxX=worldWidth-PLAYER_RADIUS;
+
+let minY=PLAYER_RADIUS;
+let maxY=worldHeight-PLAYER_RADIUS;
+
+
+if(
+p.team==="blue" &&
+p===teamPlayers[activePlayerIndex]
+){
+
+return{
+minX,
+maxX,
+minY,
+maxY
+};
+
+}
+
+
+if(p.team==="blue"){
+
+if(p.role==="guard"){
+
+minY=worldHeight*0.85;
+maxY=worldHeight-PLAYER_RADIUS;
+
+}
+
+else if(p.role==="defender"){
+
+minY=worldHeight*0.65;
+maxY=worldHeight*0.90;
+
+}
+
+else if(p.role==="wing"){
+
+minY=worldHeight*0.40;
+maxY=worldHeight*0.70;
+
+}
+
+else if(p.role==="forward"){
+
+minY=worldHeight*0.30;
+maxY=worldHeight*0.65;
+
+}
+
+}
+
+
+if(p.team==="red"){
+
+if(p.role==="guard"){
+
+minY=PLAYER_RADIUS;
+maxY=worldHeight*0.15;
+
+}
+
+else if(p.role==="defender"){
+
+minY=worldHeight*0.10;
+maxY=worldHeight*0.35;
+
+}
+
+else if(p.role==="wing"){
+
+minY=worldHeight*0.30;
+maxY=worldHeight*0.60;
+
+}
+
+else if(p.role==="forward"){
+
+minY=worldHeight*0.35;
+maxY=worldHeight*0.65;
+
+}
+
+}
+
+
+return{
+minX,
+maxX,
+minY,
+maxY
+};
+
+}
+
+
+/* =========================================================
+   GOAL POST COLLISION
+========================================================= */
+
+function resolveGoalPostCollision(p,x,y){
+
+const centerX=worldWidth/2;
+
+const halfGoal=GOAL_WIDTH/2;
+
+const posts=[
+
+{
+x:centerX-halfGoal,
+y:0
+},
+
+{
+x:centerX+halfGoal,
+y:0
+},
+
+{
+x:centerX-halfGoal,
+y:worldHeight
+},
+
+{
+x:centerX+halfGoal,
+y:worldHeight
+}
+
+];
+
+
+for(const post of posts){
+
+let dx=x-post.x;
+let dy=y-post.y;
+
+let d=Math.hypot(dx,dy);
+
+
+if(d<PLAYER_GOAL_POST_DISTANCE){
+
+if(d<0.001){
+
+dx=1;
+dy=0;
+d=1;
+
+}
+
+dx/=d;
+dy/=d;
+
+const push=
+PLAYER_GOAL_POST_DISTANCE-d;
+
+x+=dx*push;
+y+=dy*push;
+
+}
+
+}
+
+
+return{x,y};
+
+}
+
+
+/* =========================================================
+   PLAYER COLLISION
+========================================================= */
+
+function resolvePlayerCollisions(
+p,
+x,
+y
+){
+
+const players=getAllPlayers();
+
+
+for(
+let iteration=0;
+iteration<PLAYER_COLLISION_ITERATIONS;
+iteration++
+){
+
+let changed=false;
+
+
+for(const other of players){
+
+if(other===p)
+continue;
+
+
+let dx=x-other.x;
+let dy=y-other.y;
+
+let d=Math.hypot(dx,dy);
+
+
+if(d<PLAYER_COLLISION_DISTANCE){
+
+if(d<0.001){
+
+dx=p.moveX;
+dy=p.moveY;
+
+
+if(
+Math.hypot(dx,dy)<0.001
+){
+
+dx=p.x-other.x;
+dy=p.y-other.y;
+
+}
+
+
+if(
+Math.hypot(dx,dy)<0.001
+){
+
+dx=1;
+dy=0;
+
+}
+
+
+d=Math.hypot(dx,dy);
+
+}
+
+
+dx/=d;
+dy/=d;
+
+
+const push=
+PLAYER_COLLISION_DISTANCE-d;
+
+
+x+=dx*push;
+y+=dy*push;
+
+changed=true;
+
+}
+
+}
+
+
+if(!changed)
+break;
+
+}
+
+
+const postResult=
+resolveGoalPostCollision(
+p,
+x,
+y
+);
+
+x=postResult.x;
+y=postResult.y;
+
+
+x=clamp(
+x,
+PLAYER_RADIUS,
+worldWidth-PLAYER_RADIUS
+);
+
+y=clamp(
+y,
+PLAYER_RADIUS,
+worldHeight-PLAYER_RADIUS
+);
+
+
+return{x,y};
+
+}
+
+
+/* =========================================================
+   MOVE PLAYER
+========================================================= */
+
+function movePlayer(
+p,
+dx,
+dy,
+dt
+){
+
+const length=Math.hypot(dx,dy);
+
+
+if(length>1){
+
+dx/=length;
+dy/=length;
+
+}
+
+
+if(
+Math.abs(dx)>0.01 ||
+Math.abs(dy)>0.01
+){
+
+p.direction=Math.atan2(dy,dx);
+
+}
+
+
+p.moveX=dx;
+p.moveY=dy;
+
+
+let targetX=
+p.x+
+dx*p.speed*dt;
+
+let targetY=
+p.y+
+dy*p.speed*dt;
+
+
+const resolved=
+resolvePlayerCollisions(
+p,
+targetX,
+targetY
+);
+
+
+p.x=resolved.x;
+p.y=resolved.y;
+
+return true;
+
+}
+
+
+/* =========================================================
+   CONTROLLED PLAYER
+========================================================= */
+
+function updateControlledPlayer(dt){
+
+const p=
+teamPlayers[activePlayerIndex];
+
+
+if(!p)
+return;
+
+
+p.controlled=true;
+
+
+const dx=joystickX;
+const dy=joystickY;
+
+
+p.moveX=dx;
+p.moveY=dy;
+
+
+if(
+Math.abs(dx)>0.01 ||
+Math.abs(dy)>0.01
+){
+
+movePlayer(
+p,
+dx,
+dy,
+dt
+);
+
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   ACTIVE PLAYER
+========================================================= */
+
+function setActivePlayer(index,manual=false){
+
+if(
+index<0 ||
+index>=teamPlayers.length
+)
+return false;
+
+
+const newPlayer=teamPlayers[index];
+
+if(!newPlayer)
+return false;
+
+
+cancelCharging();
+
+
+for(
+let i=0;
+i<teamPlayers.length;
+i++
+){
+
+teamPlayers[i].controlled=false;
+teamPlayers[i].moveX=0;
+teamPlayers[i].moveY=0;
+
+}
+
+
+activePlayerIndex=index;
+
+newPlayer.controlled=true;
+
+
+if(manual){
+
+manualSelectedPlayerIndex=index;
+
+lastManualSwitchTime=
+performance.now();
+
+manualControlLockUntil=
+performance.now()+
+MANUAL_CONTROL_LOCK;
+
+lastAutoSwitchTime=
+performance.now();
+
+}
+
+
+aimAngle=-Math.PI/2;
+
+aimX=worldWidth/2;
+aimY=0;
+
+
+return true;
+
+}
+
+
+/* =========================================================
+   FIND BEST PLAYER
+========================================================= */
+
+function findBestPlayerForBall(){
+
+let bestIndex=-1;
+let bestDistance=Infinity;
+
+
+for(
+let i=0;
+i<teamPlayers.length;
+i++
+){
+
+if(i===activePlayerIndex)
+continue;
+
+
+const p=teamPlayers[i];
+
+
+const d=
+Math.hypot(
+p.x-ballX,
+p.y-ballY
+);
+
+
+if(d<bestDistance){
+
+bestDistance=d;
+bestIndex=i;
+
+}
+
+}
+
+
+return{
+index:bestIndex,
+distance:bestDistance
+};
+
+}
+
+
+
+
+
+
+/* =========================================================
+   BALL PICKUP
+========================================================= */
+
+function tryBallPickup(){
+
+if(ballOwner)
+return;
+
+
+let nearestBlue=null;
+let nearestBlueDistance=Infinity;
+
+
+for(const p of teamPlayers){
+
+const d=
+Math.hypot(
+p.x-ballX,
+p.y-ballY
+);
+
+
+if(
+d<PLAYER_PICKUP_DISTANCE &&
+d<nearestBlueDistance
+){
+
+nearestBlueDistance=d;
+nearestBlue=p;
+
+}
+
+}
+
+
+if(nearestBlue){
+
+ballOwner=nearestBlue;
+
+ballVX=0;
+ballVY=0;
+
+lastOwnerChangeTime=
+performance.now();
+
+
+nearestBlue.hasBall=true;
+nearestBlue.currentAction="won-ball";
+
+
+const index=
+teamPlayers.indexOf(
+nearestBlue
+);
+
+
+if(
+index>=0 &&
+index!==activePlayerIndex
+){
+
+if(
+setActivePlayer(
+index,
+false
+)
+){
+
+lastAutoSwitchTime=
+performance.now();
+
+}
+
+}
+
+
+return;
+
+}
+
+
+let nearestRed=null;
+let nearestRedDistance=Infinity;
+
+
+for(const p of opponents){
+
+const d=
+Math.hypot(
+p.x-ballX,
+p.y-ballY
+);
+
+
+if(
+d<PLAYER_PICKUP_DISTANCE &&
+d<nearestRedDistance
+){
+
+nearestRedDistance=d;
+nearestRed=p;
+
+}
+
+}
+
+
+if(nearestRed){
+
+ballOwner=nearestRed;
+
+ballVX=0;
+ballVY=0;
+
+lastOwnerChangeTime=
+performance.now();
+
+nearestRed.hasBall=true;
+nearestRed.currentAction="won-ball";
+
+resetRedDecisionTimer(nearestRed);
+resetRedPassCooldown(nearestRed);
+
+}
+
+}
+
+
+
+
+/* =========================================================
+   SEPARATE ALL PLAYERS
+========================================================= */
+
+function separateAllPlayers(){
+
+const players=getAllPlayers();
+
+
+for(
+let i=0;
+i<players.length;
+i++
+){
+
+for(
+let j=i+1;
+j<players.length;
+j++
+){
+
+const a=players[i];
+const b=players[j];
+
+
+const isAFixed=
+a===teamPlayers[activePlayerIndex];
+
+const isBFixed=
+b===teamPlayers[activePlayerIndex];
+
+
+let dx=b.x-a.x;
+let dy=b.y-a.y;
+
+let d=Math.hypot(dx,dy);
+
+
+if(d===0){
+
+dx=1;
+dy=0;
+d=1;
+
+}
+
+
+if(
+d<
+PLAYER_COLLISION_DISTANCE
+){
+
+const push=
+(
+PLAYER_COLLISION_DISTANCE-d
+)/2;
+
+
+dx/=d;
+dy/=d;
+
+
+if(!isAFixed){
+
+a.x-=dx*push;
+a.y-=dy*push;
+
+}
+
+
+if(!isBFixed){
+
+b.x+=dx*push;
+b.y+=dy*push;
+
+}
+
+}
+
+}
+
+}
+
+}
+
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+function updateCamera(){
+
+const targetX=
+ballX-viewWidth/2;
+
+const targetY=
+ballY-viewHeight*0.62;
+
+
+const maxX=
+Math.max(
+0,
+worldWidth-viewWidth
+);
+
+const maxY=
+Math.max(
+0,
+worldHeight-viewHeight
+);
+
+
+const desiredX=
+clamp(
+targetX,
+0,
+maxX
+);
+
+const desiredY=
+clamp(
+targetY,
+0,
+maxY
+);
+
+
+cameraX+=
+(
+desiredX-cameraX
+)*
+CAMERA_SMOOTH;
+
+cameraY+=
+(
+desiredY-cameraY
+)*
+CAMERA_SMOOTH;
+
+}
+
+
+/* =========================================================
+   DRAW
+========================================================= */
+
+function drawPlayer(p){
+
+if(!p.el)
+return;
+
+
+p.el.style.transform=
+`translate3d(
+${p.x-PLAYER_RADIUS}px,
+${p.y-PLAYER_RADIUS}px,
+0
+)`;
+
+
+const arrow=
+p.el.querySelector(
+".controlArrow"
+);
+
+
+const isControlled=
+p.team==="blue" &&
+p===teamPlayers[activePlayerIndex];
+
+
+if(arrow){
+
+arrow.style.display=
+isControlled
+?"block"
+:"none";
+
+}
+
+
+if(isControlled){
+
+p.el.classList.add("controlled");
+
+}
+
+else{
+
+p.el.classList.remove("controlled");
+
+}
+
+}
+
+
+function drawBall(){
+
+ballElement.style.transform=
+`translate3d(
+${ballX-BALL_RADIUS}px,
+${ballY-BALL_RADIUS}px,
+0
+)`;
+
+}
+
+
+function drawAim(){
+
+const p=
+teamPlayers[activePlayerIndex];
+
+
+if(
+!p ||
+!chargingActive ||
+ballOwner!==p
+){
+
+aimArrow.style.display="none";
+
+return;
+
+}
+
+
+const length=
+45+
+chargePower*0.7;
+
+
+aimArrow.style.display="block";
+
+aimArrow.style.width="5px";
+
+aimArrow.style.height=
+`${length}px`;
+
+aimArrow.style.left=
+`${ballX}px`;
+
+aimArrow.style.top=
+`${ballY}px`;
+
+aimArrow.style.transform=
+`translate(-50%,-100%)
+rotate(${aimAngle+Math.PI/2}rad)`;
+
+aimArrow.style.transformOrigin=
+"50% 100%";
+
+}
+
+
+function drawField(){
+
+field.style.transform=
+`translate3d(
+${-cameraX}px,
+${-cameraY}px,
+0
+)`;
+
+}
+
+
+function draw(){
+
+drawField();
+
+
+for(const p of teamPlayers)
+drawPlayer(p);
+
+for(const p of opponents)
+drawPlayer(p);
+
+drawBall();
+drawAim();
+
+}
+
+
+/* =========================================================
+   JOYSTICK
+========================================================= */
+
+function resetJoystick(){
+
+joystickActive=false;
+joystickPointerId=null;
+
+joystickX=0;
+joystickY=0;
+
+joystickCenter.style.transform=
+"translate(-50%,-50%)";
+
+}
+
+
+function updateJoystick(
+clientX,
+clientY
+){
+
+const rect=
+movePad.getBoundingClientRect();
+
+
+const centerX=
+rect.left+
+rect.width/2;
+
+const centerY=
+rect.top+
+rect.height/2;
+
+
+let dx=
+clientX-centerX;
+
+let dy=
+clientY-centerY;
+
+
+const d=Math.hypot(dx,dy);
+
+
+if(
+d>JOYSTICK_MAX_DISTANCE
+){
+
+dx=dx/d*
+JOYSTICK_MAX_DISTANCE;
+
+dy=dy/d*
+JOYSTICK_MAX_DISTANCE;
+
+}
+
+
+joystickX=
+dx/JOYSTICK_MAX_DISTANCE;
+
+joystickY=
+dy/JOYSTICK_MAX_DISTANCE;
+
+
+joystickCenter.style.transform=
+`translate(
+calc(-50% + ${dx}px),
+calc(-50% + ${dy}px)
+)`;
+
+}
+
+
+/* =========================================================
+   JOYSTICK EVENTS
+========================================================= */
+
+movePad.addEventListener(
+"pointerdown",
+e=>{
+
+e.preventDefault();
+
+joystickActive=true;
+joystickPointerId=e.pointerId;
+
+movePad.setPointerCapture(
+e.pointerId
+);
+
+updateJoystick(
+e.clientX,
+e.clientY
+);
+
+}
+);
+
+
+movePad.addEventListener(
+"pointermove",
+e=>{
+
+if(
+!joystickActive ||
+e.pointerId!==joystickPointerId
+)
+return;
+
+e.preventDefault();
+
+updateJoystick(
+e.clientX,
+e.clientY
+);
+
+}
+);
+
+
+movePad.addEventListener(
+"pointerup",
+e=>{
+
+if(
+e.pointerId!==joystickPointerId
+)
+return;
+
+resetJoystick();
+
+}
+);
+
+
+movePad.addEventListener(
+"pointercancel",
+e=>{
+
+if(
+e.pointerId!==joystickPointerId
+)
+return;
+
+resetJoystick();
+
+}
+);
+
+
+/* =========================================================
+   CHARGING
+========================================================= */
+
+function startCharging(){
+
+if(
+!matchRunning ||
+matchEnded
+)
+return;
+
+
+const p=
+teamPlayers[activePlayerIndex];
+
+
+if(!p)
+return;
+
+
+if(ballOwner!==p)
+return;
+
+
+chargingActive=true;
+chargePower=0;
+
+aimAngle=-Math.PI/2;
+
+aimX=worldWidth/2;
+aimY=0;
+
+kickDragDistance=0;
+
+powerBox.style.display="block";
+
+powerBar.style.width="0%";
+
+aimArrow.style.display="block";
+
+}
+
+
+function updateCharge(dt){
+
+if(!chargingActive)
+return;
+
+
+chargePower+=
+POWER_SPEED*dt;
+
+
+chargePower=
+Math.min(
+MAX_POWER,
+chargePower
+);
+
+
+powerBar.style.width=
+`${chargePower}%`;
+
+}
+
+
+function cancelCharging(){
+
+chargingActive=false;
+
+chargePower=0;
+
+kickPointerId=null;
+
+kickDragDistance=0;
+
+powerBox.style.display="none";
+
+powerBar.style.width="0%";
+
+aimArrow.style.display="none";
+
+}
+
+
+/* =========================================================
+   AIM
+========================================================= */
+
+function updateAim(
+clientX,
+clientY
+){
+
+if(!chargingActive)
+return;
+
+
+let dx=
+clientX-kickStartX;
+
+let dy=
+clientY-kickStartY;
+
+
+const d=Math.hypot(dx,dy);
+
+
+if(d<6)
+return;
+
+
+kickDragDistance=d;
+
+
+aimAngle=Math.atan2(dy,dx);
+
+aimX=Math.cos(aimAngle);
+aimY=Math.sin(aimAngle);
+
+}
+
+
+/* =========================================================
+   DISTANCE FACTOR
+========================================================= */
+
+function getDistanceFactor(){
+
+const goalX=worldWidth/2;
+const goalY=0;
+
+
+const distToGoal=
+Math.hypot(
+ballX-goalX,
+ballY-goalY
+);
+
+
+const maxDist=
+Math.hypot(
+worldWidth,
+worldHeight
+);
+
+
+const t=
+Math.min(
+1,
+distToGoal/maxDist
+);
+
+
+return 1-t*0.7;
+
+}
+
+
+/* =========================================================
+   KICK
+========================================================= */
+
+function kickBall(){
+
+const p=
+teamPlayers[activePlayerIndex];
+
+
+if(!p){
+
+return;
+
+}
+
+
+if(ballOwner!==p){
+
+cancelCharging();
+return;
+
+}
+
+
+const dx=
+Math.cos(aimAngle);
+
+const dy=
+Math.sin(aimAngle);
+
+
+const distanceFactor=
+getDistanceFactor();
+
+
+const chargeNormalized=
+Math.max(
+0.15,
+chargePower/100
+);
+
+
+const finalPower=
+chargeNormalized*
+distanceFactor;
+
+
+const speed=
+350+
+finalPower*950;
+
+
+ballOwner=null;
+
+p.hasBall=false;
+
+ballX=p.x+dx*30;
+ballY=p.y+dy*30;
+
+ballVX=dx*speed;
+ballVY=dy*speed;
+
+
+cancelCharging();
+
+}
+
+
+/* =========================================================
+   KICK BUTTON
+========================================================= */
+
+kickControl.addEventListener(
+"pointerdown",
+e=>{
+
+e.preventDefault();
+
+
+if(chargingActive)
+return;
+
+
+/*
+   Ø¥Ø°Ø§ ÙØ§ÙØª Ø§ÙÙØ±Ø© ÙØ¹ Ø§ÙØ£Ø­ÙØ±Ø
+   ÙØ§ ÙØ­ØªØ§Ø¬ Ø²Ø± Ø§ÙØ§ÙØªÙØ§Ù.
+
+   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ¢Ù ÙØ­Ø¯Ø« ØªÙÙØ§Ø¦ÙÙØ§
+   Ø¹ÙØ¯ Ø§ÙØªÙØ§ÙØ³.
+*/
+
+if(
+ballOwner &&
+ballOwner.team==="red"
+){
+
+return;
+
+}
+
+
+kickPointerId=e.pointerId;
+
+kickStartX=e.clientX;
+kickStartY=e.clientY;
+
+
+kickControl.setPointerCapture(
+e.pointerId
+);
+
+
+startCharging();
+
+}
+);
+
+
+/* =========================================================
+   KICK MOVE
+========================================================= */
+
+window.addEventListener(
+"pointermove",
+e=>{
+
+if(!chargingActive)
+return;
+
+if(
+e.pointerId!==kickPointerId
+)
+return;
+
+e.preventDefault();
+
+updateAim(
+e.clientX,
+e.clientY
+);
+
+},
+{
+passive:false
+}
+);
+
+
+/* =========================================================
+   KICK UP
+========================================================= */
+
+window.addEventListener(
+"pointerup",
+e=>{
+
+if(
+e.pointerId!==kickPointerId
+)
+return;
+
+e.preventDefault();
+
+
+if(chargingActive){
+
+kickBall();
+
+}
+
+
+kickPointerId=null;
+
+},
+{
+passive:false
+}
+);
+
+
+/* =========================================================
+   KICK CANCEL
+========================================================= */
+
+window.addEventListener(
+"pointercancel",
+e=>{
+
+if(
+e.pointerId!==kickPointerId
+)
+return;
+
+cancelCharging();
+
+}
+);
+
+
+/* =========================================================
+   BALL PHYSICS
+========================================================= */
+
+function updateBall(dt){
+
+if(ballOwner){
+
+for(const p of teamPlayers){
+
+p.hasBall=false;
+
+}
+
+for(const p of opponents){
+
+p.hasBall=false;
+
+}
+
+ballOwner.hasBall=true;
+
+ballX=ballOwner.x;
+ballY=ballOwner.y-25;
+
+ballVX=0;
+ballVY=0;
+
+return;
+
+}
+
+
+ballX+=ballVX*dt;
+ballY+=ballVY*dt;
+
+
+const friction=
+Math.pow(
+FRICTION,
+dt*60
+);
+
+
+ballVX*=friction;
+ballVY*=friction;
+
+
+if(Math.abs(ballVX)<0.15)
+ballVX=0;
+
+if(Math.abs(ballVY)<0.15)
+ballVY=0;
+
+
+if(ballX<BALL_RADIUS){
+
+ballX=BALL_RADIUS;
+
+ballVX=
+Math.abs(ballVX)*0.8;
+
+}
+
+
+if(
+ballX>
+worldWidth-BALL_RADIUS
+){
+
+ballX=
+worldWidth-BALL_RADIUS;
+
+ballVX=
+-Math.abs(ballVX)*0.8;
+
+}
+
+
+/* TOP GOAL */
+
+if(
+ballY<
+-GOAL_EXIT_DISTANCE
+){
+
+const insideGoal=
+Math.abs(
+ballX-worldWidth/2
+)<=
+GOAL_WIDTH/2;
+
+
+if(insideGoal){
+
+scoreBlue();
+return;
+
+}
+
+else{
+
+ballY=BALL_RADIUS;
+
+ballVY=
+Math.abs(ballVY)*0.8;
+
+}
+
+}
+
+
+if(
+ballY<=BALL_RADIUS &&
+ballY>=-GOAL_EXIT_DISTANCE
+){
+
+const insideGoal=
+Math.abs(
+ballX-worldWidth/2
+)<=
+GOAL_WIDTH/2;
+
+
+if(
+!insideGoal &&
+ballVY<0
+){
+
+ballY=BALL_RADIUS;
+
+ballVY=
+Math.abs(ballVY)*0.8;
+
+}
+
+}
+
+
+/* BOTTOM GOAL */
+
+if(
+ballY>
+worldHeight+GOAL_EXIT_DISTANCE
+){
+
+const insideGoal=
+Math.abs(
+ballX-worldWidth/2
+)<=
+GOAL_WIDTH/2;
+
+
+if(insideGoal){
+
+scoreRed();
+return;
+
+}
+
+else{
+
+ballY=
+worldHeight-BALL_RADIUS;
+
+ballVY=
+-Math.abs(ballVY)*0.8;
+
+}
+
+}
+
+
+if(
+ballY>=worldHeight-BALL_RADIUS &&
+ballY<=worldHeight+GOAL_EXIT_DISTANCE
+){
+
+const insideGoal=
+Math.abs(
+ballX-worldWidth/2
+)<=
+GOAL_WIDTH/2;
+
+
+if(
+!insideGoal &&
+ballVY>0
+){
+
+ballY=
+worldHeight-BALL_RADIUS;
+
+ballVY=
+-Math.abs(ballVY)*0.8;
+
+}
+
+}
+
+}
+
+
+/* =========================================================
+   SCORE
+========================================================= */
+
+function scoreBlue(){
+
+if(
+goalCelebrationActive ||
+matchEnded
+)
+return;
+
+
+blueScore++;
+
+blueScoreElement.textContent=
+blueScore;
+
+ballVX=0;
+ballVY=0;
+ballOwner=null;
+
+showGoalCelebration();
+
+}
+
+
+function scoreRed(){
+
+if(
+goalCelebrationActive ||
+matchEnded
+)
+return;
+
+
+redScore++;
+
+redScoreElement.textContent=
+redScore;
+
+ballVX=0;
+ballVY=0;
+ballOwner=null;
+
+showGoalCelebration();
+
+}
+
+
+/* =========================================================
+   GOAL CELEBRATION
+========================================================= */
+
+function showGoalCelebration(){
+
+if(goalCelebrationActive)
+return;
+
+
+goalCelebrationActive=true;
+matchRunning=false;
+
+cancelCharging();
+resetJoystick();
+
+goalCelebration.style.display="flex";
+
+
+if(goalResetTimer){
+
+clearTimeout(goalResetTimer);
+
+}
+
+
+goalResetTimer=
+setTimeout(
+()=>{
+
+goalCelebration.style.display="none";
+
+resetAfterGoal();
+
+matchRunning=true;
+goalCelebrationActive=false;
+
+lastTimestamp=
+performance.now();
+
+},
+1600
+);
+
+}
+
+
+/* =========================================================
+   RESET AFTER GOAL
+========================================================= */
+
+function resetAfterGoal(){
+
+ballOwner=null;
+
+ballVX=0;
+ballVY=0;
+
+cancelCharging();
+
+
+for(const p of teamPlayers){
+
+p.x=p.anchorX;
+p.y=p.anchorY;
+p.hasBall=false;
+
+p.passCooldown=
+Math.random()*0.5;
+
+}
+
+
+for(const p of opponents){
+
+p.x=p.anchorX;
+p.y=p.anchorY;
+
+p.hasBall=false;
+
+resetRedDecisionTimer(p);
+resetRedShotCooldown(p);
+resetRedPassCooldown(p);
+
+}
+
+
+const p=
+teamPlayers[activePlayerIndex];
+
+
+p.x=worldWidth/2;
+p.y=worldHeight/2+25;
+
+
+ballOwner=p;
+
+ballX=worldWidth/2;
+ballY=worldHeight/2;
+
+ballVX=0;
+ballVY=0;
+
+lastOwnerChangeTime=
+performance.now();
+
+manualSelectedPlayerIndex=
+activePlayerIndex;
+
+manualControlLockUntil=
+performance.now()+
+MANUAL_CONTROL_LOCK;
+
+aimAngle=-Math.PI/2;
+
+aimX=worldWidth/2;
+aimY=0;
+
+draw();
+
+}
+
+
+/* =========================================================
+   MANUAL SWITCH
+========================================================= */
+
+function switchPlayer(){
+
+if(
+!matchRunning ||
+matchEnded
+)
+return;
+
+
+const now=performance.now();
+
+
+if(
+now-lastManualSwitchTime<
+MANUAL_SWITCH_COOLDOWN
+)
+return;
+
+
+let candidates=[];
+
+
+for(
+let i=0;
+i<teamPlayers.length;
+i++
+){
+
+if(i===activePlayerIndex)
+continue;
+
+
+const p=teamPlayers[i];
+
+
+const d=
+Math.hypot(
+p.x-ballX,
+p.y-ballY
+);
+
+
+candidates.push({
+index:i,
+distance:d
+});
+
+}
+
+
+if(candidates.length===0)
+return;
+
+
+candidates.sort(
+(a,b)=>
+a.distance-b.distance
+);
+
+
+const selected=candidates[0];
+
+
+if(
+setActivePlayer(
+selected.index,
+true
+)
+){
+
+manualSelectedPlayerIndex=
+selected.index;
+
+lastManualSwitchTime=now;
+
+manualControlLockUntil=
+now+
+MANUAL_CONTROL_LOCK;
+
+lastAutoSwitchTime=now;
+
+draw();
+
+}
+
+}
+
+
+/* =========================================================
+   DOUBLE TAP
+========================================================= */
+
+game.addEventListener(
+"pointerdown",
+e=>{
+
+if(
+e.target===movePad ||
+movePad.contains(e.target) ||
+e.target===kickControl ||
+kickControl.contains(e.target)
+){
+
+return;
+
+}
+
+
+if(chargingActive)
+return;
+
+
+e.preventDefault();
+
+
+const now=performance.now();
+
+
+if(
+now-lastTapTime<
+320
+){
+
+switchPlayer();
+
+}
+
+
+lastTapTime=now;
+
+}
+);
+
+
+/* =========================================================
+   PREVENT ZOOM
+========================================================= */
+
+document.addEventListener(
+"dblclick",
+e=>{
+e.preventDefault();
+},
+{
+passive:false
+}
+);
+
+
+document.addEventListener(
+"gesturestart",
+e=>{
+e.preventDefault();
+},
+{
+passive:false
+}
+);
+
+
+document.addEventListener(
+"gesturechange",
+e=>{
+e.preventDefault();
+},
+{
+passive:false
+}
+);
+
+
+document.addEventListener(
+"gestureend",
+e=>{
+e.preventDefault();
+},
+{
+passive:false
+}
+);
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function formatTime(seconds){
+
+seconds=
+Math.max(
+0,
+Math.ceil(seconds)
+);
+
+
+const minutes=
+Math.floor(seconds/60);
+
+const secs=
+seconds%60;
+
+
+return(
+String(minutes).padStart(2,"0")
++
+":"
++
+String(secs).padStart(2,"0")
+);
+
+}
+
+
+function updateMatchTimer(dt){
+
+if(
+!matchRunning ||
+matchEnded
+)
+return;
+
+
+matchTimeRemaining-=dt;
+
+
+if(matchTimeRemaining<=0){
+
+matchTimeRemaining=0;
+
+endMatch();
+
+}
+
+
+matchTimeElement.textContent=
+formatTime(
+matchTimeRemaining
+);
+
+
+if(
+matchTimeRemaining<=10
+){
+
+matchTimeElement.classList.add(
+"warning"
+);
+
+}
+
+else{
+
+matchTimeElement.classList.remove(
+"warning"
+);
+
+}
+
+}
+
+
+/* =========================================================
+   END MATCH
+========================================================= */
+
+function endMatch(){
+
+matchRunning=false;
+matchEnded=true;
+
+cancelCharging();
+resetJoystick();
+
+finalScore.textContent=
+`ðµ ${blueScore} - ${redScore} ð´`;
+
+matchEnd.style.display="flex";
+
+}
+
+
+/* =========================================================
+   NEW MATCH
+========================================================= */
+
+newMatch.addEventListener(
+"click",
+e=>{
+
+e.preventDefault();
+
+
+blueScore=0;
+redScore=0;
+
+blueScoreElement.textContent="0";
+redScoreElement.textContent="0";
+
+matchTimeRemaining=
+MATCH_DURATION;
+
+matchRunning=true;
+matchEnded=false;
+
+goalCelebrationActive=false;
+
+
+if(goalResetTimer){
+
+clearTimeout(goalResetTimer);
+goalResetTimer=null;
+
+}
+
+
+goalCelebration.style.display="none";
+matchEnd.style.display="none";
+
+
+activePlayerIndex=0;
+manualSelectedPlayerIndex=0;
+
+lastManualSwitchTime=0;
+lastAutoSwitchTime=0;
+
+manualControlLockUntil=0;
+
+lastOwnerChangeTime=0;
+
+
+createTeams();
+
+
+ballOwner=teamPlayers[0];
+
+ballX=ballOwner.x;
+ballY=ballOwner.y-25;
+
+ballVX=0;
+ballVY=0;
+
+
+cameraX=
+clamp(
+ballX-viewWidth/2,
+0,
+Math.max(
+0,
+worldWidth-viewWidth
+)
+);
+
+
+cameraY=
+clamp(
+ballY-viewHeight/2,
+0,
+Math.max(
+0,
+worldHeight-viewHeight
+)
+);
+
+
+resetJoystick();
+cancelCharging();
+
+setActivePlayer(0);
+
+draw();
+
+}
+);
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+function resizeGame(){
+
+viewWidth=game.clientWidth;
+viewHeight=game.clientHeight;
+
+worldWidth=WORLD_WIDTH;
+worldHeight=WORLD_HEIGHT;
+
+
+field.style.width=
+`${worldWidth}px`;
+
+field.style.height=
+`${worldHeight}px`;
+
+}
+
+
+/* =========================================================
+   UPDATE GAME
+========================================================= */
+
+function updateGame(dt){
+
+if(
+!matchRunning ||
+matchEnded
+)
+return;
+
+
+updateMatchTimer(dt);
+
+updateControlledPlayer(dt);
+
+updateBlueAI(dt);
+
+updateRedAI(dt);
+
+updateBallAI(dt);
+
+
+/*
+   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ£Ø­ÙØ± Ø§ÙÙØ¯ÙÙ.
+*/
+
+tackle();
+
+
+/*
+   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ£Ø²Ø±Ù Ø§ÙÙØ¨Ø§Ø´Ø±.
+
+   ÙØªÙ Ø¨Ø¹Ø¯ Ø­Ø±ÙØ© Ø§ÙÙØ§Ø¹Ø¨ÙÙ ÙÙØ¨Ù
+   ØªØ­Ø¯ÙØ« Ø§ÙÙØ±Ø©Ø Ø­ØªÙ Ø¥Ø°Ø§ ÙØµÙ ÙØ§Ø¹Ø¨
+   Ø£Ø²Ø±Ù Ø¥ÙÙ Ø­Ø§ÙÙ Ø§ÙÙØ±Ø© Ø§ÙØ£Ø­ÙØ± ÙÙ
+   ÙØ°Ù Ø§ÙØ¯ÙØ±Ø© ÙØªÙ Ø§ÙØ§ÙØªÙØ§Ù ÙÙØ±ÙØ§.
+*/
+
+automaticBlueTackle();
+
+
+updateCharge(dt);
+
+updateBall(dt);
+
+tryBallPickup();
+
+autoSwitchPlayer();
+
+separateAllPlayers();
+
+updateCamera();
+
+draw();
+
+}
+
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+function gameLoop(now){
+
+let dt=
+(now-lastTimestamp)/1000;
+
+
+lastTimestamp=now;
+
+dt=Math.min(dt,0.033);
+
+updateGame(dt);
+
+requestAnimationFrame(
+gameLoop
+);
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+function initializeGame(){
+
+resizeGame();
+
+createTeams();
+
+ballOwner=teamPlayers[0];
+
+ballX=ballOwner.x;
+ballY=ballOwner.y-25;
+
+ballVX=0;
+ballVY=0;
+
+activePlayerIndex=0;
+manualSelectedPlayerIndex=0;
+
+lastOwnerChangeTime=
+performance.now();
+
+setActivePlayer(0);
+
+
+cameraX=
+clamp(
+ballX-viewWidth/2,
+0,
+Math.max(
+0,
+worldWidth-viewWidth
+)
+);
+
+
+cameraY=
+clamp(
+ballY-viewHeight/2,
+0,
+Math.max(
+0,
+worldHeight-viewHeight
+)
+);
+
+
+draw();
+
+lastTimestamp=
+performance.now();
+
+requestAnimationFrame(
+gameLoop
+);
+
+}
+
+
+/* =========================================================
+   RESIZE EVENT
+========================================================= */
+
+window.addEventListener(
+"resize",
+()=>{
+
+resizeGame();
+
+
+ballX=
+clamp(
+ballX,
+BALL_RADIUS,
+worldWidth-BALL_RADIUS
+);
+
+
+ballY=
+clamp(
+ballY,
+BALL_RADIUS,
+worldHeight-BALL_RADIUS
+);
+
+
+cameraX=
+clamp(
+cameraX,
+0,
+Math.max(
+0,
+worldWidth-viewWidth
+)
+);
+
+
+cameraY=
+clamp(
+cameraY,
+0,
+Math.max(
+0,
+worldHeight-viewHeight
+)
+);
+
+
+draw();
+
+}
+);
+
+
+/* =========================================================
+   START
+========================================================= */
+
+initializeGame();
