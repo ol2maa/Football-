@@ -440,6 +440,7 @@ color:white;
 <div class="controlArrow">▼</div>
 🧍
 </div>
+
 <div id="teammate5" class="playerUnit blue">
 <div class="controlArrow">🅾️</div>
 😁
@@ -549,17 +550,9 @@ const CAMERA_SMOOTH=0.075;
 const MATCH_DURATION=180;
 
 
-/*
-   ========================================================
-   WORLD SIZE v4.1.0
-   ========================================================
-
-   الملعب كبير:
-   1200 × 2200
-
-   تم رفع سرعة اللاعبين لأن زيادة مساحة
-   الملعب جعلت السرعات القديمة تبدو بطيئة.
-*/
+/* =========================================================
+   WORLD SIZE
+========================================================= */
 
 const WORLD_WIDTH=1200;
 const WORLD_HEIGHT=2200;
@@ -581,46 +574,14 @@ const PLAYER_PICKUP_DISTANCE=30;
 
 
 /* =========================================================
-   PLAYER SPEEDS v4.1.0
+   PLAYER SPEEDS
 ========================================================= */
-
-/*
-   BLUE
-
-   Forward:
-   300→ 350
-
-   Wing:
-   300→ 350
-
-   Defender:
-   300→ 350
-
-   Guard:
-   300→ 350
-*/
 
 const BLUE_FORWARD_SPEED=150;
 const BLUE_WING_SPEED=150;
 const BLUE_DEFENDER_SPEED=150;
 const BLUE_GUARD_SPEED=150;
 
-
-/*
-   RED
-
-   Forward:
-   90 → 115
-
-   Wing:
-   90 → 115
-
-   Defender:
-   85 → 110
-
-   Guard:
-   80 → 100
-*/
 
 const RED_FORWARD_SPEED=115;
 const RED_WING_SPEED=115;
@@ -643,22 +604,6 @@ const PLAYER_GOAL_POST_DISTANCE=
 PLAYER_RADIUS+
 GOAL_POST_RADIUS+
 1;
-
-
-/* =========================================================
-   BLUE TACKLE
-========================================================= */
-
-const BLUE_TACKLE_DISTANCE=55;
-
-const BLUE_TACKLE_CONTACT_DISTANCE=
-PLAYER_COLLISION_DISTANCE+6;
-
-const BLUE_TACKLE_DOT=0.45;
-
-const BLUE_TACKLE_COOLDOWN=420;
-
-const BLUE_TACKLE_LUNGE=12;
 
 
 /* =========================================================
@@ -698,6 +643,27 @@ const RED_SHOT_TARGET_OFFSET=58;
 
 
 /* =========================================================
+   RED PASSING
+========================================================= */
+
+const RED_PASS_MIN_DISTANCE=150;
+const RED_PASS_MAX_DISTANCE=680;
+
+const RED_PASS_PRESSURE_DISTANCE=190;
+
+const RED_PASS_SAFE_DISTANCE=72;
+
+const RED_PASS_COOLDOWN=1.10;
+
+const RED_PASS_SPEED_MIN=620;
+const RED_PASS_SPEED_MAX=900;
+
+const RED_PASS_NORMAL_CHANCE=0.42;
+const RED_PASS_FAR_CHANCE=0.55;
+const RED_PASS_PRESSURE_CHANCE=0.94;
+
+
+/* =========================================================
    GOAL
 ========================================================= */
 
@@ -722,7 +688,6 @@ let lastAutoSwitchTime=0;
 let lastManualSwitchTime=0;
 let manualControlLockUntil=0;
 let lastOwnerChangeTime=0;
-let lastBlueTackleTime=0;
 
 
 /* =========================================================
@@ -876,6 +841,9 @@ Math.random()*0.25,
 shotCooldown:
 Math.random()*0.5,
 
+passCooldown:
+Math.random()*0.5,
+
 currentAction:"position",
 
 shotType:"direct"
@@ -941,7 +909,7 @@ worldHeight*0.95,
 BLUE_GUARD_SPEED,
 "guard"
 ),
-   
+
 createPlayer(
 "teammate5",
 "blue",
@@ -1578,23 +1546,9 @@ if(owner && owner.team==="blue"){
 const ownerX=owner.x;
 const ownerY=owner.y;
 
-
-/* =========================================
-‎   لاعب 5 يفتح زاوية تمرير أمام حامل الكرة
-========================================= */
-
 let side=1;
 
-
-/*
-‎   إذا حامل الكرة على اليسار
-‎   لاعب 5 يفتح جهة اليمين
-
-‎   وإذا حامل الكرة على اليمين
-‎   لاعب 5 يفتح جهة اليسار
-*/
-
-if(ownerX < worldWidth/2){
+if(ownerX<worldWidth/2){
 
 side=1;
 
@@ -1605,19 +1559,8 @@ side=-1;
 
 }
 
-
-/* =========================================
-‎   المسافة عن حامل الكرة
-========================================= */
-
 const PASS_OFFSET_X=150;
 const PASS_OFFSET_Y=500;
-
-
-/* =========================================
-‎   الهدف:
-‎   فوق حامل الكرة + مائل يمين/يسار
-========================================= */
 
 targetX=
 ownerX+
@@ -1626,11 +1569,6 @@ side*PASS_OFFSET_X;
 targetY=
 ownerY-
 PASS_OFFSET_Y;
-
-
-/* =========================================
-‎   إبقاء لاعب 5 داخل منطقة الوسط
-========================================= */
 
 targetX=clamp(
 targetX,
@@ -1647,11 +1585,6 @@ worldHeight*0.62
 }
 
 else{
-
-/*
-‎   لا أحد من الأزرق معه الكرة
-‎   يرجع لاعب 5 إلى مركزه
-*/
 
 targetX=worldWidth/2;
 targetY=worldHeight*0.50;
@@ -1723,6 +1656,15 @@ Math.random()*0.35;
 }
 
 
+function resetRedPassCooldown(p){
+
+p.passCooldown=
+RED_PASS_COOLDOWN+
+Math.random()*0.35;
+
+}
+
+
 function chooseRedShotType(
 p,
 distanceToGoal
@@ -1757,6 +1699,458 @@ if(r<0.82)
 return"diagonal-right";
 
 return"power";
+
+}
+
+
+/* =========================================================
+   FIND BEST RED PASS
+========================================================= */
+
+function findBestRedPass(p){
+
+let bestPlayer=null;
+let bestScore=-Infinity;
+
+
+for(const receiver of opponents){
+
+if(receiver===p)
+continue;
+
+
+const distance=
+Math.hypot(
+receiver.x-p.x,
+receiver.y-p.y
+);
+
+
+if(
+distance<RED_PASS_MIN_DISTANCE ||
+distance>RED_PASS_MAX_DISTANCE
+){
+
+continue;
+
+}
+
+
+/*
+   اللاعب الذي أمام حامل الكرة
+   باتجاه مرمى الأحمر يحصل على أفضلية.
+
+   الأحمر يهاجم باتجاه الأسفل،
+   لذلك y الأكبر يعني تقدمًا.
+*/
+
+const forwardProgress=
+clamp(
+(receiver.y-p.y)/
+RED_PASS_MAX_DISTANCE,
+-1,
+1
+);
+
+
+const forwardScore=
+forwardProgress*190;
+
+
+/*
+   التقدم الفعلي نحو المرمى.
+*/
+
+const carrierGoalDistance=
+Math.hypot(
+worldWidth/2-p.x,
+worldHeight-p.y
+);
+
+const receiverGoalDistance=
+Math.hypot(
+worldWidth/2-receiver.x,
+worldHeight-receiver.y
+);
+
+
+const goalProgress=
+clamp(
+carrierGoalDistance-receiverGoalDistance,
+-RED_PASS_MAX_DISTANCE,
+RED_PASS_MAX_DISTANCE
+);
+
+
+const goalScore=
+(goalProgress/RED_PASS_MAX_DISTANCE)*150;
+
+
+/*
+   المسافة عن أقرب لاعب أزرق.
+*/
+
+let nearestBlueDistance=Infinity;
+
+
+for(const blue of teamPlayers){
+
+const d=
+Math.hypot(
+blue.x-receiver.x,
+blue.y-receiver.y
+);
+
+
+if(d<nearestBlueDistance){
+
+nearestBlueDistance=d;
+
+}
+
+}
+
+
+/*
+   إذا كان المستقبل ملتصقًا تقريبًا
+   بلاعب أزرق، لا نختاره.
+
+   لكن لا نمنع التمرير إذا كان الضغط
+   شديدًا على حامل الكرة ولا يوجد
+   مستقبل مثالي.
+*/
+
+if(
+nearestBlueDistance<RED_PASS_SAFE_DISTANCE
+){
+
+continue;
+
+}
+
+
+const safetyScore=
+clamp(
+nearestBlueDistance/300,
+0,
+1
+)*170;
+
+
+/*
+   المسافة المثالية للتمريرة.
+*/
+
+const idealDistance=390;
+
+const distanceScore=
+100-
+Math.abs(distance-idealDistance)*0.28;
+
+
+/*
+   توزيع اللاعبين.
+
+   الجناح والمهاجم مفيدان للتقدم،
+   المدافع خيار آمن،
+   الحارس أقل أولوية.
+*/
+
+let roleScore=0;
+
+
+if(receiver.role==="forward")
+roleScore=65;
+
+else if(receiver.role==="wing")
+roleScore=55;
+
+else if(receiver.role==="defender")
+roleScore=20;
+
+else if(receiver.role==="guard")
+roleScore=-40;
+
+
+/*
+   تشجيع التمرير الجانبي عندما يكون
+   أفضل من التمرير العمودي المباشر.
+*/
+
+const horizontalSeparation=
+Math.abs(
+receiver.x-p.x
+);
+
+const horizontalScore=
+clamp(
+horizontalSeparation/250,
+0,
+1
+)*35;
+
+
+let score=
+forwardScore+
+goalScore+
+safetyScore+
+distanceScore+
+roleScore+
+horizontalScore;
+
+
+/*
+   إذا كان المستقبل أمام حامل الكرة
+   بشكل واضح، يحصل على أفضلية إضافية.
+*/
+
+if(receiver.y>p.y+80){
+
+score+=75;
+
+}
+
+
+/*
+   إذا كان المستقبل خلف حامل الكرة
+   فلا نمنعه تمامًا، لكن نقلل الأولوية.
+*/
+
+if(receiver.y<p.y-100){
+
+score-=100;
+
+}
+
+
+if(score>bestScore){
+
+bestScore=score;
+bestPlayer=receiver;
+
+}
+
+}
+
+
+return{
+player:bestPlayer,
+score:bestScore
+};
+
+}
+
+
+/* =========================================================
+   RED PASS
+========================================================= */
+
+function redPass(p,force=false){
+
+if(ballOwner!==p)
+return false;
+
+
+if(
+p.passCooldown>0 &&
+!force
+){
+
+return false;
+
+}
+
+
+const result=
+findBestRedPass(p);
+
+
+const receiver=
+result.player;
+
+
+if(!receiver)
+return false;
+
+
+let nearestBlueDistance=Infinity;
+
+
+for(const blue of teamPlayers){
+
+const d=
+Math.hypot(
+blue.x-p.x,
+blue.y-p.y
+);
+
+
+if(d<nearestBlueDistance){
+
+nearestBlueDistance=d;
+
+}
+
+}
+
+
+const underPressure=
+nearestBlueDistance<=
+RED_PASS_PRESSURE_DISTANCE;
+
+
+let passChance=
+RED_PASS_NORMAL_CHANCE;
+
+
+if(underPressure){
+
+passChance=
+RED_PASS_PRESSURE_CHANCE;
+
+}
+else if(
+p.y<worldHeight*0.50
+){
+
+passChance=
+RED_PASS_FAR_CHANCE;
+
+}
+
+
+/*
+   عند الضغط الشديد:
+   التمرير شبه مؤكد.
+
+   force يستخدم فقط في الحالات التي
+   نريد فيها تمريرة تكتيكية واضحة.
+*/
+
+if(
+!force &&
+Math.random()>passChance
+){
+
+return false;
+
+}
+
+
+/*
+   نقطة الاستلام تكون أمام المستقبل
+   قليلًا في اتجاه تقدمه.
+
+   هذا يجعل الكرة تتحرك إلى اللاعب
+   بدل أن تمر خلفه.
+*/
+
+let leadX=receiver.x;
+let leadY=receiver.y;
+
+
+const receiverMoveLength=
+Math.hypot(
+receiver.moveX,
+receiver.moveY
+);
+
+
+if(receiverMoveLength>0.01){
+
+leadX+=
+(
+receiver.moveX/
+receiverMoveLength
+)*35;
+
+leadY+=
+(
+receiver.moveY/
+receiverMoveLength
+)*35;
+
+}
+else{
+
+/*
+   إذا كان المستقبل لا يتحرك،
+   نضع الكرة أمامه باتجاه مرمى الأحمر.
+*/
+
+leadY+=35;
+
+}
+
+
+leadX=clamp(
+leadX,
+BALL_RADIUS,
+worldWidth-BALL_RADIUS
+);
+
+leadY=clamp(
+leadY,
+BALL_RADIUS,
+worldHeight-BALL_RADIUS
+);
+
+
+let dx=leadX-p.x;
+let dy=leadY-p.y;
+
+const d=Math.hypot(dx,dy);
+
+
+if(d<1)
+return false;
+
+
+dx/=d;
+dy/=d;
+
+
+const distanceRatio=
+clamp(
+d/RED_PASS_MAX_DISTANCE,
+0,
+1
+);
+
+
+const speed=
+RED_PASS_SPEED_MIN+
+(
+RED_PASS_SPEED_MAX-
+RED_PASS_SPEED_MIN
+)*
+distanceRatio;
+
+
+ballOwner=null;
+
+ballX=p.x+dx*28;
+ballY=p.y+dy*28;
+
+ballVX=dx*speed;
+ballVY=dy*speed;
+
+
+p.currentAction="pass";
+
+receiver.currentAction="receive";
+
+resetRedPassCooldown(p);
+resetRedDecisionTimer(p);
+
+
+/*
+   المستقبل لا يملك الكرة بعد.
+   سيأخذها عندما تصل الكرة إلى
+   مسافة الالتقاط.
+*/
+
+return true;
 
 }
 
@@ -1989,6 +2383,7 @@ performance.now();
 p.currentAction="won-ball";
 
 resetRedDecisionTimer(p);
+resetRedPassCooldown(p);
 
 return true;
 
@@ -2047,9 +2442,65 @@ for(const p of opponents){
 
 p.decisionTimer-=dt;
 p.shotCooldown-=dt;
+p.passCooldown-=dt;
 
+
+/* =====================================================
+   RED HAS BALL
+===================================================== */
 
 if(ballOwner===p){
+
+/*
+   أول شيء:
+   نعرف هل يوجد ضغط أزرق قريب.
+*/
+
+let nearestBlue=null;
+let nearestBlueDistance=Infinity;
+
+
+for(const blue of teamPlayers){
+
+const d=
+Math.hypot(
+blue.x-p.x,
+blue.y-p.y
+);
+
+
+if(d<nearestBlueDistance){
+
+nearestBlueDistance=d;
+nearestBlue=blue;
+
+}
+
+}
+
+
+/*
+   عند الضغط الشديد، الأحمر يمرر
+   مباشرة بدل محاولة المراوغة.
+*/
+
+if(
+nearestBlueDistance<=
+RED_PASS_PRESSURE_DISTANCE
+){
+
+if(redPass(p,true)){
+
+continue;
+
+}
+
+}
+
+
+/*
+   القرار التكتيكي الدوري.
+*/
 
 if(p.decisionTimer<=0){
 
@@ -2066,6 +2517,64 @@ goalX-p.x,
 goalY-p.y
 );
 
+
+/* =========================================
+   التمرير قبل التسديد عندما يكون بعيدًا
+========================================= */
+
+let passChance=
+RED_PASS_NORMAL_CHANCE;
+
+
+/*
+   في منتصف الملعب أو الخلفية:
+   الاعتماد على التمرير أعلى.
+*/
+
+if(p.y<worldHeight*0.48){
+
+passChance=
+RED_PASS_FAR_CHANCE;
+
+}
+
+
+/*
+   إذا كان قريبًا من المرمى،
+   نعطي التسديد أولوية أكبر.
+*/
+
+if(distToGoal<420){
+
+passChance=0.30;
+
+}
+
+
+/*
+   محاولة التمرير.
+
+   إذا نجحت التمريرة تنتهي حركة
+   حامل الكرة في هذه الدورة.
+*/
+
+if(
+p.passCooldown<=0 &&
+Math.random()<passChance
+){
+
+if(redPass(p)){
+
+continue;
+
+}
+
+}
+
+
+/* =========================================
+   التسديد
+========================================= */
 
 let shotChance=0.10;
 
@@ -2101,6 +2610,10 @@ continue;
 
 }
 
+
+/* =========================================
+   التقدم بالكرة
+========================================= */
 
 const targetX=worldWidth/2;
 const targetY=worldHeight-230;
@@ -2139,6 +2652,12 @@ dt
 
 else{
 
+/*
+   عندما لا يحتاج قرارًا جديدًا،
+   يستمر بالتقدم ولكن لا يجري مباشرة
+   دائمًا إلى المرمى بنفس القوة.
+*/
+
 const goalX=worldWidth/2;
 const goalY=worldHeight-240;
 
@@ -2168,6 +2687,10 @@ continue;
 }
 
 
+/* =====================================================
+   RED DOES NOT HAVE BALL
+===================================================== */
+
 const blueHasBall=
 ballOwner &&
 ballOwner.team==="blue";
@@ -2182,6 +2705,10 @@ ballX-p.x,
 ballY-p.y
 );
 
+
+/* =====================================================
+   BLUE HAS BALL
+===================================================== */
 
 if(blueHasBall){
 
@@ -2249,6 +2776,10 @@ continue;
 }
 
 
+/* =====================================================
+   FREE BALL
+===================================================== */
+
 if(
 freeBall &&
 distToBall<RED_CHASE_DISTANCE
@@ -2284,6 +2815,10 @@ continue;
 
 }
 
+
+/* =====================================================
+   RED POSITIONING
+===================================================== */
 
 let targetX=p.anchorX;
 let targetY=p.anchorY;
@@ -2906,8 +3441,7 @@ return;
 
 
 const emergencyClose=
-bestDistance<=
-AUTO_EMERGENCY_DISTANCE;
+bestDistance<=AUTO_EMERGENCY_DISTANCE;
 
 
 const clearlyCloser=
@@ -2971,23 +3505,16 @@ lastAutoSwitchTime=now;
 
 
 /* =========================================================
-   BLUE TACKLE v4.0.8
+   AUTOMATIC BLUE TACKLE
+   v4.1.0
 ========================================================= */
 
-function attemptBlueTackle(){
+function automaticBlueTackle(){
 
 if(
 !matchRunning ||
 matchEnded
 )
-return false;
-
-
-const p=
-teamPlayers[activePlayerIndex];
-
-
-if(!p)
 return false;
 
 
@@ -3001,134 +3528,62 @@ return false;
 }
 
 
+const red=ballOwner;
+
+
+/*
+   نفحص جميع لاعبي الأزرق.
+
+   لا يوجد:
+   - زر
+   - احتمال
+   - اتجاه نظر
+   - زمن انتظار
+   - اندفاع
+   - شرط لاعب محدد
+
+   مجرد تلامس = افتكاك مباشر.
+*/
+
+for(const blue of teamPlayers){
+
+const distance=
+Math.hypot(
+blue.x-red.x,
+blue.y-red.y
+);
+
+
+if(
+distance<=PLAYER_COLLISION_DISTANCE
+){
+
 const now=performance.now();
 
 
-if(
-now-lastBlueTackleTime<
-BLUE_TACKLE_COOLDOWN
-){
-
-return false;
-
-}
-
-
-const owner=ballOwner;
-
-
-const dx=
-owner.x-p.x;
-
-const dy=
-owner.y-p.y;
-
-const distance=
-Math.hypot(dx,dy);
-
-
-if(
-distance>
-BLUE_TACKLE_DISTANCE
-){
-
-return false;
-
-}
-
-
-const directionX=
-Math.cos(p.direction);
-
-const directionY=
-Math.sin(p.direction);
-
-
-let targetX=dx;
-let targetY=dy;
-
-
-if(distance>0.001){
-
-targetX/=distance;
-targetY/=distance;
-
-}
-
-
-const facing=
-directionX*targetX+
-directionY*targetY;
-
-
-if(
-facing<
-BLUE_TACKLE_DOT
-){
-
-lastBlueTackleTime=now;
-
-return false;
-
-}
-
-
-const ownerBeforeX=owner.x;
-const ownerBeforeY=owner.y;
-
-
-const lungeX=
-directionX*
-BLUE_TACKLE_LUNGE;
-
-const lungeY=
-directionY*
-BLUE_TACKLE_LUNGE;
-
-
-const resolved=
-resolvePlayerCollisions(
-p,
-p.x+lungeX,
-p.y+lungeY
-);
-
-
-p.x=resolved.x;
-p.y=resolved.y;
-
-
-const finalDistance=
-Math.hypot(
-ownerBeforeX-p.x,
-ownerBeforeY-p.y
-);
-
-
-if(
-finalDistance<=
-BLUE_TACKLE_CONTACT_DISTANCE
-){
-
-ballOwner=p;
+ballOwner=blue;
 
 ballVX=0;
 ballVY=0;
 
-ballX=p.x;
-ballY=p.y-25;
+ballX=blue.x;
+ballY=blue.y-25;
 
 
 lastOwnerChangeTime=now;
-lastBlueTackleTime=now;
+
+blue.hasBall=true;
+blue.currentAction="won-ball";
 
 
-p.currentAction="won-ball";
-p.hasBall=true;
-
+/*
+   إذا كان اللاعب الذي افتك الكرة
+   ليس اللاعب المتحكم حاليًا،
+   ينتقل التحكم إليه مباشرة.
+*/
 
 const index=
-teamPlayers.indexOf(p);
+teamPlayers.indexOf(blue);
 
 
 if(
@@ -3141,6 +3596,8 @@ index,
 false
 );
 
+lastAutoSwitchTime=now;
+
 }
 
 
@@ -3148,8 +3605,8 @@ return true;
 
 }
 
+}
 
-lastBlueTackleTime=now;
 
 return false;
 
@@ -3201,6 +3658,10 @@ ballVY=0;
 
 lastOwnerChangeTime=
 performance.now();
+
+
+nearestBlue.hasBall=true;
+nearestBlue.currentAction="won-ball";
 
 
 const index=
@@ -3270,7 +3731,11 @@ ballVY=0;
 lastOwnerChangeTime=
 performance.now();
 
+nearestRed.hasBall=true;
+nearestRed.currentAction="won-ball";
+
 resetRedDecisionTimer(nearestRed);
+resetRedPassCooldown(nearestRed);
 
 }
 
@@ -3320,7 +3785,11 @@ ballVY=0;
 lastOwnerChangeTime=
 performance.now();
 
+e.hasBall=true;
+e.currentAction="won-ball";
+
 resetRedDecisionTimer(e);
+resetRedPassCooldown(e);
 
 return;
 
@@ -3992,6 +4461,7 @@ finalPower*950;
 
 ballOwner=null;
 
+p.hasBall=false;
 
 ballX=p.x+dx*30;
 ballY=p.y+dy*30;
@@ -4006,7 +4476,7 @@ cancelCharging();
 
 
 /* =========================================================
-   KICK / TACKLE BUTTON
+   KICK BUTTON
 ========================================================= */
 
 kickControl.addEventListener(
@@ -4020,12 +4490,18 @@ if(chargingActive)
 return;
 
 
+/*
+   إذا كانت الكرة مع الأحمر،
+   لا نحتاج زر الافتكاك.
+
+   الافتكاك الآن يحدث تلقائيًا
+   عند التلامس.
+*/
+
 if(
 ballOwner &&
 ballOwner.team==="red"
 ){
-
-attemptBlueTackle();
 
 return;
 
@@ -4137,6 +4613,20 @@ cancelCharging();
 function updateBall(dt){
 
 if(ballOwner){
+
+for(const p of teamPlayers){
+
+p.hasBall=false;
+
+}
+
+for(const p of opponents){
+
+p.hasBall=false;
+
+}
+
+ballOwner.hasBall=true;
 
 ballX=ballOwner.x;
 ballY=ballOwner.y-25;
@@ -4436,6 +4926,9 @@ p.x=p.anchorX;
 p.y=p.anchorY;
 p.hasBall=false;
 
+p.passCooldown=
+Math.random()*0.5;
+
 }
 
 
@@ -4444,8 +4937,11 @@ for(const p of opponents){
 p.x=p.anchorX;
 p.y=p.anchorY;
 
+p.hasBall=false;
+
 resetRedDecisionTimer(p);
 resetRedShotCooldown(p);
+resetRedPassCooldown(p);
 
 }
 
@@ -4468,8 +4964,6 @@ ballVY=0;
 
 lastOwnerChangeTime=
 performance.now();
-
-lastBlueTackleTime=0;
 
 manualSelectedPlayerIndex=
 activePlayerIndex;
@@ -4820,7 +5314,6 @@ lastAutoSwitchTime=0;
 manualControlLockUntil=0;
 
 lastOwnerChangeTime=0;
-lastBlueTackleTime=0;
 
 
 createTeams();
@@ -4913,7 +5406,25 @@ updateRedAI(dt);
 
 updateBallAI(dt);
 
+
+/*
+   الافتكاك الأحمر القديم.
+*/
+
 tackle();
+
+
+/*
+   الافتكاك الأزرق المباشر.
+
+   يتم بعد حركة اللاعبين وقبل
+   تحديث الكرة، حتى إذا وصل لاعب
+   أزرق إلى حامل الكرة الأحمر في
+   هذه الدورة يتم الافتكاك فورًا.
+*/
+
+automaticBlueTackle();
+
 
 updateCharge(dt);
 
@@ -4978,8 +5489,6 @@ manualSelectedPlayerIndex=0;
 
 lastOwnerChangeTime=
 performance.now();
-
-lastBlueTackleTime=0;
 
 setActivePlayer(0);
 
