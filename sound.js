@@ -1,12 +1,51 @@
-const kickSound = new Audio("kick.wav");
+let audioContext = null;
+let kickBuffer = null;
+
+async function initAudio(){
+
+    if(!audioContext){
+
+        audioContext =
+            new (window.AudioContext ||
+                 window.webkitAudioContext)({
+                latencyHint:"interactive"
+            });
+    }
+
+    if(audioContext.state === "suspended"){
+        await audioContext.resume();
+    }
+
+    if(!kickBuffer){
+
+        const response =
+            await fetch("kick.wav");
+
+        const arrayBuffer =
+            await response.arrayBuffer();
+
+        kickBuffer =
+            await audioContext.decodeAudioData(arrayBuffer);
+    }
+}
+
 
 function playKickSound(){
 
-    kickSound.currentTime = 0;
+    if(!audioContext || !kickBuffer){
+        return;
+    }
 
-    kickSound.play()
-    .catch(error=>{
-        console.log("KICK SOUND ERROR:", error);
-    });
+    if(audioContext.state === "suspended"){
+        audioContext.resume();
+    }
 
+    const source =
+        audioContext.createBufferSource();
+
+    source.buffer = kickBuffer;
+
+    source.connect(audioContext.destination);
+
+    source.start(0);
 }
