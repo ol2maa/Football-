@@ -25,16 +25,6 @@ const goalCelebration=document.getElementById("goalCelebration");
 ========================================================= */
 
 const CAMERA_SMOOTH=0.075;
-
-/* =========================================================
-   CAMERA ZOOM
-   0.65 = رؤية أبعد
-   0.60 = أبعد أكثر
-   0.70 = أقرب قليلًا
-========================================================= */
-
-const CAMERA_ZOOM=0.80;
-
 const MATCH_DURATION=180;
 
 
@@ -92,6 +82,7 @@ const PLAYER_GOAL_POST_DISTANCE=
 PLAYER_RADIUS+
 GOAL_POST_RADIUS+
 1;
+
 
 
 /* =========================================================
@@ -838,6 +829,24 @@ dt
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    ACTIVE PLAYER
 ========================================================= */
@@ -952,6 +961,10 @@ distance:bestDistance
 };
 
 }
+
+
+
+
 
 
 /* =========================================================
@@ -1083,6 +1096,8 @@ resetRedPassCooldown(nearestRed);
 }
 
 
+
+
 /* =========================================================
    SEPARATE ALL PLAYERS
 ========================================================= */
@@ -1175,45 +1190,23 @@ b.y+=dy*push;
 
 function updateCamera(){
 
-/*
-   لأن CAMERA_ZOOM = 0.65
-   فإن المساحة الظاهرة من العالم أكبر من الشاشة
-*/
-
-const visibleWorldWidth=
-viewWidth/CAMERA_ZOOM;
-
-const visibleWorldHeight=
-viewHeight/CAMERA_ZOOM;
-
-
-/*
-   مركز الكاميرا أفقيًا على الكرة
-*/
-
 const targetX=
-ballX-visibleWorldWidth/2;
-
-
-/*
-   نفس وضع الكاميرا العمودي السابق
-   لكن باستخدام المساحة الجديدة المرئية
-*/
+ballX-viewWidth/2;
 
 const targetY=
-ballY-visibleWorldHeight*0.62;
+ballY-viewHeight*0.62;
 
 
 const maxX=
 Math.max(
 0,
-worldWidth-visibleWorldWidth
+worldWidth-viewWidth
 );
 
 const maxY=
 Math.max(
 0,
-worldHeight-visibleWorldHeight
+worldHeight-viewHeight
 );
 
 
@@ -1360,36 +1353,14 @@ aimArrow.style.transformOrigin=
 }
 
 
-/* =========================================================
-   DRAW FIELD
-========================================================= */
-
 function drawField(){
-
-/*
-   مهم جدًا:
-   نجعل نقطة الأصل أعلى يسار الملعب
-   حتى يكون حساب الكاميرا دقيقًا.
-*/
-
-field.style.transformOrigin="0 0";
-
-
-/*
-   المعادلة:
-
-   screen = (world - camera) × zoom
-
-   لذلك نضرب إزاحة الكاميرا في CAMERA_ZOOM.
-*/
 
 field.style.transform=
 `translate3d(
-${-cameraX*CAMERA_ZOOM}px,
-${-cameraY*CAMERA_ZOOM}px,
+${-cameraX}px,
+${-cameraY}px,
 0
-)
-scale(${CAMERA_ZOOM})`;
+)`;
 
 }
 
@@ -1786,7 +1757,6 @@ ballY=p.y+dy*30;
 ballVX=dx*speed;
 ballVY=dy*speed;
 
-playKickSound();
 
 cancelCharging();
 
@@ -1801,8 +1771,6 @@ kickControl.addEventListener(
 "pointerdown",
 e=>{
 
-initAudio();
-
 e.preventDefault();
 
 
@@ -1811,9 +1779,11 @@ return;
 
 
 /*
-   إذا كانت الكرة مع الأحمر
-   لا نحتاج زر الافتكاك.
-   الافتكاك يحدث تلقائيًا عند التلامس.
+   Ø¥Ø°Ø§ ÙØ§ÙØª Ø§ÙÙØ±Ø© ÙØ¹ Ø§ÙØ£Ø­ÙØ±Ø
+   ÙØ§ ÙØ­ØªØ§Ø¬ Ø²Ø± Ø§ÙØ§ÙØªÙØ§Ù.
+
+   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ¢Ù ÙØ­Ø¯Ø« ØªÙÙØ§Ø¦ÙÙØ§
+   Ø¹ÙØ¯ Ø§ÙØªÙØ§ÙØ³.
 */
 
 if(
@@ -2578,7 +2548,7 @@ cancelCharging();
 resetJoystick();
 
 finalScore.textContent=
-`🔵 ${blueScore} - ${redScore} 🔴`;
+`ðµ ${blueScore} - ${redScore} ð´`;
 
 matchEnd.style.display="flex";
 
@@ -2636,6 +2606,8 @@ lastOwnerChangeTime=0;
 
 createTeams();
 
+updatePitchColors();
+
 
 ballOwner=teamPlayers[0];
 
@@ -2646,35 +2618,24 @@ ballVX=0;
 ballVY=0;
 
 
-/* =====================================================
-   CAMERA - NEW MATCH
-===================================================== */
-
-const visibleWorldWidth=
-viewWidth/CAMERA_ZOOM;
-
-const visibleWorldHeight=
-viewHeight/CAMERA_ZOOM;
-
-
 cameraX=
 clamp(
-ballX-visibleWorldWidth/2,
+ballX-viewWidth/2,
 0,
 Math.max(
 0,
-worldWidth-visibleWorldWidth
+worldWidth-viewWidth
 )
 );
 
 
 cameraY=
 clamp(
-ballY-visibleWorldHeight/2,
+ballY-viewHeight/2,
 0,
 Math.max(
 0,
-worldHeight-visibleWorldHeight
+worldHeight-viewHeight
 )
 );
 
@@ -2729,21 +2690,50 @@ updateMatchTimer(dt);
 
 updateControlledPlayer(dt);
 
+try{
 updateBlueAI(dt);
+}catch(error){
+console.error("BLUE AI ERROR:",error);
+}
 
+try{
 updateRedAI(dt);
+}catch(error){
+console.error("RED AI ERROR:",error);
+}
 
+try{
 updateBallAI(dt);
+}catch(error){
+console.error("BALL AI ERROR:",error);
+}
 
 
-/* RED TACKLE */
+/*
+   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ£Ø­ÙØ± Ø§ÙÙØ¯ÙÙ.
+*/
 
+try{
 tackle();
+}catch(error){
+console.error("RED TACKLE ERROR:",error);
+}
 
 
-/* BLUE AUTOMATIC TACKLE */
+/*
+   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ£Ø²Ø±Ù Ø§ÙÙØ¨Ø§Ø´Ø±.
 
+   ÙØªÙ Ø¨Ø¹Ø¯ Ø­Ø±ÙØ© Ø§ÙÙØ§Ø¹Ø¨ÙÙ ÙÙØ¨Ù
+   ØªØ­Ø¯ÙØ« Ø§ÙÙØ±Ø©Ø Ø­ØªÙ Ø¥Ø°Ø§ ÙØµÙ ÙØ§Ø¹Ø¨
+   Ø£Ø²Ø±Ù Ø¥ÙÙ Ø­Ø§ÙÙ Ø§ÙÙØ±Ø© Ø§ÙØ£Ø­ÙØ± ÙÙ
+   ÙØ°Ù Ø§ÙØ¯ÙØ±Ø© ÙØªÙ Ø§ÙØ§ÙØªÙØ§Ù ÙÙØ±ÙØ§.
+*/
+
+try{
 automaticBlueTackle();
+}catch(error){
+console.error("BLUE TACKLE ERROR:",error);
+}
 
 
 updateCharge(dt);
@@ -2796,6 +2786,8 @@ resizeGame();
 
 createTeams();
 
+updatePitchColors();
+
 ballOwner=teamPlayers[0];
 
 ballX=ballOwner.x;
@@ -2813,35 +2805,24 @@ performance.now();
 setActivePlayer(0);
 
 
-/* =====================================================
-   CAMERA - INITIAL
-===================================================== */
-
-const visibleWorldWidth=
-viewWidth/CAMERA_ZOOM;
-
-const visibleWorldHeight=
-viewHeight/CAMERA_ZOOM;
-
-
 cameraX=
 clamp(
-ballX-visibleWorldWidth/2,
+ballX-viewWidth/2,
 0,
 Math.max(
 0,
-worldWidth-visibleWorldWidth
+worldWidth-viewWidth
 )
 );
 
 
 cameraY=
 clamp(
-ballY-visibleWorldHeight/2,
+ballY-viewHeight/2,
 0,
 Math.max(
 0,
-worldHeight-visibleWorldHeight
+worldHeight-viewHeight
 )
 );
 
@@ -2885,24 +2866,13 @@ worldHeight-BALL_RADIUS
 );
 
 
-/* =====================================================
-   CAMERA - RESIZE
-===================================================== */
-
-const visibleWorldWidth=
-viewWidth/CAMERA_ZOOM;
-
-const visibleWorldHeight=
-viewHeight/CAMERA_ZOOM;
-
-
 cameraX=
 clamp(
 cameraX,
 0,
 Math.max(
 0,
-worldWidth-visibleWorldWidth
+worldWidth-viewWidth
 )
 );
 
@@ -2913,7 +2883,7 @@ cameraY,
 0,
 Math.max(
 0,
-worldHeight-visibleWorldHeight
+worldHeight-viewHeight
 )
 );
 
