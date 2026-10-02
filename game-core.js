@@ -25,6 +25,16 @@ const goalCelebration=document.getElementById("goalCelebration");
 ========================================================= */
 
 const CAMERA_SMOOTH=0.075;
+
+/* =========================================================
+   CAMERA ZOOM
+   0.65 = رؤية أبعد
+   0.60 = أبعد أكثر
+   0.70 = أقرب قليلًا
+========================================================= */
+
+const CAMERA_ZOOM=0.65;
+
 const MATCH_DURATION=180;
 
 
@@ -82,7 +92,6 @@ const PLAYER_GOAL_POST_DISTANCE=
 PLAYER_RADIUS+
 GOAL_POST_RADIUS+
 1;
-
 
 
 /* =========================================================
@@ -829,24 +838,6 @@ dt
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
    ACTIVE PLAYER
 ========================================================= */
@@ -961,10 +952,6 @@ distance:bestDistance
 };
 
 }
-
-
-
-
 
 
 /* =========================================================
@@ -1096,8 +1083,6 @@ resetRedPassCooldown(nearestRed);
 }
 
 
-
-
 /* =========================================================
    SEPARATE ALL PLAYERS
 ========================================================= */
@@ -1190,23 +1175,45 @@ b.y+=dy*push;
 
 function updateCamera(){
 
+/*
+   لأن CAMERA_ZOOM = 0.65
+   فإن المساحة الظاهرة من العالم أكبر من الشاشة
+*/
+
+const visibleWorldWidth=
+viewWidth/CAMERA_ZOOM;
+
+const visibleWorldHeight=
+viewHeight/CAMERA_ZOOM;
+
+
+/*
+   مركز الكاميرا أفقيًا على الكرة
+*/
+
 const targetX=
-ballX-viewWidth/2;
+ballX-visibleWorldWidth/2;
+
+
+/*
+   نفس وضع الكاميرا العمودي السابق
+   لكن باستخدام المساحة الجديدة المرئية
+*/
 
 const targetY=
-ballY-viewHeight*0.62;
+ballY-visibleWorldHeight*0.62;
 
 
 const maxX=
 Math.max(
 0,
-worldWidth-viewWidth
+worldWidth-visibleWorldWidth
 );
 
 const maxY=
 Math.max(
 0,
-worldHeight-viewHeight
+worldHeight-visibleWorldHeight
 );
 
 
@@ -1353,14 +1360,36 @@ aimArrow.style.transformOrigin=
 }
 
 
+/* =========================================================
+   DRAW FIELD
+========================================================= */
+
 function drawField(){
+
+/*
+   مهم جدًا:
+   نجعل نقطة الأصل أعلى يسار الملعب
+   حتى يكون حساب الكاميرا دقيقًا.
+*/
+
+field.style.transformOrigin="0 0";
+
+
+/*
+   المعادلة:
+
+   screen = (world - camera) × zoom
+
+   لذلك نضرب إزاحة الكاميرا في CAMERA_ZOOM.
+*/
 
 field.style.transform=
 `translate3d(
-${-cameraX}px,
-${-cameraY}px,
+${-cameraX*CAMERA_ZOOM}px,
+${-cameraY*CAMERA_ZOOM}px,
 0
-)`;
+)
+scale(${CAMERA_ZOOM})`;
 
 }
 
@@ -1756,6 +1785,7 @@ ballY=p.y+dy*30;
 
 ballVX=dx*speed;
 ballVY=dy*speed;
+
 playKickSound();
 
 cancelCharging();
@@ -1770,7 +1800,9 @@ cancelCharging();
 kickControl.addEventListener(
 "pointerdown",
 e=>{
+
 initAudio();
+
 e.preventDefault();
 
 
@@ -1779,11 +1811,9 @@ return;
 
 
 /*
-   Ø¥Ø°Ø§ ÙØ§ÙØª Ø§ÙÙØ±Ø© ÙØ¹ Ø§ÙØ£Ø­ÙØ±Ø
-   ÙØ§ ÙØ­ØªØ§Ø¬ Ø²Ø± Ø§ÙØ§ÙØªÙØ§Ù.
-
-   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ¢Ù ÙØ­Ø¯Ø« ØªÙÙØ§Ø¦ÙÙØ§
-   Ø¹ÙØ¯ Ø§ÙØªÙØ§ÙØ³.
+   إذا كانت الكرة مع الأحمر
+   لا نحتاج زر الافتكاك.
+   الافتكاك يحدث تلقائيًا عند التلامس.
 */
 
 if(
@@ -2548,7 +2578,7 @@ cancelCharging();
 resetJoystick();
 
 finalScore.textContent=
-`ðµ ${blueScore} - ${redScore} ð´`;
+`🔵 ${blueScore} - ${redScore} 🔴`;
 
 matchEnd.style.display="flex";
 
@@ -2616,24 +2646,35 @@ ballVX=0;
 ballVY=0;
 
 
+/* =====================================================
+   CAMERA - NEW MATCH
+===================================================== */
+
+const visibleWorldWidth=
+viewWidth/CAMERA_ZOOM;
+
+const visibleWorldHeight=
+viewHeight/CAMERA_ZOOM;
+
+
 cameraX=
 clamp(
-ballX-viewWidth/2,
+ballX-visibleWorldWidth/2,
 0,
 Math.max(
 0,
-worldWidth-viewWidth
+worldWidth-visibleWorldWidth
 )
 );
 
 
 cameraY=
 clamp(
-ballY-viewHeight/2,
+ballY-visibleWorldHeight/2,
 0,
 Math.max(
 0,
-worldHeight-viewHeight
+worldHeight-visibleWorldHeight
 )
 );
 
@@ -2695,21 +2736,12 @@ updateRedAI(dt);
 updateBallAI(dt);
 
 
-/*
-   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ£Ø­ÙØ± Ø§ÙÙØ¯ÙÙ.
-*/
+/* RED TACKLE */
 
 tackle();
 
 
-/*
-   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ£Ø²Ø±Ù Ø§ÙÙØ¨Ø§Ø´Ø±.
-
-   ÙØªÙ Ø¨Ø¹Ø¯ Ø­Ø±ÙØ© Ø§ÙÙØ§Ø¹Ø¨ÙÙ ÙÙØ¨Ù
-   ØªØ­Ø¯ÙØ« Ø§ÙÙØ±Ø©Ø Ø­ØªÙ Ø¥Ø°Ø§ ÙØµÙ ÙØ§Ø¹Ø¨
-   Ø£Ø²Ø±Ù Ø¥ÙÙ Ø­Ø§ÙÙ Ø§ÙÙØ±Ø© Ø§ÙØ£Ø­ÙØ± ÙÙ
-   ÙØ°Ù Ø§ÙØ¯ÙØ±Ø© ÙØªÙ Ø§ÙØ§ÙØªÙØ§Ù ÙÙØ±ÙØ§.
-*/
+/* BLUE AUTOMATIC TACKLE */
 
 automaticBlueTackle();
 
@@ -2781,24 +2813,35 @@ performance.now();
 setActivePlayer(0);
 
 
+/* =====================================================
+   CAMERA - INITIAL
+===================================================== */
+
+const visibleWorldWidth=
+viewWidth/CAMERA_ZOOM;
+
+const visibleWorldHeight=
+viewHeight/CAMERA_ZOOM;
+
+
 cameraX=
 clamp(
-ballX-viewWidth/2,
+ballX-visibleWorldWidth/2,
 0,
 Math.max(
 0,
-worldWidth-viewWidth
+worldWidth-visibleWorldWidth
 )
 );
 
 
 cameraY=
 clamp(
-ballY-viewHeight/2,
+ballY-visibleWorldHeight/2,
 0,
 Math.max(
 0,
-worldHeight-viewHeight
+worldHeight-visibleWorldHeight
 )
 );
 
@@ -2842,13 +2885,24 @@ worldHeight-BALL_RADIUS
 );
 
 
+/* =====================================================
+   CAMERA - RESIZE
+===================================================== */
+
+const visibleWorldWidth=
+viewWidth/CAMERA_ZOOM;
+
+const visibleWorldHeight=
+viewHeight/CAMERA_ZOOM;
+
+
 cameraX=
 clamp(
 cameraX,
 0,
 Math.max(
 0,
-worldWidth-viewWidth
+worldWidth-visibleWorldWidth
 )
 );
 
@@ -2859,7 +2913,7 @@ cameraY,
 0,
 Math.max(
 0,
-worldHeight-viewHeight
+worldHeight-visibleWorldHeight
 )
 );
 
