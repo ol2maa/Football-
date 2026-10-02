@@ -33,7 +33,7 @@ const CAMERA_SMOOTH=0.075;
    0.70 = أقرب قليلًا
 ========================================================= */
 
-const CAMERA_ZOOM=0.70;
+const CAMERA_ZOOM=0.80;
 
 const MATCH_DURATION=180;
 
