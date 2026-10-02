@@ -1,4 +1,4 @@
-const kickSound = new Audio("kick.mp3");
+const kickSound = new Audio("kick.wav");
 
 function playKickSound(){
     kickSound.currentTime = 0;
