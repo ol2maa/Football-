@@ -25,6 +25,9 @@ const goalCelebration=document.getElementById("goalCelebration");
 ========================================================= */
 
 const CAMERA_SMOOTH=0.075;
+
+const CAMERA_ZOOM=0.80;
+
 const MATCH_DURATION=180;
 
 
@@ -82,7 +85,6 @@ const PLAYER_GOAL_POST_DISTANCE=
 PLAYER_RADIUS+
 GOAL_POST_RADIUS+
 1;
-
 
 
 /* =========================================================
@@ -392,6 +394,58 @@ RED_GUARD_SPEED,
 )
 
 ];
+
+}
+
+
+/* =========================================================
+   PITCH COLORS
+========================================================= */
+
+function updatePitchColors(){
+
+const markings=
+document.querySelector(".pitchMarkings");
+
+if(!markings)
+return;
+
+
+const lines=
+markings.querySelectorAll("line");
+
+
+for(const line of lines){
+
+const y1=
+line.getAttribute("y1");
+
+const y2=
+line.getAttribute("y2");
+
+
+/*
+   Goal lines at the very top and bottom.
+*/
+
+if(
+(y1==="2" && y2==="2") ||
+(y1==="2198" && y2==="2198")
+){
+
+line.setAttribute(
+"stroke",
+"#e52d38"
+);
+
+line.setAttribute(
+"stroke-width",
+"10"
+);
+
+}
+
+}
 
 }
 
@@ -829,24 +883,6 @@ dt
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
    ACTIVE PLAYER
 ========================================================= */
@@ -961,10 +997,6 @@ distance:bestDistance
 };
 
 }
-
-
-
-
 
 
 /* =========================================================
@@ -1096,8 +1128,6 @@ resetRedPassCooldown(nearestRed);
 }
 
 
-
-
 /* =========================================================
    SEPARATE ALL PLAYERS
 ========================================================= */
@@ -1190,23 +1220,30 @@ b.y+=dy*push;
 
 function updateCamera(){
 
+const visibleWorldWidth=
+viewWidth/CAMERA_ZOOM;
+
+const visibleWorldHeight=
+viewHeight/CAMERA_ZOOM;
+
+
 const targetX=
-ballX-viewWidth/2;
+ballX-visibleWorldWidth/2;
 
 const targetY=
-ballY-viewHeight*0.62;
+ballY-visibleWorldHeight*0.62;
 
 
 const maxX=
 Math.max(
 0,
-worldWidth-viewWidth
+worldWidth-visibleWorldWidth
 );
 
 const maxY=
 Math.max(
 0,
-worldHeight-viewHeight
+worldHeight-visibleWorldHeight
 );
 
 
@@ -1357,10 +1394,11 @@ function drawField(){
 
 field.style.transform=
 `translate3d(
-${-cameraX}px,
-${-cameraY}px,
+${-cameraX*CAMERA_ZOOM}px,
+${-cameraY*CAMERA_ZOOM}px,
 0
-)`;
+)
+scale(${CAMERA_ZOOM})`;
 
 }
 
@@ -1777,14 +1815,6 @@ e.preventDefault();
 if(chargingActive)
 return;
 
-
-/*
-   Ø¥Ø°Ø§ ÙØ§ÙØª Ø§ÙÙØ±Ø© ÙØ¹ Ø§ÙØ£Ø­ÙØ±Ø
-   ÙØ§ ÙØ­ØªØ§Ø¬ Ø²Ø± Ø§ÙØ§ÙØªÙØ§Ù.
-
-   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ¢Ù ÙØ­Ø¯Ø« ØªÙÙØ§Ø¦ÙÙØ§
-   Ø¹ÙØ¯ Ø§ÙØªÙØ§ÙØ³.
-*/
 
 if(
 ballOwner &&
@@ -2548,7 +2578,7 @@ cancelCharging();
 resetJoystick();
 
 finalScore.textContent=
-`ðµ ${blueScore} - ${redScore} ð´`;
+`🔵 ${blueScore} - ${redScore} 🔴`;
 
 matchEnd.style.display="flex";
 
@@ -2618,24 +2648,31 @@ ballVX=0;
 ballVY=0;
 
 
+const visibleWorldWidth=
+viewWidth/CAMERA_ZOOM;
+
+const visibleWorldHeight=
+viewHeight/CAMERA_ZOOM;
+
+
 cameraX=
 clamp(
-ballX-viewWidth/2,
+ballX-visibleWorldWidth/2,
 0,
 Math.max(
 0,
-worldWidth-viewWidth
+worldWidth-visibleWorldWidth
 )
 );
 
 
 cameraY=
 clamp(
-ballY-viewHeight/2,
+ballY-visibleWorldHeight/2,
 0,
 Math.max(
 0,
-worldHeight-viewHeight
+worldHeight-visibleWorldHeight
 )
 );
 
@@ -2690,49 +2727,82 @@ updateMatchTimer(dt);
 
 updateControlledPlayer(dt);
 
+
 try{
+
 updateBlueAI(dt);
+
 }catch(error){
-console.error("BLUE AI ERROR:",error);
+
+console.error(
+"BLUE AI ERROR:",
+error
+);
+
 }
 
+
 try{
+
 updateRedAI(dt);
+
 }catch(error){
-console.error("RED AI ERROR:",error);
+
+console.error(
+"RED AI ERROR:",
+error
+);
+
 }
 
+
 try{
+
 updateBallAI(dt);
+
 }catch(error){
-console.error("BALL AI ERROR:",error);
+
+console.error(
+"BALL AI ERROR:",
+error
+);
+
 }
 
 
-/*
-   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ£Ø­ÙØ± Ø§ÙÙØ¯ÙÙ.
-*/
+/* =========================================================
+   RED TACKLE
+========================================================= */
 
 try{
+
 tackle();
+
 }catch(error){
-console.error("RED TACKLE ERROR:",error);
+
+console.error(
+"RED TACKLE ERROR:",
+error
+);
+
 }
 
 
-/*
-   Ø§ÙØ§ÙØªÙØ§Ù Ø§ÙØ£Ø²Ø±Ù Ø§ÙÙØ¨Ø§Ø´Ø±.
-
-   ÙØªÙ Ø¨Ø¹Ø¯ Ø­Ø±ÙØ© Ø§ÙÙØ§Ø¹Ø¨ÙÙ ÙÙØ¨Ù
-   ØªØ­Ø¯ÙØ« Ø§ÙÙØ±Ø©Ø Ø­ØªÙ Ø¥Ø°Ø§ ÙØµÙ ÙØ§Ø¹Ø¨
-   Ø£Ø²Ø±Ù Ø¥ÙÙ Ø­Ø§ÙÙ Ø§ÙÙØ±Ø© Ø§ÙØ£Ø­ÙØ± ÙÙ
-   ÙØ°Ù Ø§ÙØ¯ÙØ±Ø© ÙØªÙ Ø§ÙØ§ÙØªÙØ§Ù ÙÙØ±ÙØ§.
-*/
+/* =========================================================
+   BLUE AUTOMATIC TACKLE
+========================================================= */
 
 try{
+
 automaticBlueTackle();
+
 }catch(error){
-console.error("BLUE TACKLE ERROR:",error);
+
+console.error(
+"BLUE TACKLE ERROR:",
+error
+);
+
 }
 
 
@@ -2765,9 +2835,14 @@ let dt=
 
 lastTimestamp=now;
 
-dt=Math.min(dt,0.033);
+dt=Math.min(
+dt,
+0.033
+);
+
 
 updateGame(dt);
+
 
 requestAnimationFrame(
 gameLoop
@@ -2788,6 +2863,7 @@ createTeams();
 
 updatePitchColors();
 
+
 ballOwner=teamPlayers[0];
 
 ballX=ballOwner.x;
@@ -2805,24 +2881,31 @@ performance.now();
 setActivePlayer(0);
 
 
+const visibleWorldWidth=
+viewWidth/CAMERA_ZOOM;
+
+const visibleWorldHeight=
+viewHeight/CAMERA_ZOOM;
+
+
 cameraX=
 clamp(
-ballX-viewWidth/2,
+ballX-visibleWorldWidth/2,
 0,
 Math.max(
 0,
-worldWidth-viewWidth
+worldWidth-visibleWorldWidth
 )
 );
 
 
 cameraY=
 clamp(
-ballY-viewHeight/2,
+ballY-visibleWorldHeight/2,
 0,
 Math.max(
 0,
-worldHeight-viewHeight
+worldHeight-visibleWorldHeight
 )
 );
 
@@ -2866,13 +2949,20 @@ worldHeight-BALL_RADIUS
 );
 
 
+const visibleWorldWidth=
+viewWidth/CAMERA_ZOOM;
+
+const visibleWorldHeight=
+viewHeight/CAMERA_ZOOM;
+
+
 cameraX=
 clamp(
 cameraX,
 0,
 Math.max(
 0,
-worldWidth-viewWidth
+worldWidth-visibleWorldWidth
 )
 );
 
@@ -2883,7 +2973,7 @@ cameraY,
 0,
 Math.max(
 0,
-worldHeight-viewHeight
+worldHeight-visibleWorldHeight
 )
 );
 
