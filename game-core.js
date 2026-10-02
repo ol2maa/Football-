@@ -1770,7 +1770,7 @@ cancelCharging();
 kickControl.addEventListener(
 "pointerdown",
 e=>{
-
+initAudio();
 e.preventDefault();
 
 
