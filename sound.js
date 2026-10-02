@@ -1,15 +1,13 @@
 const kickSound = new Audio("kick.wav");
 
-function playKickSound(){
+kickSound.preload = "auto";
+kickSound.load();
 
-    console.log("KICK SOUND START");
+function playKickSound(){
 
     kickSound.currentTime = 0;
 
     kickSound.play()
-    .then(()=>{
-        console.log("KICK SOUND PLAYING");
-    })
     .catch(error=>{
         console.log("KICK SOUND ERROR:", error);
     });
