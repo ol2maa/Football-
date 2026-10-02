@@ -26,6 +26,10 @@ content="telephone=no">
 
 <style>
 
+/* =========================================================
+   GLOBAL
+========================================================= */
+
 *{
 box-sizing:border-box;
 -webkit-user-select:none;
@@ -34,28 +38,56 @@ user-select:none;
 -webkit-tap-highlight-color:transparent;
 }
 
-html,body{
+
+html,
+body{
+
 margin:0;
 padding:0;
+
 width:100%;
 height:100%;
+
 overflow:hidden;
+
 background:#111;
+
 font-family:Arial,sans-serif;
+
 touch-action:none;
+
 -webkit-text-size-adjust:100%;
+
 }
+
+
+/* =========================================================
+   GAME
+========================================================= */
 
 #game{
+
 position:fixed;
+
 inset:0;
+
 overflow:hidden;
+
 background:#16843a;
+
 touch-action:none;
+
 }
 
+
+/* =========================================================
+   FIELD
+========================================================= */
+
 #field{
+
 position:absolute;
+
 left:0;
 top:0;
 
@@ -65,414 +97,1029 @@ height:2200px;
 background:
 repeating-linear-gradient(
 to bottom,
+
 #168b3d 0px,
 #168b3d 80px,
+
 #15833a 80px,
 #15833a 160px
 );
 
 overflow:hidden;
-transform:translate3d(0,0,0);
+
+transform:
+translate3d(0,0,0);
+
 will-change:transform;
+
 }
 
-.line{
+
+/* =========================================================
+   PITCH MARKINGS
+========================================================= */
+
+.pitchMarkings{
+
 position:absolute;
-pointer-events:none;
-}
 
-.centerLine{
 left:0;
-width:100%;
-height:4px;
-background:white;
-top:50%;
-}
-
-.centerCircle{
-position:absolute;
-width:170px;
-height:170px;
-border:4px solid white;
-border-radius:50%;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-}
-
-.centerDot{
-position:absolute;
-width:10px;
-height:10px;
-background:white;
-border-radius:50%;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-}
-
-.goalLine{
-position:absolute;
-left:50%;
-width:190px;
-height:14px;
-background:white;
-transform:translateX(-50%);
-z-index:5;
-pointer-events:none;
-}
-
-.topGoal{
 top:0;
+
+width:1200px;
+height:2200px;
+
+z-index:5;
+
+pointer-events:none;
+
+overflow:visible;
+
 }
 
-.bottomGoal{
-bottom:0;
-}
+
+/* =========================================================
+   PLAYER
+========================================================= */
 
 .playerUnit{
+
 position:absolute;
+
 left:0;
 top:0;
+
 width:38px;
 height:38px;
+
 border-radius:50%;
+
 display:flex;
+
 align-items:center;
 justify-content:center;
+
 font-size:24px;
+
 line-height:1;
+
 z-index:20;
+
 will-change:transform;
+
 }
+
 
 .playerUnit.blue{
+
 background:#1677ff;
+
 border:3px solid #fff;
-box-shadow:0 2px 5px #0008;
+
+box-shadow:
+0 2px 5px #0008;
+
 }
+
 
 .playerUnit.red{
+
 background:#e52d38;
+
 border:3px solid #fff;
-box-shadow:0 2px 5px #0008;
+
+box-shadow:
+0 2px 5px #0008;
+
 }
+
+
+/* =========================================================
+   CONTROL ARROW
+========================================================= */
 
 .controlArrow{
+
 position:absolute;
+
 left:50%;
 top:-21px;
-transform:translateX(-50%);
+
+transform:
+translateX(-50%);
+
 color:#ffd400;
+
 font-size:16px;
+
 font-weight:900;
+
 line-height:1;
-text-shadow:0 2px 3px #000;
+
+text-shadow:
+0 2px 3px #000;
+
 pointer-events:none;
+
 display:none;
+
 z-index:30;
+
 }
+
 
 .playerUnit.controlled{
+
 box-shadow:
+
 0 0 0 3px #ffd400,
+
 0 0 12px #ffd400,
+
 0 2px 5px #0008;
+
 }
+
+
+/* =========================================================
+   BALL
+========================================================= */
 
 #ball{
+
 position:absolute;
+
 left:0;
 top:0;
+
 width:22px;
 height:22px;
+
 border-radius:50%;
+
 background:white;
+
 border:2px solid #222;
+
 z-index:25;
+
 display:flex;
+
 align-items:center;
 justify-content:center;
+
 font-size:14px;
+
 will-change:transform;
+
 }
+
+
+/* =========================================================
+   AIM ARROW
+========================================================= */
 
 #aimArrow{
+
 position:absolute;
+
 left:0;
 top:0;
+
 width:5px;
 height:70px;
+
 background:#ffd400;
-transform-origin:50% 100%;
+
+transform-origin:
+50% 100%;
+
 z-index:15;
+
 display:none;
+
 border-radius:4px;
-box-shadow:0 0 6px #000;
+
+box-shadow:
+0 0 6px #000;
+
 pointer-events:none;
+
 }
+
 
 #aimArrow::after{
+
 content:"";
+
 position:absolute;
+
 left:50%;
 top:-10px;
-transform:translateX(-50%);
-border-left:9px solid transparent;
-border-right:9px solid transparent;
-border-bottom:16px solid #ffd400;
+
+transform:
+translateX(-50%);
+
+border-left:
+9px solid transparent;
+
+border-right:
+9px solid transparent;
+
+border-bottom:
+16px solid #ffd400;
+
 }
+
+
+/* =========================================================
+   SCORE BOARD
+========================================================= */
 
 #scoreBoard{
+
 position:fixed;
-top:calc(env(safe-area-inset-top) + 8px);
+
+top:
+calc(
+env(safe-area-inset-top) + 8px
+);
+
 left:50%;
-transform:translateX(-50%);
+
+transform:
+translateX(-50%);
+
 z-index:100;
+
 background:#000b;
+
 color:white;
+
 padding:7px 18px;
+
 border-radius:18px;
+
 font-size:20px;
+
 font-weight:bold;
+
 min-width:130px;
+
 text-align:center;
+
 }
+
 
 #matchTime{
+
 font-size:14px;
+
 margin-top:2px;
+
 }
+
 
 #matchTime.warning{
+
 color:#ff3b30;
+
 }
+
+
+/* =========================================================
+   GOAL CELEBRATION
+========================================================= */
 
 #goalCelebration{
+
 position:fixed;
+
 inset:0;
+
 z-index:450;
+
 display:none;
+
 align-items:center;
 justify-content:center;
+
 pointer-events:none;
+
 }
 
+
 #goalCelebrationText{
+
 padding:20px 35px;
+
 border-radius:25px;
+
 background:#000c;
+
 color:white;
+
 font-size:48px;
+
 font-weight:900;
+
 text-align:center;
-text-shadow:0 3px 8px #000;
-transform:scale(0.7);
-animation:goalPop .35s ease-out forwards;
+
+text-shadow:
+0 3px 8px #000;
+
+transform:
+scale(0.7);
+
+animation:
+goalPop .35s ease-out forwards;
+
 }
+
 
 @keyframes goalPop{
 
 0%{
-transform:scale(.7);
+
+transform:
+scale(.7);
+
 opacity:0;
+
 }
 
 70%{
-transform:scale(1.15);
+
+transform:
+scale(1.15);
+
 opacity:1;
+
 }
 
 100%{
-transform:scale(1);
+
+transform:
+scale(1);
+
 opacity:1;
+
 }
 
 }
+
+
+/* =========================================================
+   POWER
+========================================================= */
 
 #powerBox{
+
 position:fixed;
+
 left:50%;
+
 bottom:145px;
-transform:translateX(-50%);
+
+transform:
+translateX(-50%);
+
 width:150px;
 height:13px;
+
 border:2px solid white;
+
 border-radius:10px;
+
 overflow:hidden;
+
 background:#0008;
+
 z-index:100;
+
 display:none;
+
 }
+
 
 #powerBar{
+
 width:0%;
+
 height:100%;
+
 background:#ffd400;
+
 }
+
+
+/* =========================================================
+   JOYSTICK
+========================================================= */
 
 #movePad{
+
 position:fixed;
+
 left:25px;
-bottom:calc(25px + env(safe-area-inset-bottom));
+
+bottom:
+calc(
+25px +
+env(safe-area-inset-bottom)
+);
+
 width:120px;
 height:120px;
+
 border-radius:50%;
+
 background:#ffffff22;
+
 border:3px solid #ffffff66;
+
 z-index:200;
+
 touch-action:none;
+
 }
+
 
 #joystickCenter{
+
 position:absolute;
+
 left:50%;
 top:50%;
+
 width:55px;
 height:55px;
+
 border-radius:50%;
-transform:translate(-50%,-50%);
+
+transform:
+translate(-50%,-50%);
+
 background:#ffffff66;
+
 border:3px solid #fff;
+
 will-change:transform;
+
 }
+
+
+/* =========================================================
+   KICK CONTROL
+========================================================= */
 
 #kickControl{
+
 position:fixed;
+
 right:28px;
-bottom:calc(30px + env(safe-area-inset-bottom));
+
+bottom:
+calc(
+30px +
+env(safe-area-inset-bottom)
+);
+
 width:92px;
 height:92px;
+
 border-radius:50%;
+
 background:#e52d38dd;
+
 border:4px solid #fff;
+
 z-index:200;
+
 display:flex;
+
 align-items:center;
 justify-content:center;
+
 touch-action:none;
-box-shadow:0 3px 8px #0008;
+
+box-shadow:
+0 3px 8px #0008;
+
 }
+
 
 #kickDot{
+
 width:25px;
 height:25px;
+
 border-radius:50%;
+
 background:white;
+
 display:flex;
+
 align-items:center;
 justify-content:center;
+
 font-size:22px;
+
 line-height:1;
+
 }
+
+
+/* =========================================================
+   MATCH END
+========================================================= */
 
 #matchEnd{
+
 position:fixed;
+
 inset:0;
+
 background:#000b;
+
 z-index:500;
+
 display:none;
+
 align-items:center;
+
 justify-content:center;
+
 flex-direction:column;
+
 color:white;
+
 }
+
 
 #matchEnd h1{
+
 margin:0 0 15px;
+
 font-size:32px;
+
 }
+
 
 #finalScore{
+
 font-size:28px;
+
 margin-bottom:25px;
+
 }
 
+
 #newMatch{
+
 border:0;
+
 border-radius:15px;
+
 padding:14px 28px;
+
 font-size:20px;
+
 font-weight:bold;
+
 background:#1677ff;
+
 color:white;
+
 }
 
 </style>
 
 </head>
 
+
 <body>
 
 <div id="game">
 
+
+<!-- =====================================================
+     FIELD
+===================================================== -->
+
 <div id="field">
 
-<div class="line centerLine"></div>
-<div class="centerCircle"></div>
-<div class="centerDot"></div>
 
-<div class="goalLine topGoal"></div>
-<div class="goalLine bottomGoal"></div>
+<!-- =====================================================
+     COMPLETE PITCH MARKINGS
+===================================================== -->
 
+<svg
+class="pitchMarkings"
+viewBox="0 0 1200 2200"
+width="1200"
+height="2200"
+xmlns="http://www.w3.org/2000/svg"
+>
+
+
+<!-- =====================================================
+     OUTER FIELD
+===================================================== -->
+
+<rect
+x="2"
+y="2"
+width="1196"
+height="2196"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     HALF WAY LINE
+===================================================== -->
+
+<line
+x1="0"
+y1="1100"
+x2="1200"
+y2="1100"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     CENTRE CIRCLE
+===================================================== -->
+
+<circle
+cx="600"
+cy="1100"
+r="183"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     CENTRE SPOT
+===================================================== -->
+
+<circle
+cx="600"
+cy="1100"
+r="6"
+fill="white"
+/>
+
+
+<!-- =====================================================
+     TOP PENALTY AREA
+===================================================== -->
+
+<rect
+x="241"
+y="0"
+width="718"
+height="330"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     TOP GOAL AREA
+===================================================== -->
+
+<rect
+x="420"
+y="0"
+width="360"
+height="110"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     TOP PENALTY SPOT
+===================================================== -->
+
+<circle
+cx="600"
+cy="220"
+r="6"
+fill="white"
+/>
+
+
+<!-- =====================================================
+     TOP PENALTY ARC
+===================================================== -->
+
+<path
+d="
+M 417 330
+A 183 183 0 0 1 783 330
+"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     BOTTOM PENALTY AREA
+===================================================== -->
+
+<rect
+x="241"
+y="1870"
+width="718"
+height="330"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     BOTTOM GOAL AREA
+===================================================== -->
+
+<rect
+x="420"
+y="2090"
+width="360"
+height="110"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     BOTTOM PENALTY SPOT
+===================================================== -->
+
+<circle
+cx="600"
+cy="1980"
+r="6"
+fill="white"
+/>
+
+
+<!-- =====================================================
+     BOTTOM PENALTY ARC
+===================================================== -->
+
+<path
+d="
+M 417 1870
+A 183 183 0 0 0 783 1870
+"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     TOP GOAL LINE
+===================================================== -->
+
+<line
+x1="505"
+y1="2"
+x2="695"
+y2="2"
+stroke="white"
+stroke-width="8"
+/>
+
+
+<!-- =====================================================
+     BOTTOM GOAL LINE
+===================================================== -->
+
+<line
+x1="505"
+y1="2198"
+x2="695"
+y2="2198"
+stroke="white"
+stroke-width="8"
+/>
+
+
+<!-- =====================================================
+     TOP LEFT CORNER ARC
+===================================================== -->
+
+<path
+d="
+M 0 20
+A 20 20 0 0 1 20 0
+"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     TOP RIGHT CORNER ARC
+===================================================== -->
+
+<path
+d="
+M 1180 0
+A 20 20 0 0 1 1200 20
+"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     BOTTOM LEFT CORNER ARC
+===================================================== -->
+
+<path
+d="
+M 0 2180
+A 20 20 0 0 0 20 2200
+"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+<!-- =====================================================
+     BOTTOM RIGHT CORNER ARC
+===================================================== -->
+
+<path
+d="
+M 1180 2200
+A 20 20 0 0 0 1200 2180
+"
+fill="none"
+stroke="white"
+stroke-width="4"
+/>
+
+
+</svg>
+
+
+<!-- =====================================================
+     BLUE PLAYERS
+===================================================== -->
 
 <div id="player" class="playerUnit blue">
+
 <div class="controlArrow">▼</div>
+
 🧍
+
 </div>
+
 
 <div id="teammate1" class="playerUnit blue">
+
 <div class="controlArrow">▼</div>
+
 🧍
+
 </div>
+
 
 <div id="teammate2" class="playerUnit blue">
+
 <div class="controlArrow">▼</div>
+
 🧍
+
 </div>
+
 
 <div id="teammate3" class="playerUnit blue">
+
 <div class="controlArrow">▼</div>
+
 🧍
+
 </div>
+
 
 <div id="teammate4" class="playerUnit blue">
+
 <div class="controlArrow">▼</div>
+
+🧍
+
+</div>
+
+
+<div id="teammate5" class="playerUnit blue">
+
+<div class="controlArrow">🅾️</div>
+
+😁
+
+</div>
+
+
+<!-- =====================================================
+     RED PLAYERS
+===================================================== -->
+
+<div id="opponent1" class="playerUnit red">
 🧍
 </div>
 
-<div id="teammate5" class="playerUnit blue">
-<div class="controlArrow">🅾️</div>
-😁
+
+<div id="opponent2" class="playerUnit red">
+🧍
 </div>
 
 
-<div id="opponent1" class="playerUnit red">🧍</div>
-<div id="opponent2" class="playerUnit red">🧍</div>
-<div id="opponent3" class="playerUnit red">🧍</div>
-<div id="opponent4" class="playerUnit red">🧍</div>
-<div id="opponent5" class="playerUnit red">🧍</div>
+<div id="opponent3" class="playerUnit red">
+🧍
+</div>
 
 
-<div id="ball">⚽</div>
+<div id="opponent4" class="playerUnit red">
+🧍
+</div>
+
+
+<div id="opponent5" class="playerUnit red">
+🧍
+</div>
+
+
+<!-- =====================================================
+     BALL
+===================================================== -->
+
+<div id="ball">
+⚽
+</div>
+
+
+<!-- =====================================================
+     AIM
+===================================================== -->
 
 <div id="aimArrow"></div>
 
+
 </div>
 
+
+<!-- =====================================================
+     SCORE BOARD
+===================================================== -->
 
 <div id="scoreBoard">
 
 🔵
-<span id="blueScore">0</span>
+
+<span id="blueScore">
+0
+</span>
+
 &nbsp; - &nbsp;
-<span id="redScore">0</span>
+
+<span id="redScore">
+0
+</span>
+
 🔴
 
-<div id="matchTime">03:00</div>
+
+<div id="matchTime">
+03:00
+</div>
 
 </div>
 
+
+<!-- =====================================================
+     GOAL CELEBRATION
+===================================================== -->
 
 <div id="goalCelebration">
 
@@ -483,28 +1130,54 @@ color:white;
 </div>
 
 
+<!-- =====================================================
+     POWER BAR
+===================================================== -->
+
 <div id="powerBox">
+
 <div id="powerBar"></div>
+
 </div>
 
+
+<!-- =====================================================
+     JOYSTICK
+===================================================== -->
 
 <div id="movePad">
+
 <div id="joystickCenter"></div>
+
 </div>
 
+
+<!-- =====================================================
+     KICK CONTROL
+===================================================== -->
 
 <div id="kickControl">
+
 <div id="kickDot"></div>
+
 </div>
 
+
+<!-- =====================================================
+     MATCH END
+===================================================== -->
 
 <div id="matchEnd">
 
-<h1>انتهت المباراة</h1>
+<h1>
+انتهت المباراة
+</h1>
+
 
 <div id="finalScore">
 🔵 0 - 0 🔴
 </div>
+
 
 <button id="newMatch">
 مباراة جديدة
@@ -512,11 +1185,20 @@ color:white;
 
 </div>
 
+
 </div>
 
 
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+
 <script src="sound.js"></script>
+
 <script src="game-core.js"></script>
+
 <script src="game-ai.js"></script>
+
 </body>
+
 </html>
