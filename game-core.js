@@ -1756,7 +1756,7 @@ ballY=p.y+dy*30;
 
 ballVX=dx*speed;
 ballVY=dy*speed;
-
+playKickSound();
 
 cancelCharging();
 
