@@ -26,7 +26,13 @@ const goalCelebration=document.getElementById("goalCelebration");
 
 const CAMERA_SMOOTH=0.075;
 
-const CAMERA_ZOOM=0.80;
+
+/*
+   لا يوجد Zoom ثابت.
+   يتم حسابه تلقائيًا حسب حجم الشاشة.
+*/
+let cameraZoom=0;
+
 
 const MATCH_DURATION=180;
 
@@ -126,6 +132,76 @@ let worldHeight=WORLD_HEIGHT;
 
 let cameraX=0;
 let cameraY=0;
+
+
+/* =========================================================
+   CAMERA ZOOM
+========================================================= */
+
+/*
+   يحسب Zoom المناسب للشاشة بحيث يستطيع
+   كامل الملعب 1200 × 2200 الظهور داخل الشاشة.
+
+   مثال iPhone:
+   عرض الشاشة ≈ 393
+   393 / 1200 ≈ 0.327
+
+   ارتفاع الشاشة ≈ 852
+   852 / 2200 ≈ 0.387
+
+   نأخذ الأصغر حتى لا يخرج أي جزء من الملعب.
+*/
+
+function calculateCameraZoom(){
+
+const widthZoom=
+viewWidth/worldWidth;
+
+const heightZoom=
+viewHeight/worldHeight;
+
+
+/*
+   نأخذ الأصغر حتى يظهر كامل الملعب.
+*/
+cameraZoom=
+Math.min(
+widthZoom,
+heightZoom
+);
+
+
+/*
+   حماية من القيم غير الصحيحة.
+*/
+if(
+!Number.isFinite(cameraZoom) ||
+cameraZoom<=0
+){
+
+cameraZoom=0.25;
+
+}
+
+}
+
+
+/* =========================================================
+   CAMERA VISIBLE WORLD
+========================================================= */
+
+function getVisibleWorldWidth(){
+
+return viewWidth/cameraZoom;
+
+}
+
+
+function getVisibleWorldHeight(){
+
+return viewHeight/cameraZoom;
+
+}
 
 
 /* =========================================================
@@ -423,10 +499,6 @@ line.getAttribute("y1");
 const y2=
 line.getAttribute("y2");
 
-
-/*
-   Goal lines at the very top and bottom.
-*/
 
 if(
 (y1==="2" && y2==="2") ||
@@ -1220,18 +1292,16 @@ b.y+=dy*push;
 
 function updateCamera(){
 
+/*
+   بما أن الـZoom محسوب ليعرض كامل الملعب،
+   لا نحتاج إلى تحريك الكاميرا خارج حدود الملعب.
+*/
+
 const visibleWorldWidth=
-viewWidth/CAMERA_ZOOM;
+getVisibleWorldWidth();
 
 const visibleWorldHeight=
-viewHeight/CAMERA_ZOOM;
-
-
-const targetX=
-ballX-visibleWorldWidth/2;
-
-const targetY=
-ballY-visibleWorldHeight*0.62;
+getVisibleWorldHeight();
 
 
 const maxX=
@@ -1246,6 +1316,23 @@ Math.max(
 worldHeight-visibleWorldHeight
 );
 
+
+/*
+   إذا كانت الشاشة أكبر من الملعب بعد الـZoom،
+   تكون الكاميرا في المنتصف.
+   وإذا كانت الشاشة أصغر، تتبع الكرة.
+*/
+
+let targetX=
+ballX-visibleWorldWidth/2;
+
+let targetY=
+ballY-visibleWorldHeight/2;
+
+
+/*
+   الحدود.
+*/
 
 const desiredX=
 clamp(
@@ -1273,6 +1360,26 @@ cameraY+=
 desiredY-cameraY
 )*
 CAMERA_SMOOTH;
+
+
+/*
+   تصحيح نهائي حتى لا تخرج الكاميرا
+   خارج الملعب بسبب الحركة الناعمة.
+*/
+
+cameraX=
+clamp(
+cameraX,
+0,
+maxX
+);
+
+cameraY=
+clamp(
+cameraY,
+0,
+maxY
+);
 
 }
 
@@ -1392,13 +1499,23 @@ aimArrow.style.transformOrigin=
 
 function drawField(){
 
+/*
+   مهم جدًا:
+   نجعل نقطة التحويل من أعلى يسار الملعب.
+   هذا يجعل cameraX / cameraY متوافقين
+   تمامًا مع حسابات الـZoom.
+*/
+
+field.style.transformOrigin="0 0";
+
+
 field.style.transform=
 `translate3d(
-${-cameraX*CAMERA_ZOOM}px,
-${-cameraY*CAMERA_ZOOM}px,
+${-cameraX*cameraZoom}px,
+${-cameraY*cameraZoom}px,
 0
 )
-scale(${CAMERA_ZOOM})`;
+scale(${cameraZoom})`;
 
 }
 
@@ -2648,11 +2765,16 @@ ballVX=0;
 ballVY=0;
 
 
+/* إعادة حساب Zoom حسب الشاشة */
+
+calculateCameraZoom();
+
+
 const visibleWorldWidth=
-viewWidth/CAMERA_ZOOM;
+getVisibleWorldWidth();
 
 const visibleWorldHeight=
-viewHeight/CAMERA_ZOOM;
+getVisibleWorldHeight();
 
 
 cameraX=
@@ -2701,11 +2823,24 @@ worldWidth=WORLD_WIDTH;
 worldHeight=WORLD_HEIGHT;
 
 
+/*
+   حساب Zoom جديد بعد معرفة حجم الشاشة.
+*/
+calculateCameraZoom();
+
+
 field.style.width=
 `${worldWidth}px`;
 
 field.style.height=
 `${worldHeight}px`;
+
+
+/*
+   مهم جدًا مع transform:
+   نقطة الأصل هي أعلى يسار الملعب.
+*/
+field.style.transformOrigin="0 0";
 
 }
 
@@ -2881,11 +3016,18 @@ performance.now();
 setActivePlayer(0);
 
 
+/* =========================================================
+   INITIAL CAMERA
+========================================================= */
+
+calculateCameraZoom();
+
+
 const visibleWorldWidth=
-viewWidth/CAMERA_ZOOM;
+getVisibleWorldWidth();
 
 const visibleWorldHeight=
-viewHeight/CAMERA_ZOOM;
+getVisibleWorldHeight();
 
 
 cameraX=
@@ -2949,16 +3091,25 @@ worldHeight-BALL_RADIUS
 );
 
 
+/*
+   بعد تغيير الشاشة نحسب حجم الرؤية الجديد.
+*/
+
 const visibleWorldWidth=
-viewWidth/CAMERA_ZOOM;
+getVisibleWorldWidth();
 
 const visibleWorldHeight=
-viewHeight/CAMERA_ZOOM;
+getVisibleWorldHeight();
 
+
+/*
+   إعادة تمركز الكاميرا على الكرة
+   مع الالتزام بحدود الملعب.
+*/
 
 cameraX=
 clamp(
-cameraX,
+ballX-visibleWorldWidth/2,
 0,
 Math.max(
 0,
@@ -2969,7 +3120,7 @@ worldWidth-visibleWorldWidth
 
 cameraY=
 clamp(
-cameraY,
+ballY-visibleWorldHeight/2,
 0,
 Math.max(
 0,
