@@ -27,10 +27,13 @@ const goalCelebration=document.getElementById("goalCelebration");
 const CAMERA_SMOOTH=0.075;
 
 /*
-   لا نستخدم Zoom ثابت.
-   يتم حسابه حسب عرض الشاشة حتى يبقى
-   كامل عرض الملعب ظاهرًا.
+   Zoom محسوب حسب عرض الشاشة.
+   الهدف:
+   - إبقاء خط التماس الأيسر ظاهرًا.
+   - إبقاء خط التماس الأيمن ظاهرًا.
+   - عدم قص الملعب أفقيًا.
 */
+
 let cameraZoom=0;
 
 const MATCH_DURATION=180;
@@ -42,7 +45,6 @@ const MATCH_DURATION=180;
 
 const WORLD_WIDTH=1200;
 const WORLD_HEIGHT=2200;
-
 
 const PLAYER_RADIUS=19;
 const BALL_RADIUS=11;
@@ -67,7 +69,6 @@ const BLUE_FORWARD_SPEED=150;
 const BLUE_WING_SPEED=150;
 const BLUE_DEFENDER_SPEED=150;
 const BLUE_GUARD_SPEED=150;
-
 
 const RED_FORWARD_SPEED=115;
 const RED_WING_SPEED=115;
@@ -112,7 +113,6 @@ const AUTO_SWITCH_ADVANTAGE=35;
 const AUTO_EMERGENCY_DISTANCE=60;
 const AUTO_EMERGENCY_ADVANTAGE=20;
 
-
 let lastAutoSwitchTime=0;
 let lastManualSwitchTime=0;
 let manualControlLockUntil=0;
@@ -134,49 +134,38 @@ let cameraY=0;
 
 
 /* =========================================================
-   CAMERA
+   CAMERA ZOOM
 ========================================================= */
-
-/*
-   الكاميرا الآن مصممة بحيث:
-
-   1. كامل عرض الملعب يبقى ظاهرًا.
-   2. خط التماس الأيسر والأيمن لا يختفيان.
-   3. الكاميرا تتحرك عموديًا مع الكرة.
-   4. لا تتحرك أفقيًا خارج حدود الملعب.
-*/
 
 function calculateCameraZoom(){
 
-/*
-   نعتمد على عرض الشاشة.
+    /*
+       نستخدم عرض الشاشة فقط.
 
-   بهذه الطريقة:
-   1200px الخاصة بعرض الملعب
-   تدخل بالكامل داخل عرض اللعبة.
-*/
+       مثال:
+       إذا كان عرض الشاشة 390px
 
-const widthZoom=
-viewWidth/worldWidth;
+       390 / 1200 = 0.325
 
+       أي أن عرض الملعب الكامل سيظهر داخل الشاشة.
+    */
 
-/*
-   حماية من القيم غير الصحيحة.
-*/
+    const widthZoom=
+        viewWidth/worldWidth;
 
-if(
-!Number.isFinite(widthZoom) ||
-widthZoom<=0
-){
+    if(
+        !Number.isFinite(widthZoom) ||
+        widthZoom<=0
+    ){
 
-cameraZoom=0.30;
+        cameraZoom=0.30;
 
-}
-else{
+    }
+    else{
 
-cameraZoom=widthZoom;
+        cameraZoom=widthZoom;
 
-}
+    }
 
 }
 
@@ -187,14 +176,32 @@ cameraZoom=widthZoom;
 
 function getVisibleWorldWidth(){
 
-return viewWidth/cameraZoom;
+    if(
+        !Number.isFinite(cameraZoom) ||
+        cameraZoom<=0
+    ){
+
+        return worldWidth;
+
+    }
+
+    return viewWidth/cameraZoom;
 
 }
 
 
 function getVisibleWorldHeight(){
 
-return viewHeight/cameraZoom;
+    if(
+        !Number.isFinite(cameraZoom) ||
+        cameraZoom<=0
+    ){
+
+        return worldHeight;
+
+    }
+
+    return viewHeight/cameraZoom;
 
 }
 
@@ -292,58 +299,58 @@ let manualSelectedPlayerIndex=0;
 ========================================================= */
 
 function createPlayer(
-id,
-team,
-x,
-y,
-speed,
-role
+    id,
+    team,
+    x,
+    y,
+    speed,
+    role
 ){
 
-const el=document.getElementById(id);
+    const el=document.getElementById(id);
 
-return{
+    return{
 
-id:id,
-team:team,
+        id:id,
+        team:team,
 
-x:x,
-y:y,
+        x:x,
+        y:y,
 
-anchorX:x,
-anchorY:y,
+        anchorX:x,
+        anchorY:y,
 
-speed:speed,
-role:role,
+        speed:speed,
+        role:role,
 
-el:el,
+        el:el,
 
-controlled:false,
+        controlled:false,
 
-moveX:0,
-moveY:0,
+        moveX:0,
+        moveY:0,
 
-direction:-Math.PI/2,
+        direction:-Math.PI/2,
 
-vx:0,
-vy:0,
+        vx:0,
+        vy:0,
 
-hasBall:false,
+        hasBall:false,
 
-decisionTimer:
-Math.random()*0.25,
+        decisionTimer:
+        Math.random()*0.25,
 
-shotCooldown:
-Math.random()*0.5,
+        shotCooldown:
+        Math.random()*0.5,
 
-passCooldown:
-Math.random()*0.5,
+        passCooldown:
+        Math.random()*0.5,
 
-currentAction:"position",
+        currentAction:"position",
 
-shotType:"direct"
+        shotType:"direct"
 
-};
+    };
 
 }
 
@@ -358,113 +365,113 @@ let opponents=[];
 
 function createTeams(){
 
-teamPlayers=[
+    teamPlayers=[
 
-createPlayer(
-"player",
-"blue",
-worldWidth/2,
-worldHeight*0.62,
-BLUE_FORWARD_SPEED,
-"forward"
-),
+        createPlayer(
+            "player",
+            "blue",
+            worldWidth/2,
+            worldHeight*0.62,
+            BLUE_FORWARD_SPEED,
+            "forward"
+        ),
 
-createPlayer(
-"teammate1",
-"blue",
-worldWidth*0.15,
-worldHeight*0.58,
-BLUE_WING_SPEED,
-"wing"
-),
+        createPlayer(
+            "teammate1",
+            "blue",
+            worldWidth*0.15,
+            worldHeight*0.58,
+            BLUE_WING_SPEED,
+            "wing"
+        ),
 
-createPlayer(
-"teammate2",
-"blue",
-worldWidth*0.85,
-worldHeight*0.58,
-BLUE_WING_SPEED,
-"wing"
-),
+        createPlayer(
+            "teammate2",
+            "blue",
+            worldWidth*0.85,
+            worldHeight*0.58,
+            BLUE_WING_SPEED,
+            "wing"
+        ),
 
-createPlayer(
-"teammate3",
-"blue",
-worldWidth*0.30,
-worldHeight*0.75,
-BLUE_DEFENDER_SPEED,
-"defender"
-),
+        createPlayer(
+            "teammate3",
+            "blue",
+            worldWidth*0.30,
+            worldHeight*0.75,
+            BLUE_DEFENDER_SPEED,
+            "defender"
+        ),
 
-createPlayer(
-"teammate4",
-"blue",
-worldWidth*0.50,
-worldHeight*0.95,
-BLUE_GUARD_SPEED,
-"guard"
-),
+        createPlayer(
+            "teammate4",
+            "blue",
+            worldWidth*0.50,
+            worldHeight*0.95,
+            BLUE_GUARD_SPEED,
+            "guard"
+        ),
 
-createPlayer(
-"teammate5",
-"blue",
-worldWidth*0.50,
-worldHeight*0.50,
-BLUE_DEFENDER_SPEED,
-"midfielder"
-)
+        createPlayer(
+            "teammate5",
+            "blue",
+            worldWidth*0.50,
+            worldHeight*0.50,
+            BLUE_DEFENDER_SPEED,
+            "midfielder"
+        )
 
-];
+    ];
 
 
-opponents=[
+    opponents=[
 
-createPlayer(
-"opponent1",
-"red",
-worldWidth/2,
-worldHeight*0.38,
-RED_FORWARD_SPEED,
-"forward"
-),
+        createPlayer(
+            "opponent1",
+            "red",
+            worldWidth/2,
+            worldHeight*0.38,
+            RED_FORWARD_SPEED,
+            "forward"
+        ),
 
-createPlayer(
-"opponent2",
-"red",
-worldWidth*0.15,
-worldHeight*0.42,
-RED_WING_SPEED,
-"wing"
-),
+        createPlayer(
+            "opponent2",
+            "red",
+            worldWidth*0.15,
+            worldHeight*0.42,
+            RED_WING_SPEED,
+            "wing"
+        ),
 
-createPlayer(
-"opponent3",
-"red",
-worldWidth*0.85,
-worldHeight*0.42,
-RED_WING_SPEED,
-"wing"
-),
+        createPlayer(
+            "opponent3",
+            "red",
+            worldWidth*0.85,
+            worldHeight*0.42,
+            RED_WING_SPEED,
+            "wing"
+        ),
 
-createPlayer(
-"opponent4",
-"red",
-worldWidth*0.30,
-worldHeight*0.22,
-RED_DEFENDER_SPEED,
-"defender"
-),
+        createPlayer(
+            "opponent4",
+            "red",
+            worldWidth*0.30,
+            worldHeight*0.22,
+            RED_DEFENDER_SPEED,
+            "defender"
+        ),
 
-createPlayer(
-"opponent5",
-"red",
-worldWidth*0.50,
-worldHeight*0.10,
-RED_GUARD_SPEED,
-"guard"
-)
+        createPlayer(
+            "opponent5",
+            "red",
+            worldWidth*0.50,
+            worldHeight*0.10,
+            RED_GUARD_SPEED,
+            "guard"
+        )
 
-];
+    ];
 
 }
 
@@ -475,44 +482,44 @@ RED_GUARD_SPEED,
 
 function updatePitchColors(){
 
-const markings=
-document.querySelector(".pitchMarkings");
+    const markings=
+        document.querySelector(".pitchMarkings");
 
-if(!markings)
-return;
-
-
-const lines=
-markings.querySelectorAll("line");
+    if(!markings)
+        return;
 
 
-for(const line of lines){
-
-const y1=
-line.getAttribute("y1");
-
-const y2=
-line.getAttribute("y2");
+    const lines=
+        markings.querySelectorAll("line");
 
 
-if(
-(y1==="2" && y2==="2") ||
-(y1==="2198" && y2==="2198")
-){
+    for(const line of lines){
 
-line.setAttribute(
-"stroke",
-"#e52d38"
-);
+        const y1=
+            line.getAttribute("y1");
 
-line.setAttribute(
-"stroke-width",
-"10"
-);
+        const y2=
+            line.getAttribute("y2");
 
-}
 
-}
+        if(
+            (y1==="2" && y2==="2") ||
+            (y1==="2198" && y2==="2198")
+        ){
+
+            line.setAttribute(
+                "stroke",
+                "#e52d38"
+            );
+
+            line.setAttribute(
+                "stroke-width",
+                "10"
+            );
+
+        }
+
+    }
 
 }
 
@@ -523,30 +530,30 @@ line.setAttribute(
 
 function clamp(value,min,max){
 
-return Math.max(
-min,
-Math.min(max,value)
-);
+    return Math.max(
+        min,
+        Math.min(max,value)
+    );
 
 }
 
 
 function distanceBetween(a,b){
 
-return Math.hypot(
-a.x-b.x,
-a.y-b.y
-);
+    return Math.hypot(
+        a.x-b.x,
+        a.y-b.y
+    );
 
 }
 
 
 function getAllPlayers(){
 
-return[
-...teamPlayers,
-...opponents
-];
+    return[
+        ...teamPlayers,
+        ...opponents
+    ];
 
 }
 
@@ -557,100 +564,114 @@ return[
 
 function getRoleBounds(p){
 
-let minX=PLAYER_RADIUS;
-let maxX=worldWidth-PLAYER_RADIUS;
+    let minX=PLAYER_RADIUS;
+    let maxX=worldWidth-PLAYER_RADIUS;
 
-let minY=PLAYER_RADIUS;
-let maxY=worldHeight-PLAYER_RADIUS;
-
-
-if(
-p.team==="blue" &&
-p===teamPlayers[activePlayerIndex]
-){
-
-return{
-minX,
-maxX,
-minY,
-maxY
-};
-
-}
+    let minY=PLAYER_RADIUS;
+    let maxY=worldHeight-PLAYER_RADIUS;
 
 
-if(p.team==="blue"){
+    if(
+        p.team==="blue" &&
+        p===teamPlayers[activePlayerIndex]
+    ){
 
-if(p.role==="guard"){
+        return{
+            minX,
+            maxX,
+            minY,
+            maxY
+        };
 
-minY=worldHeight*0.85;
-maxY=worldHeight-PLAYER_RADIUS;
-
-}
-
-else if(p.role==="defender"){
-
-minY=worldHeight*0.65;
-maxY=worldHeight*0.90;
-
-}
-
-else if(p.role==="wing"){
-
-minY=worldHeight*0.40;
-maxY=worldHeight*0.70;
-
-}
-
-else if(p.role==="forward"){
-
-minY=worldHeight*0.30;
-maxY=worldHeight*0.65;
-
-}
-
-}
+    }
 
 
-if(p.team==="red"){
+    if(p.team==="blue"){
 
-if(p.role==="guard"){
+        if(p.role==="guard"){
 
-minY=PLAYER_RADIUS;
-maxY=worldHeight*0.15;
+            minY=worldHeight*0.85;
+            maxY=worldHeight-PLAYER_RADIUS;
 
-}
+        }
 
-else if(p.role==="defender"){
+        else if(p.role==="defender"){
 
-minY=worldHeight*0.10;
-maxY=worldHeight*0.35;
+            minY=worldHeight*0.65;
+            maxY=worldHeight*0.90;
 
-}
+        }
 
-else if(p.role==="wing"){
+        else if(p.role==="wing"){
 
-minY=worldHeight*0.30;
-maxY=worldHeight*0.60;
+            minY=worldHeight*0.40;
+            maxY=worldHeight*0.70;
 
-}
+        }
 
-else if(p.role==="forward"){
+        else if(p.role==="forward"){
 
-minY=worldHeight*0.35;
-maxY=worldHeight*0.65;
+            minY=worldHeight*0.30;
+            maxY=worldHeight*0.65;
 
-}
+        }
 
-}
+        /*
+           لاعب الوسط:
+           يبقى في المنطقة الوسطى،
+           لكنه يستطيع التحرك أفقيًا وعموديًا
+           داخل هذه المنطقة.
+        */
+
+        else if(p.role==="midfielder"){
+
+            minY=worldHeight*0.35;
+            maxY=worldHeight*0.65;
+
+        }
+
+    }
 
 
-return{
-minX,
-maxX,
-minY,
-maxY
-};
+    if(p.team==="red"){
+
+        if(p.role==="guard"){
+
+            minY=PLAYER_RADIUS;
+            maxY=worldHeight*0.15;
+
+        }
+
+        else if(p.role==="defender"){
+
+            minY=worldHeight*0.10;
+            maxY=worldHeight*0.35;
+
+        }
+
+        else if(p.role==="wing"){
+
+            minY=worldHeight*0.30;
+            maxY=worldHeight*0.60;
+
+        }
+
+        else if(p.role==="forward"){
+
+            minY=worldHeight*0.35;
+            maxY=worldHeight*0.65;
+
+        }
+
+    }
+
+
+    return{
+        minX,
+        maxX,
+        minY,
+        maxY
+    };
 
 }
 
@@ -661,68 +682,68 @@ maxY
 
 function resolveGoalPostCollision(p,x,y){
 
-const centerX=worldWidth/2;
+    const centerX=worldWidth/2;
 
-const halfGoal=GOAL_WIDTH/2;
+    const halfGoal=GOAL_WIDTH/2;
 
-const posts=[
+    const posts=[
 
-{
-x:centerX-halfGoal,
-y:0
-},
+        {
+            x:centerX-halfGoal,
+            y:0
+        },
 
-{
-x:centerX+halfGoal,
-y:0
-},
+        {
+            x:centerX+halfGoal,
+            y:0
+        },
 
-{
-x:centerX-halfGoal,
-y:worldHeight
-},
+        {
+            x:centerX-halfGoal,
+            y:worldHeight
+        },
 
-{
-x:centerX+halfGoal,
-y:worldHeight
-}
+        {
+            x:centerX+halfGoal,
+            y:worldHeight
+        }
 
-];
-
-
-for(const post of posts){
-
-let dx=x-post.x;
-let dy=y-post.y;
-
-let d=Math.hypot(dx,dy);
+    ];
 
 
-if(d<PLAYER_GOAL_POST_DISTANCE){
+    for(const post of posts){
 
-if(d<0.001){
+        let dx=x-post.x;
+        let dy=y-post.y;
 
-dx=1;
-dy=0;
-d=1;
-
-}
-
-dx/=d;
-dy/=d;
-
-const push=
-PLAYER_GOAL_POST_DISTANCE-d;
-
-x+=dx*push;
-y+=dy*push;
-
-}
-
-}
+        let d=Math.hypot(dx,dy);
 
 
-return{x,y};
+        if(d<PLAYER_GOAL_POST_DISTANCE){
+
+            if(d<0.001){
+
+                dx=1;
+                dy=0;
+                d=1;
+
+            }
+
+            dx/=d;
+            dy/=d;
+
+            const push=
+                PLAYER_GOAL_POST_DISTANCE-d;
+
+            x+=dx*push;
+            y+=dy*push;
+
+        }
+
+    }
+
+
+    return{x,y};
 
 }
 
@@ -732,117 +753,118 @@ return{x,y};
 ========================================================= */
 
 function resolvePlayerCollisions(
-p,
-x,
-y
+    p,
+    x,
+    y
 ){
 
-const players=getAllPlayers();
+    const players=getAllPlayers();
 
 
-for(
-let iteration=0;
-iteration<PLAYER_COLLISION_ITERATIONS;
-iteration++
-){
+    for(
+        let iteration=0;
+        iteration<PLAYER_COLLISION_ITERATIONS;
+        iteration++
+    ){
 
-let changed=false;
-
-
-for(const other of players){
-
-if(other===p)
-continue;
+        let changed=false;
 
 
-let dx=x-other.x;
-let dy=y-other.y;
+        for(const other of players){
 
-let d=Math.hypot(dx,dy);
-
-
-if(d<PLAYER_COLLISION_DISTANCE){
-
-if(d<0.001){
-
-dx=p.moveX;
-dy=p.moveY;
+            if(other===p)
+                continue;
 
 
-if(
-Math.hypot(dx,dy)<0.001
-){
+            let dx=x-other.x;
+            let dy=y-other.y;
 
-dx=p.x-other.x;
-dy=p.y-other.y;
-
-}
+            let d=Math.hypot(dx,dy);
 
 
-if(
-Math.hypot(dx,dy)<0.001
-){
+            if(d<PLAYER_COLLISION_DISTANCE){
 
-dx=1;
-dy=0;
+                if(d<0.001){
 
-}
+                    dx=p.moveX;
+                    dy=p.moveY;
 
 
-d=Math.hypot(dx,dy);
+                    if(
+                        Math.hypot(dx,dy)<0.001
+                    ){
 
-}
+                        dx=p.x-other.x;
+                        dy=p.y-other.y;
 
-
-dx/=d;
-dy/=d;
-
-
-const push=
-PLAYER_COLLISION_DISTANCE-d;
+                    }
 
 
-x+=dx*push;
-y+=dy*push;
+                    if(
+                        Math.hypot(dx,dy)<0.001
+                    ){
 
-changed=true;
+                        dx=1;
+                        dy=0;
 
-}
-
-}
-
-
-if(!changed)
-break;
-
-}
+                    }
 
 
-const postResult=
-resolveGoalPostCollision(
-p,
-x,
-y
-);
+                    d=Math.hypot(dx,dy);
 
-x=postResult.x;
-y=postResult.y;
+                }
 
 
-x=clamp(
-x,
-PLAYER_RADIUS,
-worldWidth-PLAYER_RADIUS
-);
-
-y=clamp(
-y,
-PLAYER_RADIUS,
-worldHeight-PLAYER_RADIUS
-);
+                dx/=d;
+                dy/=d;
 
 
-return{x,y};
+                const push=
+                    PLAYER_COLLISION_DISTANCE-d;
+
+
+                x+=dx*push;
+                y+=dy*push;
+
+                changed=true;
+
+            }
+
+        }
+
+
+        if(!changed)
+            break;
+
+    }
+
+
+    const postResult=
+        resolveGoalPostCollision(
+            p,
+            x,
+            y
+        );
+
+
+    x=postResult.x;
+    y=postResult.y;
+
+
+    x=clamp(
+        x,
+        PLAYER_RADIUS,
+        worldWidth-PLAYER_RADIUS
+    );
+
+    y=clamp(
+        y,
+        PLAYER_RADIUS,
+        worldHeight-PLAYER_RADIUS
+    );
+
+
+    return{x,y};
 
 }
 
@@ -852,58 +874,58 @@ return{x,y};
 ========================================================= */
 
 function movePlayer(
-p,
-dx,
-dy,
-dt
+    p,
+    dx,
+    dy,
+    dt
 ){
 
-const length=Math.hypot(dx,dy);
+    const length=Math.hypot(dx,dy);
 
 
-if(length>1){
+    if(length>1){
 
-dx/=length;
-dy/=length;
+        dx/=length;
+        dy/=length;
 
-}
-
-
-if(
-Math.abs(dx)>0.01 ||
-Math.abs(dy)>0.01
-){
-
-p.direction=Math.atan2(dy,dx);
-
-}
+    }
 
 
-p.moveX=dx;
-p.moveY=dy;
+    if(
+        Math.abs(dx)>0.01 ||
+        Math.abs(dy)>0.01
+    ){
+
+        p.direction=Math.atan2(dy,dx);
+
+    }
 
 
-let targetX=
-p.x+
-dx*p.speed*dt;
-
-let targetY=
-p.y+
-dy*p.speed*dt;
+    p.moveX=dx;
+    p.moveY=dy;
 
 
-const resolved=
-resolvePlayerCollisions(
-p,
-targetX,
-targetY
-);
+    let targetX=
+        p.x+
+        dx*p.speed*dt;
+
+    let targetY=
+        p.y+
+        dy*p.speed*dt;
 
 
-p.x=resolved.x;
-p.y=resolved.y;
+    const resolved=
+        resolvePlayerCollisions(
+            p,
+            targetX,
+            targetY
+        );
 
-return true;
+
+    p.x=resolved.x;
+    p.y=resolved.y;
+
+    return true;
 
 }
 
@@ -914,38 +936,38 @@ return true;
 
 function updateControlledPlayer(dt){
 
-const p=
-teamPlayers[activePlayerIndex];
+    const p=
+        teamPlayers[activePlayerIndex];
 
 
-if(!p)
-return;
+    if(!p)
+        return;
 
 
-p.controlled=true;
+    p.controlled=true;
 
 
-const dx=joystickX;
-const dy=joystickY;
+    const dx=joystickX;
+    const dy=joystickY;
 
 
-p.moveX=dx;
-p.moveY=dy;
+    p.moveX=dx;
+    p.moveY=dy;
 
 
-if(
-Math.abs(dx)>0.01 ||
-Math.abs(dy)>0.01
-){
+    if(
+        Math.abs(dx)>0.01 ||
+        Math.abs(dy)>0.01
+    ){
 
-movePlayer(
-p,
-dx,
-dy,
-dt
-);
+        movePlayer(
+            p,
+            dx,
+            dy,
+            dt
+        );
 
-}
+    }
 
 }
 
@@ -956,64 +978,64 @@ dt
 
 function setActivePlayer(index,manual=false){
 
-if(
-index<0 ||
-index>=teamPlayers.length
-)
-return false;
+    if(
+        index<0 ||
+        index>=teamPlayers.length
+    )
+        return false;
 
 
-const newPlayer=teamPlayers[index];
+    const newPlayer=teamPlayers[index];
 
-if(!newPlayer)
-return false;
-
-
-cancelCharging();
+    if(!newPlayer)
+        return false;
 
 
-for(
-let i=0;
-i<teamPlayers.length;
-i++
-){
-
-teamPlayers[i].controlled=false;
-teamPlayers[i].moveX=0;
-teamPlayers[i].moveY=0;
-
-}
+    cancelCharging();
 
 
-activePlayerIndex=index;
+    for(
+        let i=0;
+        i<teamPlayers.length;
+        i++
+    ){
 
-newPlayer.controlled=true;
+        teamPlayers[i].controlled=false;
+        teamPlayers[i].moveX=0;
+        teamPlayers[i].moveY=0;
 
-
-if(manual){
-
-manualSelectedPlayerIndex=index;
-
-lastManualSwitchTime=
-performance.now();
-
-manualControlLockUntil=
-performance.now()+
-MANUAL_CONTROL_LOCK;
-
-lastAutoSwitchTime=
-performance.now();
-
-}
+    }
 
 
-aimAngle=-Math.PI/2;
+    activePlayerIndex=index;
 
-aimX=worldWidth/2;
-aimY=0;
+    newPlayer.controlled=true;
 
 
-return true;
+    if(manual){
+
+        manualSelectedPlayerIndex=index;
+
+        lastManualSwitchTime=
+            performance.now();
+
+        manualControlLockUntil=
+            performance.now()+
+            MANUAL_CONTROL_LOCK;
+
+        lastAutoSwitchTime=
+            performance.now();
+
+    }
+
+
+    aimAngle=-Math.PI/2;
+
+    aimX=worldWidth/2;
+    aimY=0;
+
+
+    return true;
 
 }
 
@@ -1024,44 +1046,44 @@ return true;
 
 function findBestPlayerForBall(){
 
-let bestIndex=-1;
-let bestDistance=Infinity;
+    let bestIndex=-1;
+    let bestDistance=Infinity;
 
 
-for(
-let i=0;
-i<teamPlayers.length;
-i++
-){
+    for(
+        let i=0;
+        i<teamPlayers.length;
+        i++
+    ){
 
-if(i===activePlayerIndex)
-continue;
-
-
-const p=teamPlayers[i];
+        if(i===activePlayerIndex)
+            continue;
 
 
-const d=
-Math.hypot(
-p.x-ballX,
-p.y-ballY
-);
+        const p=teamPlayers[i];
 
 
-if(d<bestDistance){
-
-bestDistance=d;
-bestIndex=i;
-
-}
-
-}
+        const d=
+            Math.hypot(
+                p.x-ballX,
+                p.y-ballY
+            );
 
 
-return{
-index:bestIndex,
-distance:bestDistance
-};
+        if(d<bestDistance){
+
+            bestDistance=d;
+            bestIndex=i;
+
+        }
+
+    }
+
+
+    return{
+        index:bestIndex,
+        distance:bestDistance
+    };
 
 }
 
@@ -1072,125 +1094,125 @@ distance:bestDistance
 
 function tryBallPickup(){
 
-if(ballOwner)
-return;
+    if(ballOwner)
+        return;
 
 
-let nearestBlue=null;
-let nearestBlueDistance=Infinity;
+    let nearestBlue=null;
+    let nearestBlueDistance=Infinity;
 
 
-for(const p of teamPlayers){
+    for(const p of teamPlayers){
 
-const d=
-Math.hypot(
-p.x-ballX,
-p.y-ballY
-);
-
-
-if(
-d<PLAYER_PICKUP_DISTANCE &&
-d<nearestBlueDistance
-){
-
-nearestBlueDistance=d;
-nearestBlue=p;
-
-}
-
-}
+        const d=
+            Math.hypot(
+                p.x-ballX,
+                p.y-ballY
+            );
 
 
-if(nearestBlue){
+        if(
+            d<PLAYER_PICKUP_DISTANCE &&
+            d<nearestBlueDistance
+        ){
 
-ballOwner=nearestBlue;
+            nearestBlueDistance=d;
+            nearestBlue=p;
 
-ballVX=0;
-ballVY=0;
+        }
 
-lastOwnerChangeTime=
-performance.now();
-
-
-nearestBlue.hasBall=true;
-nearestBlue.currentAction="won-ball";
+    }
 
 
-const index=
-teamPlayers.indexOf(
-nearestBlue
-);
+    if(nearestBlue){
+
+        ballOwner=nearestBlue;
+
+        ballVX=0;
+        ballVY=0;
+
+        lastOwnerChangeTime=
+            performance.now();
 
 
-if(
-index>=0 &&
-index!==activePlayerIndex
-){
-
-if(
-setActivePlayer(
-index,
-false
-)
-){
-
-lastAutoSwitchTime=
-performance.now();
-
-}
-
-}
+        nearestBlue.hasBall=true;
+        nearestBlue.currentAction="won-ball";
 
 
-return;
-
-}
-
-
-let nearestRed=null;
-let nearestRedDistance=Infinity;
+        const index=
+            teamPlayers.indexOf(
+                nearestBlue
+            );
 
 
-for(const p of opponents){
+        if(
+            index>=0 &&
+            index!==activePlayerIndex
+        ){
 
-const d=
-Math.hypot(
-p.x-ballX,
-p.y-ballY
-);
+            if(
+                setActivePlayer(
+                    index,
+                    false
+                )
+            ){
 
+                lastAutoSwitchTime=
+                    performance.now();
 
-if(
-d<PLAYER_PICKUP_DISTANCE &&
-d<nearestRedDistance
-){
+            }
 
-nearestRedDistance=d;
-nearestRed=p;
-
-}
-
-}
+        }
 
 
-if(nearestRed){
+        return;
 
-ballOwner=nearestRed;
+    }
 
-ballVX=0;
-ballVY=0;
 
-lastOwnerChangeTime=
-performance.now();
+    let nearestRed=null;
+    let nearestRedDistance=Infinity;
 
-nearestRed.hasBall=true;
-nearestRed.currentAction="won-ball";
 
-resetRedDecisionTimer(nearestRed);
-resetRedPassCooldown(nearestRed);
+    for(const p of opponents){
 
-}
+        const d=
+            Math.hypot(
+                p.x-ballX,
+                p.y-ballY
+            );
+
+
+        if(
+            d<PLAYER_PICKUP_DISTANCE &&
+            d<nearestRedDistance
+        ){
+
+            nearestRedDistance=d;
+            nearestRed=p;
+
+        }
+
+    }
+
+
+    if(nearestRed){
+
+        ballOwner=nearestRed;
+
+        ballVX=0;
+        ballVY=0;
+
+        lastOwnerChangeTime=
+            performance.now();
+
+        nearestRed.hasBall=true;
+        nearestRed.currentAction="won-ball";
+
+        resetRedDecisionTimer(nearestRed);
+        resetRedPassCooldown(nearestRed);
+
+    }
 
 }
 
@@ -1201,82 +1223,82 @@ resetRedPassCooldown(nearestRed);
 
 function separateAllPlayers(){
 
-const players=getAllPlayers();
+    const players=getAllPlayers();
 
 
-for(
-let i=0;
-i<players.length;
-i++
-){
+    for(
+        let i=0;
+        i<players.length;
+        i++
+    ){
 
-for(
-let j=i+1;
-j<players.length;
-j++
-){
+        for(
+            let j=i+1;
+            j<players.length;
+            j++
+        ){
 
-const a=players[i];
-const b=players[j];
-
-
-const isAFixed=
-a===teamPlayers[activePlayerIndex];
-
-const isBFixed=
-b===teamPlayers[activePlayerIndex];
+            const a=players[i];
+            const b=players[j];
 
 
-let dx=b.x-a.x;
-let dy=b.y-a.y;
+            const isAFixed=
+                a===teamPlayers[activePlayerIndex];
 
-let d=Math.hypot(dx,dy);
-
-
-if(d===0){
-
-dx=1;
-dy=0;
-d=1;
-
-}
+            const isBFixed=
+                b===teamPlayers[activePlayerIndex];
 
 
-if(
-d<
-PLAYER_COLLISION_DISTANCE
-){
+            let dx=b.x-a.x;
+            let dy=b.y-a.y;
 
-const push=
-(
-PLAYER_COLLISION_DISTANCE-d
-)/2;
+            let d=Math.hypot(dx,dy);
 
 
-dx/=d;
-dy/=d;
+            if(d===0){
+
+                dx=1;
+                dy=0;
+                d=1;
+
+            }
 
 
-if(!isAFixed){
+            if(
+                d<
+                PLAYER_COLLISION_DISTANCE
+            ){
 
-a.x-=dx*push;
-a.y-=dy*push;
+                const push=
+                    (
+                        PLAYER_COLLISION_DISTANCE-d
+                    )/2;
 
-}
+
+                dx/=d;
+                dy/=d;
 
 
-if(!isBFixed){
+                if(!isAFixed){
 
-b.x+=dx*push;
-b.y+=dy*push;
+                    a.x-=dx*push;
+                    a.y-=dy*push;
 
-}
+                }
 
-}
 
-}
+                if(!isBFixed){
 
-}
+                    b.x+=dx*push;
+                    b.y+=dy*push;
+
+                }
+
+            }
+
+        }
+
+    }
 
 }
 
@@ -1287,106 +1309,96 @@ b.y+=dy*push;
 
 function updateCamera(){
 
-const visibleWorldWidth=
-getVisibleWorldWidth();
+    /*
+       حماية من أي قيمة غير صحيحة.
+    */
 
-const visibleWorldHeight=
-getVisibleWorldHeight();
+    if(
+        !Number.isFinite(cameraZoom) ||
+        cameraZoom<=0
+    ){
 
+        calculateCameraZoom();
 
-/*
-   ---------------------------------------------------------
-   أفقيًا:
-   
-   لا نحرك الكاميرا إطلاقًا.
-
-   السبب:
-   نريد خط التماس الأيسر والأيمن ظاهرين دائمًا.
-   ---------------------------------------------------------
-*/
-
-const maxX=
-Math.max(
-0,
-worldWidth-visibleWorldWidth
-);
+    }
 
 
-/*
-   بما أن الـZoom محسوب حسب عرض الشاشة،
-   visibleWorldWidth يكون تقريبًا 1200.
-   
-   لذلك maxX غالبًا = 0.
-*/
+    const visibleWorldWidth=
+        getVisibleWorldWidth();
 
-cameraX=
-clamp(
-0,
-0,
-maxX
-);
+    const visibleWorldHeight=
+        getVisibleWorldHeight();
 
 
-/*
-   ---------------------------------------------------------
-   عموديًا:
-   
-   هنا الكاميرا تلاحق الكرة.
-   
-   وبالتالي عندما تنتقل الكرة من جهة إلى جهة
-   في طول الملعب، الشاشة تتحرك معها.
-   ---------------------------------------------------------
-*/
+    /* -------------------------------------------------------
+       أفقيًا
 
-const maxY=
-Math.max(
-0,
-worldHeight-visibleWorldHeight
-);
+       لا نحرك الكاميرا أفقيًا.
 
+       السبب:
+       نريد خط التماس الأيسر والأيمن
+       ظاهرين دائمًا.
+    ------------------------------------------------------- */
 
-/*
-   نضع الكرة قريبًا من منتصف الشاشة.
-*/
-
-const targetY=
-ballY-
-visibleWorldHeight/2;
+    const maxX=
+        Math.max(
+            0,
+            worldWidth-visibleWorldWidth
+        );
 
 
-/*
-   حدود الكاميرا العمودية.
-*/
-
-const desiredY=
-clamp(
-targetY,
-0,
-maxY
-);
+    cameraX=
+        clamp(
+            0,
+            0,
+            maxX
+        );
 
 
-/*
-   حركة ناعمة.
-*/
+    /* -------------------------------------------------------
+       عموديًا
 
-cameraY+=
-(
-desiredY-cameraY
-)*
-CAMERA_SMOOTH;
+       هنا فقط تلاحق الكاميرا الكرة.
+
+       إذا كانت الشاشة تعرض كامل الملعب:
+       maxY = 0
+
+       وبالتالي لا توجد حاجة للحركة.
+    ------------------------------------------------------- */
+
+    const maxY=
+        Math.max(
+            0,
+            worldHeight-visibleWorldHeight
+        );
 
 
-/*
-   حماية نهائية.
-*/
+    const targetY=
+        ballY-
+        visibleWorldHeight/2;
 
-cameraY=
-clamp(
-cameraY,
-0,
-maxY
-);
+
+    const desiredY=
+        clamp(
+            targetY,
+            0,
+            maxY
+        );
+
+
+    cameraY+=
+        (
+            desiredY-cameraY
+        )*
+        CAMERA_SMOOTH;
+
+
+    cameraY=
+        clamp(
+            cameraY,
+            0,
+            maxY
+        );
 
 }
 
@@ -1397,147 +1409,143 @@ maxY
 
 function drawPlayer(p){
 
-if(!p.el)
-return;
+    if(!p.el)
+        return;
 
 
-p.el.style.transform=
-`translate3d(
-${p.x-PLAYER_RADIUS}px,
-${p.y-PLAYER_RADIUS}px,
-0
-)`;
+    p.el.style.transform=
+        `translate3d(
+            ${p.x-PLAYER_RADIUS}px,
+            ${p.y-PLAYER_RADIUS}px,
+            0
+        )`;
 
 
-const arrow=
-p.el.querySelector(
-".controlArrow"
-);
+    const arrow=
+        p.el.querySelector(
+            ".controlArrow"
+        );
 
 
-const isControlled=
-p.team==="blue" &&
-p===teamPlayers[activePlayerIndex];
+    const isControlled=
+        p.team==="blue" &&
+        p===teamPlayers[activePlayerIndex];
 
 
-if(arrow){
+    if(arrow){
 
-arrow.style.display=
-isControlled
-?"block"
-:"none";
+        arrow.style.display=
+            isControlled
+            ?"block"
+            :"none";
 
-}
+    }
 
 
-if(isControlled){
+    if(isControlled){
 
-p.el.classList.add("controlled");
+        p.el.classList.add("controlled");
 
-}
+    }
+    else{
 
-else{
+        p.el.classList.remove("controlled");
 
-p.el.classList.remove("controlled");
-
-}
+    }
 
 }
 
 
 function drawBall(){
 
-ballElement.style.transform=
-`translate3d(
-${ballX-BALL_RADIUS}px,
-${ballY-BALL_RADIUS}px,
-0
-)`;
+    ballElement.style.transform=
+        `translate3d(
+            ${ballX-BALL_RADIUS}px,
+            ${ballY-BALL_RADIUS}px,
+            0
+        )`;
 
 }
 
 
 function drawAim(){
 
-const p=
-teamPlayers[activePlayerIndex];
+    const p=
+        teamPlayers[activePlayerIndex];
 
 
-if(
-!p ||
-!chargingActive ||
-ballOwner!==p
-){
+    if(
+        !p ||
+        !chargingActive ||
+        ballOwner!==p
+    ){
 
-aimArrow.style.display="none";
+        aimArrow.style.display="none";
 
-return;
+        return;
 
-}
-
-
-const length=
-45+
-chargePower*0.7;
+    }
 
 
-aimArrow.style.display="block";
+    const length=
+        45+
+        chargePower*0.7;
 
-aimArrow.style.width="5px";
 
-aimArrow.style.height=
-`${length}px`;
+    aimArrow.style.display="block";
 
-aimArrow.style.left=
-`${ballX}px`;
+    aimArrow.style.width="5px";
 
-aimArrow.style.top=
-`${ballY}px`;
+    aimArrow.style.height=
+        `${length}px`;
 
-aimArrow.style.transform=
-`translate(-50%,-100%)
-rotate(${aimAngle+Math.PI/2}rad)`;
+    aimArrow.style.left=
+        `${ballX}px`;
 
-aimArrow.style.transformOrigin=
-"50% 100%";
+    aimArrow.style.top=
+        `${ballY}px`;
+
+    aimArrow.style.transform=
+        `translate(-50%,-100%)
+         rotate(${aimAngle+Math.PI/2}rad)`;
+
+    aimArrow.style.transformOrigin=
+        "50% 100%";
 
 }
 
 
 function drawField(){
 
-/*
-   مهم:
-   التحويل يبدأ من أعلى يسار الملعب.
-*/
-
-field.style.transformOrigin="0 0";
+    field.style.transformOrigin="0 0";
 
 
-field.style.transform=
-`translate3d(
-${-cameraX*cameraZoom}px,
-${-cameraY*cameraZoom}px,
-0
-)
-scale(${cameraZoom})`;
+    field.style.transform=
+        `translate3d(
+            ${-cameraX*cameraZoom}px,
+            ${-cameraY*cameraZoom}px,
+            0
+        )
+        scale(${cameraZoom})`;
 
 }
 
 
 function draw(){
 
-drawField();
+    drawField();
 
 
-for(const p of teamPlayers)
-drawPlayer(p);
+    for(const p of teamPlayers)
+        drawPlayer(p);
 
-for(const p of opponents)
-drawPlayer(p);
 
-drawBall();
-drawAim();
+    for(const p of opponents)
+        drawPlayer(p);
+
+
+    drawBall();
+    drawAim();
 
 }
 
@@ -1548,71 +1556,71 @@ drawAim();
 
 function resetJoystick(){
 
-joystickActive=false;
-joystickPointerId=null;
+    joystickActive=false;
+    joystickPointerId=null;
 
-joystickX=0;
-joystickY=0;
+    joystickX=0;
+    joystickY=0;
 
-joystickCenter.style.transform=
-"translate(-50%,-50%)";
+    joystickCenter.style.transform=
+        "translate(-50%,-50%)";
 
 }
 
 
 function updateJoystick(
-clientX,
-clientY
+    clientX,
+    clientY
 ){
 
-const rect=
-movePad.getBoundingClientRect();
+    const rect=
+        movePad.getBoundingClientRect();
 
 
-const centerX=
-rect.left+
-rect.width/2;
+    const centerX=
+        rect.left+
+        rect.width/2;
 
-const centerY=
-rect.top+
-rect.height/2;
-
-
-let dx=
-clientX-centerX;
-
-let dy=
-clientY-centerY;
+    const centerY=
+        rect.top+
+        rect.height/2;
 
 
-const d=Math.hypot(dx,dy);
+    let dx=
+        clientX-centerX;
+
+    let dy=
+        clientY-centerY;
 
 
-if(
-d>JOYSTICK_MAX_DISTANCE
-){
-
-dx=dx/d*
-JOYSTICK_MAX_DISTANCE;
-
-dy=dy/d*
-JOYSTICK_MAX_DISTANCE;
-
-}
+    const d=Math.hypot(dx,dy);
 
 
-joystickX=
-dx/JOYSTICK_MAX_DISTANCE;
+    if(
+        d>JOYSTICK_MAX_DISTANCE
+    ){
 
-joystickY=
-dy/JOYSTICK_MAX_DISTANCE;
+        dx=dx/d*
+            JOYSTICK_MAX_DISTANCE;
+
+        dy=dy/d*
+            JOYSTICK_MAX_DISTANCE;
+
+    }
 
 
-joystickCenter.style.transform=
-`translate(
-calc(-50% + ${dx}px),
-calc(-50% + ${dy}px)
-)`;
+    joystickX=
+        dx/JOYSTICK_MAX_DISTANCE;
+
+    joystickY=
+        dy/JOYSTICK_MAX_DISTANCE;
+
+
+    joystickCenter.style.transform=
+        `translate(
+            calc(-50% + ${dx}px),
+            calc(-50% + ${dy}px)
+        )`;
 
 }
 
@@ -1622,75 +1630,78 @@ calc(-50% + ${dy}px)
 ========================================================= */
 
 movePad.addEventListener(
-"pointerdown",
-e=>{
+    "pointerdown",
+    e=>{
 
-e.preventDefault();
+        e.preventDefault();
 
-joystickActive=true;
-joystickPointerId=e.pointerId;
+        joystickActive=true;
+        joystickPointerId=e.pointerId;
 
-movePad.setPointerCapture(
-e.pointerId
-);
+        movePad.setPointerCapture(
+            e.pointerId
+        );
 
-updateJoystick(
-e.clientX,
-e.clientY
-);
+        updateJoystick(
+            e.clientX,
+            e.clientY
+        );
 
-}
-);
-
-
-movePad.addEventListener(
-"pointermove",
-e=>{
-
-if(
-!joystickActive ||
-e.pointerId!==joystickPointerId
-)
-return;
-
-e.preventDefault();
-
-updateJoystick(
-e.clientX,
-e.clientY
-);
-
-}
+    }
 );
 
 
 movePad.addEventListener(
-"pointerup",
-e=>{
+    "pointermove",
+    e=>{
 
-if(
-e.pointerId!==joystickPointerId
-)
-return;
+        if(
+            !joystickActive ||
+            e.pointerId!==joystickPointerId
+        )
+            return;
 
-resetJoystick();
 
-}
+        e.preventDefault();
+
+        updateJoystick(
+            e.clientX,
+            e.clientY
+        );
+
+    }
 );
 
 
 movePad.addEventListener(
-"pointercancel",
-e=>{
+    "pointerup",
+    e=>{
 
-if(
-e.pointerId!==joystickPointerId
-)
-return;
+        if(
+            e.pointerId!==joystickPointerId
+        )
+            return;
 
-resetJoystick();
 
-}
+        resetJoystick();
+
+    }
+);
+
+
+movePad.addEventListener(
+    "pointercancel",
+    e=>{
+
+        if(
+            e.pointerId!==joystickPointerId
+        )
+            return;
+
+
+        resetJoystick();
+
+    }
 );
 
 
@@ -1700,82 +1711,83 @@ resetJoystick();
 
 function startCharging(){
 
-if(
-!matchRunning ||
-matchEnded
-)
-return;
+    if(
+        !matchRunning ||
+        matchEnded
+    )
+        return;
 
 
-const p=
-teamPlayers[activePlayerIndex];
+    const p=
+        teamPlayers[activePlayerIndex];
 
 
-if(!p)
-return;
+    if(!p)
+        return;
 
 
-if(ballOwner!==p)
-return;
+    if(ballOwner!==p)
+        return;
 
 
-chargingActive=true;
-chargePower=0;
+    chargingActive=true;
 
-aimAngle=-Math.PI/2;
+    chargePower=0;
 
-aimX=worldWidth/2;
-aimY=0;
+    aimAngle=-Math.PI/2;
 
-kickDragDistance=0;
+    aimX=worldWidth/2;
+    aimY=0;
 
-powerBox.style.display="block";
+    kickDragDistance=0;
 
-powerBar.style.width="0%";
+    powerBox.style.display="block";
 
-aimArrow.style.display="block";
+    powerBar.style.width="0%";
+
+    aimArrow.style.display="block";
 
 }
 
 
 function updateCharge(dt){
 
-if(!chargingActive)
-return;
+    if(!chargingActive)
+        return;
 
 
-chargePower+=
-POWER_SPEED*dt;
+    chargePower+=
+        POWER_SPEED*dt;
 
 
-chargePower=
-Math.min(
-MAX_POWER,
-chargePower
-);
+    chargePower=
+        Math.min(
+            MAX_POWER,
+            chargePower
+        );
 
 
-powerBar.style.width=
-`${chargePower}%`;
+    powerBar.style.width=
+        `${chargePower}%`;
 
 }
 
 
 function cancelCharging(){
 
-chargingActive=false;
+    chargingActive=false;
 
-chargePower=0;
+    chargePower=0;
 
-kickPointerId=null;
+    kickPointerId=null;
 
-kickDragDistance=0;
+    kickDragDistance=0;
 
-powerBox.style.display="none";
+    powerBox.style.display="none";
 
-powerBar.style.width="0%";
+    powerBar.style.width="0%";
 
-aimArrow.style.display="none";
+    aimArrow.style.display="none";
 
 }
 
@@ -1785,35 +1797,35 @@ aimArrow.style.display="none";
 ========================================================= */
 
 function updateAim(
-clientX,
-clientY
+    clientX,
+    clientY
 ){
 
-if(!chargingActive)
-return;
+    if(!chargingActive)
+        return;
 
 
-let dx=
-clientX-kickStartX;
+    let dx=
+        clientX-kickStartX;
 
-let dy=
-clientY-kickStartY;
-
-
-const d=Math.hypot(dx,dy);
+    let dy=
+        clientY-kickStartY;
 
 
-if(d<6)
-return;
+    const d=Math.hypot(dx,dy);
 
 
-kickDragDistance=d;
+    if(d<6)
+        return;
 
 
-aimAngle=Math.atan2(dy,dx);
+    kickDragDistance=d;
 
-aimX=Math.cos(aimAngle);
-aimY=Math.sin(aimAngle);
+    aimAngle=
+        Math.atan2(dy,dx);
+
+    aimX=Math.cos(aimAngle);
+    aimY=Math.sin(aimAngle);
 
 }
 
@@ -1824,32 +1836,32 @@ aimY=Math.sin(aimAngle);
 
 function getDistanceFactor(){
 
-const goalX=worldWidth/2;
-const goalY=0;
+    const goalX=worldWidth/2;
+    const goalY=0;
 
 
-const distToGoal=
-Math.hypot(
-ballX-goalX,
-ballY-goalY
-);
+    const distToGoal=
+        Math.hypot(
+            ballX-goalX,
+            ballY-goalY
+        );
 
 
-const maxDist=
-Math.hypot(
-worldWidth,
-worldHeight
-);
+    const maxDist=
+        Math.hypot(
+            worldWidth,
+            worldHeight
+        );
 
 
-const t=
-Math.min(
-1,
-distToGoal/maxDist
-);
+    const t=
+        Math.min(
+            1,
+            distToGoal/maxDist
+        );
 
 
-return 1-t*0.7;
+    return 1-t*0.7;
 
 }
 
@@ -1860,65 +1872,76 @@ return 1-t*0.7;
 
 function kickBall(){
 
-const p=
-teamPlayers[activePlayerIndex];
+    const p=
+        teamPlayers[activePlayerIndex];
 
 
-if(!p){
+    if(!p){
 
-return;
+        return;
 
-}
-
-
-if(ballOwner!==p){
-
-cancelCharging();
-return;
-
-}
+    }
 
 
-const dx=
-Math.cos(aimAngle);
+    if(ballOwner!==p){
 
-const dy=
-Math.sin(aimAngle);
+        cancelCharging();
 
+        return;
 
-const distanceFactor=
-getDistanceFactor();
+    }
 
 
-const chargeNormalized=
-Math.max(
-0.15,
-chargePower/100
-);
+    const dx=
+        Math.cos(aimAngle);
+
+    const dy=
+        Math.sin(aimAngle);
 
 
-const finalPower=
-chargeNormalized*
-distanceFactor;
+    const distanceFactor=
+        getDistanceFactor();
 
 
-const speed=
-350+
-finalPower*950;
+    const chargeNormalized=
+        Math.max(
+            0.15,
+            chargePower/100
+        );
 
 
-ballOwner=null;
-
-p.hasBall=false;
-
-ballX=p.x+dx*30;
-ballY=p.y+dy*30;
-
-ballVX=dx*speed;
-ballVY=dy*speed;
+    const finalPower=
+        chargeNormalized*
+        distanceFactor;
 
 
-cancelCharging();
+    const speed=
+        350+
+        finalPower*950;
+
+
+    ballOwner=null;
+
+    p.hasBall=false;
+
+
+    ballX=
+        p.x+
+        dx*30;
+
+    ballY=
+        p.y+
+        dy*30;
+
+
+    ballVX=
+        dx*speed;
+
+    ballVY=
+        dy*speed;
+
+
+    cancelCharging();
 
 }
 
@@ -1928,40 +1951,40 @@ cancelCharging();
 ========================================================= */
 
 kickControl.addEventListener(
-"pointerdown",
-e=>{
+    "pointerdown",
+    e=>{
 
-e.preventDefault();
-
-
-if(chargingActive)
-return;
+        e.preventDefault();
 
 
-if(
-ballOwner &&
-ballOwner.team==="red"
-){
-
-return;
-
-}
+        if(chargingActive)
+            return;
 
 
-kickPointerId=e.pointerId;
+        if(
+            ballOwner &&
+            ballOwner.team==="red"
+        ){
 
-kickStartX=e.clientX;
-kickStartY=e.clientY;
+            return;
+
+        }
 
 
-kickControl.setPointerCapture(
-e.pointerId
-);
+        kickPointerId=e.pointerId;
+
+        kickStartX=e.clientX;
+        kickStartY=e.clientY;
 
 
-startCharging();
+        kickControl.setPointerCapture(
+            e.pointerId
+        );
 
-}
+
+        startCharging();
+
+    }
 );
 
 
@@ -1970,28 +1993,31 @@ startCharging();
 ========================================================= */
 
 window.addEventListener(
-"pointermove",
-e=>{
+    "pointermove",
+    e=>{
 
-if(!chargingActive)
-return;
+        if(!chargingActive)
+            return;
 
-if(
-e.pointerId!==kickPointerId
-)
-return;
 
-e.preventDefault();
+        if(
+            e.pointerId!==kickPointerId
+        )
+            return;
 
-updateAim(
-e.clientX,
-e.clientY
-);
 
-},
-{
-passive:false
-}
+        e.preventDefault();
+
+
+        updateAim(
+            e.clientX,
+            e.clientY
+        );
+
+    },
+    {
+        passive:false
+    }
 );
 
 
@@ -2000,30 +2026,31 @@ passive:false
 ========================================================= */
 
 window.addEventListener(
-"pointerup",
-e=>{
+    "pointerup",
+    e=>{
 
-if(
-e.pointerId!==kickPointerId
-)
-return;
-
-e.preventDefault();
+        if(
+            e.pointerId!==kickPointerId
+        )
+            return;
 
 
-if(chargingActive){
-
-kickBall();
-
-}
+        e.preventDefault();
 
 
-kickPointerId=null;
+        if(chargingActive){
 
-},
-{
-passive:false
-}
+            kickBall();
+
+        }
+
+
+        kickPointerId=null;
+
+    },
+    {
+        passive:false
+    }
 );
 
 
@@ -2032,17 +2059,18 @@ passive:false
 ========================================================= */
 
 window.addEventListener(
-"pointercancel",
-e=>{
+    "pointercancel",
+    e=>{
 
-if(
-e.pointerId!==kickPointerId
-)
-return;
+        if(
+            e.pointerId!==kickPointerId
+        )
+            return;
 
-cancelCharging();
 
-}
+        cancelCharging();
+
+    }
 );
 
 
@@ -2052,199 +2080,198 @@ cancelCharging();
 
 function updateBall(dt){
 
-if(ballOwner){
+    if(ballOwner){
 
-for(const p of teamPlayers){
+        for(const p of teamPlayers){
 
-p.hasBall=false;
+            p.hasBall=false;
 
-}
+        }
 
-for(const p of opponents){
+        for(const p of opponents){
 
-p.hasBall=false;
+            p.hasBall=false;
 
-}
+        }
 
-ballOwner.hasBall=true;
 
-ballX=ballOwner.x;
-ballY=ballOwner.y-25;
+        ballOwner.hasBall=true;
 
-ballVX=0;
-ballVY=0;
+        ballX=ballOwner.x;
+        ballY=ballOwner.y-25;
 
-return;
+        ballVX=0;
+        ballVY=0;
 
-}
+        return;
 
+    }
 
-ballX+=ballVX*dt;
-ballY+=ballVY*dt;
 
+    ballX+=ballVX*dt;
+    ballY+=ballVY*dt;
 
-const friction=
-Math.pow(
-FRICTION,
-dt*60
-);
 
+    const friction=
+        Math.pow(
+            FRICTION,
+            dt*60
+        );
 
-ballVX*=friction;
-ballVY*=friction;
 
+    ballVX*=friction;
+    ballVY*=friction;
 
-if(Math.abs(ballVX)<0.15)
-ballVX=0;
 
-if(Math.abs(ballVY)<0.15)
-ballVY=0;
+    if(Math.abs(ballVX)<0.15)
+        ballVX=0;
 
+    if(Math.abs(ballVY)<0.15)
+        ballVY=0;
 
-if(ballX<BALL_RADIUS){
 
-ballX=BALL_RADIUS;
+    if(ballX<BALL_RADIUS){
 
-ballVX=
-Math.abs(ballVX)*0.8;
+        ballX=BALL_RADIUS;
 
-}
+        ballVX=
+            Math.abs(ballVX)*0.8;
 
+    }
 
-if(
-ballX>
-worldWidth-BALL_RADIUS
-){
 
-ballX=
-worldWidth-BALL_RADIUS;
+    if(
+        ballX>
+        worldWidth-BALL_RADIUS
+    ){
 
-ballVX=
--Math.abs(ballVX)*0.8;
+        ballX=
+            worldWidth-BALL_RADIUS;
 
-}
+        ballVX=
+            -Math.abs(ballVX)*0.8;
 
+    }
 
-/* TOP GOAL */
 
-if(
-ballY<
--GOAL_EXIT_DISTANCE
-){
+    /* TOP GOAL */
 
-const insideGoal=
-Math.abs(
-ballX-worldWidth/2
-)<=
-GOAL_WIDTH/2;
+    if(
+        ballY<
+        -GOAL_EXIT_DISTANCE
+    ){
 
+        const insideGoal=
+            Math.abs(
+                ballX-worldWidth/2
+            )<=
+            GOAL_WIDTH/2;
 
-if(insideGoal){
 
-scoreBlue();
-return;
+        if(insideGoal){
 
-}
+            scoreBlue();
+            return;
 
-else{
+        }
+        else{
 
-ballY=BALL_RADIUS;
+            ballY=BALL_RADIUS;
 
-ballVY=
-Math.abs(ballVY)*0.8;
+            ballVY=
+                Math.abs(ballVY)*0.8;
 
-}
+        }
 
-}
+    }
 
 
-if(
-ballY<=BALL_RADIUS &&
-ballY>=-GOAL_EXIT_DISTANCE
-){
+    if(
+        ballY<=BALL_RADIUS &&
+        ballY>=-GOAL_EXIT_DISTANCE
+    ){
 
-const insideGoal=
-Math.abs(
-ballX-worldWidth/2
-)<=
-GOAL_WIDTH/2;
+        const insideGoal=
+            Math.abs(
+                ballX-worldWidth/2
+            )<=
+            GOAL_WIDTH/2;
 
 
-if(
-!insideGoal &&
-ballVY<0
-){
+        if(
+            !insideGoal &&
+            ballVY<0
+        ){
 
-ballY=BALL_RADIUS;
+            ballY=BALL_RADIUS;
 
-ballVY=
-Math.abs(ballVY)*0.8;
+            ballVY=
+                Math.abs(ballVY)*0.8;
 
-}
+        }
 
-}
+    }
 
 
-/* BOTTOM GOAL */
+    /* BOTTOM GOAL */
 
-if(
-ballY>
-worldHeight+GOAL_EXIT_DISTANCE
-){
+    if(
+        ballY>
+        worldHeight+GOAL_EXIT_DISTANCE
+    ){
 
-const insideGoal=
-Math.abs(
-ballX-worldWidth/2
-)<=
-GOAL_WIDTH/2;
+        const insideGoal=
+            Math.abs(
+                ballX-worldWidth/2
+            )<=
+            GOAL_WIDTH/2;
 
 
-if(insideGoal){
+        if(insideGoal){
 
-scoreRed();
-return;
+            scoreRed();
+            return;
 
-}
+        }
+        else{
 
-else{
+            ballY=
+                worldHeight-BALL_RADIUS;
 
-ballY=
-worldHeight-BALL_RADIUS;
+            ballVY=
+                -Math.abs(ballVY)*0.8;
 
-ballVY=
--Math.abs(ballVY)*0.8;
+        }
 
-}
+    }
 
-}
 
+    if(
+        ballY>=worldHeight-BALL_RADIUS &&
+        ballY<=worldHeight+GOAL_EXIT_DISTANCE
+    ){
 
-if(
-ballY>=worldHeight-BALL_RADIUS &&
-ballY<=worldHeight+GOAL_EXIT_DISTANCE
-){
+        const insideGoal=
+            Math.abs(
+                ballX-worldWidth/2
+            )<=
+            GOAL_WIDTH/2;
 
-const insideGoal=
-Math.abs(
-ballX-worldWidth/2
-)<=
-GOAL_WIDTH/2;
 
+        if(
+            !insideGoal &&
+            ballVY>0
+        ){
 
-if(
-!insideGoal &&
-ballVY>0
-){
+            ballY=
+                worldHeight-BALL_RADIUS;
 
-ballY=
-worldHeight-BALL_RADIUS;
+            ballVY=
+                -Math.abs(ballVY)*0.8;
 
-ballVY=
--Math.abs(ballVY)*0.8;
+        }
 
-}
-
-}
+    }
 
 }
 
@@ -2255,46 +2282,52 @@ ballVY=
 
 function scoreBlue(){
 
-if(
-goalCelebrationActive ||
-matchEnded
-)
-return;
+    if(
+        goalCelebrationActive ||
+        matchEnded
+    )
+        return;
 
 
-blueScore++;
+    blueScore++;
 
-blueScoreElement.textContent=
-blueScore;
+    blueScoreElement.textContent=
+        blueScore;
 
-ballVX=0;
-ballVY=0;
-ballOwner=null;
 
-showGoalCelebration();
+    ballVX=0;
+    ballVY=0;
+
+    ballOwner=null;
+
+
+    showGoalCelebration();
 
 }
 
 
 function scoreRed(){
 
-if(
-goalCelebrationActive ||
-matchEnded
-)
-return;
+    if(
+        goalCelebrationActive ||
+        matchEnded
+    )
+        return;
 
 
-redScore++;
+    redScore++;
 
-redScoreElement.textContent=
-redScore;
+    redScoreElement.textContent=
+        redScore;
 
-ballVX=0;
-ballVY=0;
-ballOwner=null;
 
-showGoalCelebration();
+    ballVX=0;
+    ballVY=0;
+
+    ballOwner=null;
+
+
+    showGoalCelebration();
 
 }
 
@@ -2305,43 +2338,45 @@ showGoalCelebration();
 
 function showGoalCelebration(){
 
-if(goalCelebrationActive)
-return;
+    if(goalCelebrationActive)
+        return;
 
 
-goalCelebrationActive=true;
-matchRunning=false;
-
-cancelCharging();
-resetJoystick();
-
-goalCelebration.style.display="flex";
+    goalCelebrationActive=true;
+    matchRunning=false;
 
 
-if(goalResetTimer){
-
-clearTimeout(goalResetTimer);
-
-}
+    cancelCharging();
+    resetJoystick();
 
 
-goalResetTimer=
-setTimeout(
-()=>{
+    goalCelebration.style.display="flex";
 
-goalCelebration.style.display="none";
 
-resetAfterGoal();
+    if(goalResetTimer){
 
-matchRunning=true;
-goalCelebrationActive=false;
+        clearTimeout(goalResetTimer);
 
-lastTimestamp=
-performance.now();
+    }
 
-},
-1600
-);
+
+    goalResetTimer=
+        setTimeout(
+            ()=>{
+
+                goalCelebration.style.display="none";
+
+                resetAfterGoal();
+
+                matchRunning=true;
+                goalCelebrationActive=false;
+
+                lastTimestamp=
+                    performance.now();
+
+            },
+            1600
+        );
 
 }
 
@@ -2352,95 +2387,103 @@ performance.now();
 
 function resetAfterGoal(){
 
-ballOwner=null;
+    ballOwner=null;
 
-ballVX=0;
-ballVY=0;
+    ballVX=0;
+    ballVY=0;
 
-cancelCharging();
-
-
-for(const p of teamPlayers){
-
-p.x=p.anchorX;
-p.y=p.anchorY;
-p.hasBall=false;
-
-p.passCooldown=
-Math.random()*0.5;
-
-}
+    cancelCharging();
 
 
-for(const p of opponents){
+    for(const p of teamPlayers){
 
-p.x=p.anchorX;
-p.y=p.anchorY;
+        p.x=p.anchorX;
+        p.y=p.anchorY;
+        p.hasBall=false;
 
-p.hasBall=false;
+        p.passCooldown=
+            Math.random()*0.5;
 
-resetRedDecisionTimer(p);
-resetRedShotCooldown(p);
-resetRedPassCooldown(p);
-
-}
+    }
 
 
-const p=
-teamPlayers[activePlayerIndex];
+    for(const p of opponents){
+
+        p.x=p.anchorX;
+        p.y=p.anchorY;
+
+        p.hasBall=false;
+
+        resetRedDecisionTimer(p);
+        resetRedShotCooldown(p);
+        resetRedPassCooldown(p);
+
+    }
 
 
-p.x=worldWidth/2;
-p.y=worldHeight/2+25;
+    const p=
+        teamPlayers[activePlayerIndex];
 
 
-ballOwner=p;
-
-ballX=worldWidth/2;
-ballY=worldHeight/2;
-
-ballVX=0;
-ballVY=0;
-
-lastOwnerChangeTime=
-performance.now();
-
-manualSelectedPlayerIndex=
-activePlayerIndex;
-
-manualControlLockUntil=
-performance.now()+
-MANUAL_CONTROL_LOCK;
-
-aimAngle=-Math.PI/2;
-
-aimX=worldWidth/2;
-aimY=0;
+    p.x=worldWidth/2;
+    p.y=worldHeight/2+25;
 
 
-/*
-   إعادة ضبط الكاميرا بعد الهدف.
-*/
+    ballOwner=p;
 
-const visibleWorldHeight=
-getVisibleWorldHeight();
+    ballX=worldWidth/2;
+    ballY=worldHeight/2;
 
-const maxY=
-Math.max(
-0,
-worldHeight-visibleWorldHeight
-);
+    ballVX=0;
+    ballVY=0;
 
-cameraY=
-clamp(
-ballY-visibleWorldHeight/2,
-0,
-maxY
-);
 
-cameraX=0;
+    lastOwnerChangeTime=
+        performance.now();
 
-draw();
+
+    manualSelectedPlayerIndex=
+        activePlayerIndex;
+
+
+    manualControlLockUntil=
+        performance.now()+
+        MANUAL_CONTROL_LOCK;
+
+
+    aimAngle=-Math.PI/2;
+
+    aimX=worldWidth/2;
+    aimY=0;
+
+
+    /*
+       إعادة ضبط الكاميرا بعد الهدف.
+    */
+
+    const visibleWorldHeight=
+        getVisibleWorldHeight();
+
+
+    const maxY=
+        Math.max(
+            0,
+            worldHeight-visibleWorldHeight
+        );
+
+
+    cameraY=
+        clamp(
+            ballY-visibleWorldHeight/2,
+            0,
+            maxY
+        );
+
+
+    cameraX=0;
+
+
+    draw();
 
 }
 
@@ -2451,88 +2494,88 @@ draw();
 
 function switchPlayer(){
 
-if(
-!matchRunning ||
-matchEnded
-)
-return;
+    if(
+        !matchRunning ||
+        matchEnded
+    )
+        return;
 
 
-const now=performance.now();
+    const now=performance.now();
 
 
-if(
-now-lastManualSwitchTime<
-MANUAL_SWITCH_COOLDOWN
-)
-return;
+    if(
+        now-lastManualSwitchTime<
+        MANUAL_SWITCH_COOLDOWN
+    )
+        return;
 
 
-let candidates=[];
+    let candidates=[];
 
 
-for(
-let i=0;
-i<teamPlayers.length;
-i++
-){
+    for(
+        let i=0;
+        i<teamPlayers.length;
+        i++
+    ){
 
-if(i===activePlayerIndex)
-continue;
-
-
-const p=teamPlayers[i];
+        if(i===activePlayerIndex)
+            continue;
 
 
-const d=
-Math.hypot(
-p.x-ballX,
-p.y-ballY
-);
+        const p=teamPlayers[i];
 
 
-candidates.push({
-index:i,
-distance:d
-});
-
-}
-
-
-if(candidates.length===0)
-return;
+        const d=
+            Math.hypot(
+                p.x-ballX,
+                p.y-ballY
+            );
 
 
-candidates.sort(
-(a,b)=>
-a.distance-b.distance
-);
+        candidates.push({
+            index:i,
+            distance:d
+        });
+
+    }
 
 
-const selected=candidates[0];
+    if(candidates.length===0)
+        return;
 
 
-if(
-setActivePlayer(
-selected.index,
-true
-)
-){
+    candidates.sort(
+        (a,b)=>
+            a.distance-b.distance
+    );
 
-manualSelectedPlayerIndex=
-selected.index;
 
-lastManualSwitchTime=now;
+    const selected=candidates[0];
 
-manualControlLockUntil=
-now+
-MANUAL_CONTROL_LOCK;
 
-lastAutoSwitchTime=now;
+    if(
+        setActivePlayer(
+            selected.index,
+            true
+        )
+    ){
 
-draw();
+        manualSelectedPlayerIndex=
+            selected.index;
 
-}
+        lastManualSwitchTime=now;
+
+        manualControlLockUntil=
+            now+
+            MANUAL_CONTROL_LOCK;
+
+        lastAutoSwitchTime=now;
+
+        draw();
+
+    }
 
 }
 
@@ -2542,44 +2585,44 @@ draw();
 ========================================================= */
 
 game.addEventListener(
-"pointerdown",
-e=>{
+    "pointerdown",
+    e=>{
 
-if(
-e.target===movePad ||
-movePad.contains(e.target) ||
-e.target===kickControl ||
-kickControl.contains(e.target)
-){
+        if(
+            e.target===movePad ||
+            movePad.contains(e.target) ||
+            e.target===kickControl ||
+            kickControl.contains(e.target)
+        ){
 
-return;
+            return;
 
-}
-
-
-if(chargingActive)
-return;
+        }
 
 
-e.preventDefault();
+        if(chargingActive)
+            return;
 
 
-const now=performance.now();
+        e.preventDefault();
 
 
-if(
-now-lastTapTime<
-320
-){
-
-switchPlayer();
-
-}
+        const now=performance.now();
 
 
-lastTapTime=now;
+        if(
+            now-lastTapTime<
+            320
+        ){
 
-}
+            switchPlayer();
+
+        }
+
+
+        lastTapTime=now;
+
+    }
 );
 
 
@@ -2588,46 +2631,46 @@ lastTapTime=now;
 ========================================================= */
 
 document.addEventListener(
-"dblclick",
-e=>{
-e.preventDefault();
-},
-{
-passive:false
-}
+    "dblclick",
+    e=>{
+        e.preventDefault();
+    },
+    {
+        passive:false
+    }
 );
 
 
 document.addEventListener(
-"gesturestart",
-e=>{
-e.preventDefault();
-},
-{
-passive:false
-}
+    "gesturestart",
+    e=>{
+        e.preventDefault();
+    },
+    {
+        passive:false
+    }
 );
 
 
 document.addEventListener(
-"gesturechange",
-e=>{
-e.preventDefault();
-},
-{
-passive:false
-}
+    "gesturechange",
+    e=>{
+        e.preventDefault();
+    },
+    {
+        passive:false
+    }
 );
 
 
 document.addEventListener(
-"gestureend",
-e=>{
-e.preventDefault();
-},
-{
-passive:false
-}
+    "gestureend",
+    e=>{
+        e.preventDefault();
+    },
+    {
+        passive:false
+    }
 );
 
 
@@ -2637,75 +2680,74 @@ passive:false
 
 function formatTime(seconds){
 
-seconds=
-Math.max(
-0,
-Math.ceil(seconds)
-);
+    seconds=
+        Math.max(
+            0,
+            Math.ceil(seconds)
+        );
 
 
-const minutes=
-Math.floor(seconds/60);
+    const minutes=
+        Math.floor(seconds/60);
 
-const secs=
-seconds%60;
+    const secs=
+        seconds%60;
 
 
-return(
-String(minutes).padStart(2,"0")
-+
-":"
-+
-String(secs).padStart(2,"0")
-);
+    return(
+        String(minutes).padStart(2,"0")
+        +
+        ":"
+        +
+        String(secs).padStart(2,"0")
+    );
 
 }
 
 
 function updateMatchTimer(dt){
 
-if(
-!matchRunning ||
-matchEnded
-)
-return;
+    if(
+        !matchRunning ||
+        matchEnded
+    )
+        return;
 
 
-matchTimeRemaining-=dt;
+    matchTimeRemaining-=dt;
 
 
-if(matchTimeRemaining<=0){
+    if(matchTimeRemaining<=0){
 
-matchTimeRemaining=0;
+        matchTimeRemaining=0;
 
-endMatch();
+        endMatch();
 
-}
-
-
-matchTimeElement.textContent=
-formatTime(
-matchTimeRemaining
-);
+    }
 
 
-if(
-matchTimeRemaining<=10
-){
+    matchTimeElement.textContent=
+        formatTime(
+            matchTimeRemaining
+        );
 
-matchTimeElement.classList.add(
-"warning"
-);
 
-}
+    if(
+        matchTimeRemaining<=10
+    ){
 
-else{
+        matchTimeElement.classList.add(
+            "warning"
+        );
 
-matchTimeElement.classList.remove(
-"warning"
-);
+    }
+    else{
 
-}
+        matchTimeElement.classList.remove(
+            "warning"
+        );
+
+    }
 
 }
 
@@ -2716,16 +2758,18 @@ matchTimeElement.classList.remove(
 
 function endMatch(){
 
-matchRunning=false;
-matchEnded=true;
+    matchRunning=false;
+    matchEnded=true;
 
-cancelCharging();
-resetJoystick();
+    cancelCharging();
+    resetJoystick();
 
-finalScore.textContent=
-`🔵 ${blueScore} - ${redScore} 🔴`;
 
-matchEnd.style.display="flex";
+    finalScore.textContent=
+        `🔵 ${blueScore} - ${redScore} 🔴`;
+
+
+    matchEnd.style.display="flex";
 
 }
 
@@ -2735,99 +2779,101 @@ matchEnd.style.display="flex";
 ========================================================= */
 
 newMatch.addEventListener(
-"click",
-e=>{
+    "click",
+    e=>{
 
-e.preventDefault();
-
-
-blueScore=0;
-redScore=0;
-
-blueScoreElement.textContent="0";
-redScoreElement.textContent="0";
-
-matchTimeRemaining=
-MATCH_DURATION;
-
-matchRunning=true;
-matchEnded=false;
-
-goalCelebrationActive=false;
+        e.preventDefault();
 
 
-if(goalResetTimer){
-
-clearTimeout(goalResetTimer);
-goalResetTimer=null;
-
-}
+        blueScore=0;
+        redScore=0;
 
 
-goalCelebration.style.display="none";
-matchEnd.style.display="none";
+        blueScoreElement.textContent="0";
+        redScoreElement.textContent="0";
 
 
-activePlayerIndex=0;
-manualSelectedPlayerIndex=0;
-
-lastManualSwitchTime=0;
-lastAutoSwitchTime=0;
-
-manualControlLockUntil=0;
-
-lastOwnerChangeTime=0;
+        matchTimeRemaining=
+            MATCH_DURATION;
 
 
-createTeams();
+        matchRunning=true;
+        matchEnded=false;
 
-updatePitchColors();
-
-
-ballOwner=teamPlayers[0];
-
-ballX=ballOwner.x;
-ballY=ballOwner.y-25;
-
-ballVX=0;
-ballVY=0;
+        goalCelebrationActive=false;
 
 
-/*
-   إعادة حساب Zoom.
-*/
+        if(goalResetTimer){
 
-calculateCameraZoom();
+            clearTimeout(goalResetTimer);
+            goalResetTimer=null;
 
-
-const visibleWorldHeight=
-getVisibleWorldHeight();
-
-const maxY=
-Math.max(
-0,
-worldHeight-visibleWorldHeight
-);
+        }
 
 
-cameraX=0;
-
-cameraY=
-clamp(
-ballY-visibleWorldHeight/2,
-0,
-maxY
-);
+        goalCelebration.style.display="none";
+        matchEnd.style.display="none";
 
 
-resetJoystick();
-cancelCharging();
+        activePlayerIndex=0;
+        manualSelectedPlayerIndex=0;
 
-setActivePlayer(0);
+        lastManualSwitchTime=0;
+        lastAutoSwitchTime=0;
 
-draw();
+        manualControlLockUntil=0;
 
-}
+        lastOwnerChangeTime=0;
+
+
+        createTeams();
+
+        updatePitchColors();
+
+
+        ballOwner=teamPlayers[0];
+
+        ballX=ballOwner.x;
+        ballY=ballOwner.y-25;
+
+        ballVX=0;
+        ballVY=0;
+
+
+        calculateCameraZoom();
+
+
+        const visibleWorldHeight=
+            getVisibleWorldHeight();
+
+
+        const maxY=
+            Math.max(
+                0,
+                worldHeight-visibleWorldHeight
+            );
+
+
+        cameraX=0;
+
+
+        cameraY=
+            clamp(
+                ballY-visibleWorldHeight/2,
+                0,
+                maxY
+            );
+
+
+        resetJoystick();
+        cancelCharging();
+
+        setActivePlayer(0);
+
+
+        draw();
+
+    }
 );
 
 
@@ -2837,32 +2883,24 @@ draw();
 
 function resizeGame(){
 
-viewWidth=game.clientWidth;
-viewHeight=game.clientHeight;
+    viewWidth=game.clientWidth;
+    viewHeight=game.clientHeight;
 
-worldWidth=WORLD_WIDTH;
-worldHeight=WORLD_HEIGHT;
-
-
-/*
-   إعادة حساب Zoom عند تغير الشاشة.
-*/
-
-calculateCameraZoom();
+    worldWidth=WORLD_WIDTH;
+    worldHeight=WORLD_HEIGHT;
 
 
-field.style.width=
-`${worldWidth}px`;
-
-field.style.height=
-`${worldHeight}px`;
+    calculateCameraZoom();
 
 
-/*
-   نقطة التحويل من أعلى يسار الملعب.
-*/
+    field.style.width=
+        `${worldWidth}px`;
 
-field.style.transformOrigin="0 0";
+    field.style.height=
+        `${worldHeight}px`;
+
+
+    field.style.transformOrigin="0 0";
 
 }
 
@@ -2873,109 +2911,216 @@ field.style.transformOrigin="0 0";
 
 function updateGame(dt){
 
-if(
-!matchRunning ||
-matchEnded
-)
-return;
+    if(
+        !matchRunning ||
+        matchEnded
+    )
+        return;
 
 
-updateMatchTimer(dt);
+    updateMatchTimer(dt);
 
-updateControlledPlayer(dt);
-
-
-try{
-
-updateBlueAI(dt);
-
-}catch(error){
-
-console.error(
-"BLUE AI ERROR:",
-error
-);
-
-}
+    updateControlledPlayer(dt);
 
 
-try{
+    /* =====================================================
+       BLUE AI
+    ===================================================== */
 
-updateRedAI(dt);
+    try{
 
-}catch(error){
+        updateBlueAI(dt);
 
-console.error(
-"RED AI ERROR:",
-error
-);
+    }
+    catch(error){
 
-}
+        console.error(
+            "BLUE AI ERROR:",
+            error
+        );
 
-
-try{
-
-updateBallAI(dt);
-
-}catch(error){
-
-console.error(
-"BALL AI ERROR:",
-error
-);
-
-}
+    }
 
 
-/* =========================================================
-   RED TACKLE
-========================================================= */
+    /* =====================================================
+       RED AI
+    ===================================================== */
 
-try{
+    try{
 
-tackle();
+        updateRedAI(dt);
 
-}catch(error){
+    }
+    catch(error){
 
-console.error(
-"RED TACKLE ERROR:",
-error
-);
+        console.error(
+            "RED AI ERROR:",
+            error
+        );
 
-}
-
-
-/* =========================================================
-   BLUE AUTOMATIC TACKLE
-========================================================= */
-
-try{
-
-automaticBlueTackle();
-
-}catch(error){
-
-console.error(
-"BLUE TACKLE ERROR:",
-error
-);
-
-}
+    }
 
 
-updateCharge(dt);
+    /* =====================================================
+       BALL AI
+    ===================================================== */
 
-updateBall(dt);
+    try{
 
-tryBallPickup();
+        updateBallAI(dt);
 
-autoSwitchPlayer();
+    }
+    catch(error){
 
-separateAllPlayers();
+        console.error(
+            "BALL AI ERROR:",
+            error
+        );
 
-updateCamera();
+    }
 
-draw();
+
+    /* =====================================================
+       RED TACKLE
+    ===================================================== */
+
+    try{
+
+        tackle();
+
+    }
+    catch(error){
+
+        console.error(
+            "RED TACKLE ERROR:",
+            error
+        );
+
+    }
+
+
+    /* =====================================================
+       BLUE AUTOMATIC TACKLE
+    ===================================================== */
+
+    try{
+
+        automaticBlueTackle();
+
+    }
+    catch(error){
+
+        console.error(
+            "BLUE TACKLE ERROR:",
+            error
+        );
+
+    }
+
+
+    updateCharge(dt);
+
+    updateBall(dt);
+
+
+    /* =====================================================
+       BALL PICKUP
+
+       حماية إضافية حتى لا يتوقف Game Loop
+       إذا حدث خطأ في AI أثناء الاستحواذ.
+    ===================================================== */
+
+    try{
+
+        tryBallPickup();
+
+    }
+    catch(error){
+
+        console.error(
+            "BALL PICKUP ERROR:",
+            error
+        );
+
+    }
+
+
+    /* =====================================================
+       AUTO SWITCH
+
+       هذا كان أهم جزء غير محمي.
+    ===================================================== */
+
+    try{
+
+        autoSwitchPlayer();
+
+    }
+    catch(error){
+
+        console.error(
+            "AUTO SWITCH ERROR:",
+            error
+        );
+
+    }
+
+
+    /* =====================================================
+       PLAYER SEPARATION
+    ===================================================== */
+
+    try{
+
+        separateAllPlayers();
+
+    }
+    catch(error){
+
+        console.error(
+            "PLAYER COLLISION ERROR:",
+            error
+        );
+
+    }
+
+
+    /* =====================================================
+       CAMERA
+    ===================================================== */
+
+    try{
+
+        updateCamera();
+
+    }
+    catch(error){
+
+        console.error(
+            "CAMERA ERROR:",
+            error
+        );
+
+    }
+
+
+    /* =====================================================
+       DRAW
+    ===================================================== */
+
+    try{
+
+        draw();
+
+    }
+    catch(error){
+
+        console.error(
+            "DRAW ERROR:",
+            error
+        );
+
+    }
 
 }
 
@@ -2986,24 +3131,61 @@ draw();
 
 function gameLoop(now){
 
-let dt=
-(now-lastTimestamp)/1000;
+    /*
+       حماية dt.
+    */
+
+    let dt=
+        (now-lastTimestamp)/1000;
 
 
-lastTimestamp=now;
-
-dt=Math.min(
-dt,
-0.033
-);
+    lastTimestamp=now;
 
 
-updateGame(dt);
+    if(
+        !Number.isFinite(dt) ||
+        dt<0
+    ){
+
+        dt=0;
+
+    }
 
 
-requestAnimationFrame(
-gameLoop
-);
+    dt=Math.min(
+        dt,
+        0.033
+    );
+
+
+    /*
+       حماية أخيرة مهمة جدًا:
+
+       حتى لو حصل خطأ في أي جزء من اللعبة،
+       requestAnimationFrame سيستمر.
+
+       هذا يمنع حالة:
+       "الشاشة موجودة لكن اللعبة توقفت".
+    */
+
+    try{
+
+        updateGame(dt);
+
+    }
+    catch(error){
+
+        console.error(
+            "GAME LOOP ERROR:",
+            error
+        );
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
 
 }
 
@@ -3014,74 +3196,81 @@ gameLoop
 
 function initializeGame(){
 
-resizeGame();
+    resizeGame();
 
-createTeams();
+    createTeams();
 
-updatePitchColors();
-
-
-ballOwner=teamPlayers[0];
-
-ballX=ballOwner.x;
-ballY=ballOwner.y-25;
-
-ballVX=0;
-ballVY=0;
-
-activePlayerIndex=0;
-manualSelectedPlayerIndex=0;
-
-lastOwnerChangeTime=
-performance.now();
-
-setActivePlayer(0);
+    updatePitchColors();
 
 
-/* =========================================================
-   INITIAL CAMERA
-========================================================= */
+    ballOwner=teamPlayers[0];
 
-calculateCameraZoom();
+    ballX=ballOwner.x;
+    ballY=ballOwner.y-25;
 
-
-const visibleWorldHeight=
-getVisibleWorldHeight();
-
-const maxY=
-Math.max(
-0,
-worldHeight-visibleWorldHeight
-);
+    ballVX=0;
+    ballVY=0;
 
 
-/*
-   عرض الملعب كامل من البداية.
-*/
-
-cameraX=0;
+    activePlayerIndex=0;
+    manualSelectedPlayerIndex=0;
 
 
-/*
-   نبدأ والكاميرا حول الكرة.
-*/
-
-cameraY=
-clamp(
-ballY-visibleWorldHeight/2,
-0,
-maxY
-);
+    lastOwnerChangeTime=
+        performance.now();
 
 
-draw();
+    setActivePlayer(0);
 
-lastTimestamp=
-performance.now();
 
-requestAnimationFrame(
-gameLoop
-);
+    /* =====================================================
+       INITIAL CAMERA
+    ===================================================== */
+
+    calculateCameraZoom();
+
+
+    const visibleWorldHeight=
+        getVisibleWorldHeight();
+
+
+    const maxY=
+        Math.max(
+            0,
+            worldHeight-visibleWorldHeight
+        );
+
+
+    /*
+       عرض الملعب كامل من البداية.
+    */
+
+    cameraX=0;
+
+
+    /*
+       نبدأ والكاميرا حول الكرة
+       إذا كان هناك مجال للحركة.
+    */
+
+    cameraY=
+        clamp(
+            ballY-visibleWorldHeight/2,
+            0,
+            maxY
+        );
+
+
+    draw();
+
+
+    lastTimestamp=
+        performance.now();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
 
 }
 
@@ -3091,60 +3280,79 @@ gameLoop
 ========================================================= */
 
 window.addEventListener(
-"resize",
-()=>{
+    "resize",
+    ()=>{
 
-resizeGame();
+        try{
 
-
-ballX=
-clamp(
-ballX,
-BALL_RADIUS,
-worldWidth-BALL_RADIUS
-);
+            resizeGame();
 
 
-ballY=
-clamp(
-ballY,
-BALL_RADIUS,
-worldHeight-BALL_RADIUS
-);
+            /*
+               لا نعيد وضع الكرة في أعلى الملعب
+               بسبب تغيّر حجم شاشة Safari.
+            */
+
+            ballX=
+                clamp(
+                    ballX,
+                    BALL_RADIUS,
+                    worldWidth-BALL_RADIUS
+                );
 
 
-const visibleWorldHeight=
-getVisibleWorldHeight();
-
-const maxY=
-Math.max(
-0,
-worldHeight-visibleWorldHeight
-);
+            ballY=
+                clamp(
+                    ballY,
+                    BALL_RADIUS,
+                    worldHeight-BALL_RADIUS
+                );
 
 
-/*
-   لا نحرك الكاميرا أفقيًا.
-*/
-
-cameraX=0;
+            const visibleWorldHeight=
+                getVisibleWorldHeight();
 
 
-/*
-   نحافظ على موقع الكرة في مجال الرؤية.
-*/
-
-cameraY=
-clamp(
-cameraY,
-0,
-maxY
-);
+            const maxY=
+                Math.max(
+                    0,
+                    worldHeight-visibleWorldHeight
+                );
 
 
-draw();
+            /*
+               لا نحرك الكاميرا أفقيًا.
+            */
 
-}
+            cameraX=0;
+
+
+            /*
+               فقط نضمن أن الكاميرا
+               ما زالت داخل الملعب.
+            */
+
+            cameraY=
+                clamp(
+                    cameraY,
+                    0,
+                    maxY
+                );
+
+
+            draw();
+
+        }
+        catch(error){
+
+            console.error(
+                "RESIZE ERROR:",
+                error
+            );
+
+        }
+
+    }
 );
 
 
