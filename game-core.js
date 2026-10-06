@@ -26,14 +26,6 @@ const goalCelebration=document.getElementById("goalCelebration");
 
 const CAMERA_SMOOTH=0.075;
 
-/*
-   Zoom محسوب حسب عرض الشاشة.
-   الهدف:
-   - إبقاء خط التماس الأيسر ظاهرًا.
-   - إبقاء خط التماس الأيمن ظاهرًا.
-   - عدم قص الملعب أفقيًا.
-*/
-
 let cameraZoom=0;
 
 const MATCH_DURATION=180;
@@ -138,17 +130,6 @@ let cameraY=0;
 ========================================================= */
 
 function calculateCameraZoom(){
-
-    /*
-       نستخدم عرض الشاشة فقط.
-
-       مثال:
-       إذا كان عرض الشاشة 390px
-
-       390 / 1200 = 0.325
-
-       أي أن عرض الملعب الكامل سيظهر داخل الشاشة.
-    */
 
     const widthZoom=
         viewWidth/worldWidth;
@@ -478,6 +459,9 @@ function createTeams(){
 
 /* =========================================================
    PITCH COLORS
+   IMPORTANT:
+   Only the actual field goal-line elements are changed.
+   The white goal crossbar remains WHITE.
 ========================================================= */
 
 function updatePitchColors(){
@@ -489,35 +473,32 @@ function updatePitchColors(){
         return;
 
 
-    const lines=
-        markings.querySelectorAll("line");
+    /*
+       بدل البحث عن كل line موجود عند y=2 أو y=2198،
+       نبحث فقط عن الخطوط التي تحمل:
+       
+       data-field-goal-line="true"
+
+       حتى لا تتحول عارضة المرمى إلى اللون الأحمر.
+    */
+
+    const goalLines=
+        markings.querySelectorAll(
+            'line[data-field-goal-line="true"]'
+        );
 
 
-    for(const line of lines){
+    for(const line of goalLines){
 
-        const y1=
-            line.getAttribute("y1");
+        line.setAttribute(
+            "stroke",
+            "#e52d38"
+        );
 
-        const y2=
-            line.getAttribute("y2");
-
-
-        if(
-            (y1==="2" && y2==="2") ||
-            (y1==="2198" && y2==="2198")
-        ){
-
-            line.setAttribute(
-                "stroke",
-                "#e52d38"
-            );
-
-            line.setAttribute(
-                "stroke-width",
-                "10"
-            );
-
-        }
+        line.setAttribute(
+            "stroke-width",
+            "10"
+        );
 
     }
 
@@ -615,13 +596,6 @@ function getRoleBounds(p){
             maxY=worldHeight*0.65;
 
         }
-
-        /*
-           لاعب الوسط:
-           يبقى في المنطقة الوسطى،
-           لكنه يستطيع التحرك أفقيًا وعموديًا
-           داخل هذه المنطقة.
-        */
 
         else if(p.role==="midfielder"){
 
@@ -1309,10 +1283,6 @@ function separateAllPlayers(){
 
 function updateCamera(){
 
-    /*
-       حماية من أي قيمة غير صحيحة.
-    */
-
     if(
         !Number.isFinite(cameraZoom) ||
         cameraZoom<=0
@@ -1330,16 +1300,6 @@ function updateCamera(){
         getVisibleWorldHeight();
 
 
-    /* -------------------------------------------------------
-       أفقيًا
-
-       لا نحرك الكاميرا أفقيًا.
-
-       السبب:
-       نريد خط التماس الأيسر والأيمن
-       ظاهرين دائمًا.
-    ------------------------------------------------------- */
-
     const maxX=
         Math.max(
             0,
@@ -1354,17 +1314,6 @@ function updateCamera(){
             maxX
         );
 
-
-    /* -------------------------------------------------------
-       عموديًا
-
-       هنا فقط تلاحق الكاميرا الكرة.
-
-       إذا كانت الشاشة تعرض كامل الملعب:
-       maxY = 0
-
-       وبالتالي لا توجد حاجة للحركة.
-    ------------------------------------------------------- */
 
     const maxY=
         Math.max(
@@ -2154,7 +2103,9 @@ function updateBall(dt){
     }
 
 
-    /* TOP GOAL */
+    /* =====================================================
+       TOP GOAL
+    ===================================================== */
 
     if(
         ballY<
@@ -2213,7 +2164,9 @@ function updateBall(dt){
     }
 
 
-    /* BOTTOM GOAL */
+    /* =====================================================
+       BOTTOM GOAL
+    ===================================================== */
 
     if(
         ballY>
@@ -2456,10 +2409,6 @@ function resetAfterGoal(){
     aimX=worldWidth/2;
     aimY=0;
 
-
-    /*
-       إعادة ضبط الكاميرا بعد الهدف.
-    */
 
     const visibleWorldHeight=
         getVisibleWorldHeight();
@@ -3023,13 +2972,6 @@ function updateGame(dt){
     updateBall(dt);
 
 
-    /* =====================================================
-       BALL PICKUP
-
-       حماية إضافية حتى لا يتوقف Game Loop
-       إذا حدث خطأ في AI أثناء الاستحواذ.
-    ===================================================== */
-
     try{
 
         tryBallPickup();
@@ -3044,12 +2986,6 @@ function updateGame(dt){
 
     }
 
-
-    /* =====================================================
-       AUTO SWITCH
-
-       هذا كان أهم جزء غير محمي.
-    ===================================================== */
 
     try{
 
@@ -3066,10 +3002,6 @@ function updateGame(dt){
     }
 
 
-    /* =====================================================
-       PLAYER SEPARATION
-    ===================================================== */
-
     try{
 
         separateAllPlayers();
@@ -3085,10 +3017,6 @@ function updateGame(dt){
     }
 
 
-    /* =====================================================
-       CAMERA
-    ===================================================== */
-
     try{
 
         updateCamera();
@@ -3103,10 +3031,6 @@ function updateGame(dt){
 
     }
 
-
-    /* =====================================================
-       DRAW
-    ===================================================== */
 
     try{
 
@@ -3131,10 +3055,6 @@ function updateGame(dt){
 
 function gameLoop(now){
 
-    /*
-       حماية dt.
-    */
-
     let dt=
         (now-lastTimestamp)/1000;
 
@@ -3157,16 +3077,6 @@ function gameLoop(now){
         0.033
     );
 
-
-    /*
-       حماية أخيرة مهمة جدًا:
-
-       حتى لو حصل خطأ في أي جزء من اللعبة،
-       requestAnimationFrame سيستمر.
-
-       هذا يمنع حالة:
-       "الشاشة موجودة لكن اللعبة توقفت".
-    */
 
     try{
 
@@ -3223,10 +3133,6 @@ function initializeGame(){
     setActivePlayer(0);
 
 
-    /* =====================================================
-       INITIAL CAMERA
-    ===================================================== */
-
     calculateCameraZoom();
 
 
@@ -3241,17 +3147,8 @@ function initializeGame(){
         );
 
 
-    /*
-       عرض الملعب كامل من البداية.
-    */
-
     cameraX=0;
 
-
-    /*
-       نبدأ والكاميرا حول الكرة
-       إذا كان هناك مجال للحركة.
-    */
 
     cameraY=
         clamp(
@@ -3288,11 +3185,6 @@ window.addEventListener(
             resizeGame();
 
 
-            /*
-               لا نعيد وضع الكرة في أعلى الملعب
-               بسبب تغيّر حجم شاشة Safari.
-            */
-
             ballX=
                 clamp(
                     ballX,
@@ -3320,17 +3212,8 @@ window.addEventListener(
                 );
 
 
-            /*
-               لا نحرك الكاميرا أفقيًا.
-            */
-
             cameraX=0;
 
-
-            /*
-               فقط نضمن أن الكاميرا
-               ما زالت داخل الملعب.
-            */
 
             cameraY=
                 clamp(
