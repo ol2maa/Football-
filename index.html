@@ -38,7 +38,6 @@ user-select:none;
 -webkit-tap-highlight-color:transparent;
 }
 
-
 html,
 body{
 
@@ -57,7 +56,6 @@ font-family:Arial,sans-serif;
 touch-action:none;
 
 -webkit-text-size-adjust:100%;
-
 }
 
 
@@ -76,7 +74,6 @@ overflow:hidden;
 background:#16843a;
 
 touch-action:none;
-
 }
 
 
@@ -111,7 +108,6 @@ transform:
 translate3d(0,0,0);
 
 will-change:transform;
-
 }
 
 
@@ -134,7 +130,6 @@ z-index:5;
 pointer-events:none;
 
 overflow:visible;
-
 }
 
 
@@ -166,9 +161,7 @@ line-height:1;
 z-index:20;
 
 will-change:transform;
-
 }
-
 
 .playerUnit.blue{
 
@@ -178,9 +171,7 @@ border:3px solid #fff;
 
 box-shadow:
 0 2px 5px #0008;
-
 }
-
 
 .playerUnit.red{
 
@@ -190,7 +181,6 @@ border:3px solid #fff;
 
 box-shadow:
 0 2px 5px #0008;
-
 }
 
 
@@ -224,9 +214,7 @@ pointer-events:none;
 display:none;
 
 z-index:30;
-
 }
-
 
 .playerUnit.controlled{
 
@@ -237,7 +225,6 @@ box-shadow:
 0 0 12px #ffd400,
 
 0 2px 5px #0008;
-
 }
 
 
@@ -271,7 +258,6 @@ justify-content:center;
 font-size:14px;
 
 will-change:transform;
-
 }
 
 
@@ -304,9 +290,7 @@ box-shadow:
 0 0 6px #000;
 
 pointer-events:none;
-
 }
-
 
 #aimArrow::after{
 
@@ -328,7 +312,6 @@ border-right:
 
 border-bottom:
 16px solid #ffd400;
-
 }
 
 
@@ -367,23 +350,18 @@ font-weight:bold;
 min-width:130px;
 
 text-align:center;
-
 }
-
 
 #matchTime{
 
 font-size:14px;
 
 margin-top:2px;
-
 }
-
 
 #matchTime.warning{
 
 color:#ff3b30;
-
 }
 
 
@@ -405,9 +383,7 @@ align-items:center;
 justify-content:center;
 
 pointer-events:none;
-
 }
-
 
 #goalCelebrationText{
 
@@ -433,9 +409,7 @@ scale(0.7);
 
 animation:
 goalPop .35s ease-out forwards;
-
 }
-
 
 @keyframes goalPop{
 
@@ -445,7 +419,6 @@ transform:
 scale(.7);
 
 opacity:0;
-
 }
 
 70%{
@@ -454,7 +427,6 @@ transform:
 scale(1.15);
 
 opacity:1;
-
 }
 
 100%{
@@ -463,9 +435,7 @@ transform:
 scale(1);
 
 opacity:1;
-
 }
-
 }
 
 
@@ -498,9 +468,7 @@ background:#0008;
 z-index:100;
 
 display:none;
-
 }
-
 
 #powerBar{
 
@@ -509,7 +477,6 @@ width:0%;
 height:100%;
 
 background:#ffd400;
-
 }
 
 
@@ -541,9 +508,7 @@ border:3px solid #ffffff66;
 z-index:200;
 
 touch-action:none;
-
 }
-
 
 #joystickCenter{
 
@@ -565,7 +530,6 @@ background:#ffffff66;
 border:3px solid #fff;
 
 will-change:transform;
-
 }
 
 
@@ -605,9 +569,7 @@ touch-action:none;
 
 box-shadow:
 0 3px 8px #0008;
-
 }
-
 
 #kickDot{
 
@@ -626,7 +588,6 @@ justify-content:center;
 font-size:22px;
 
 line-height:1;
-
 }
 
 
@@ -653,27 +614,21 @@ justify-content:center;
 flex-direction:column;
 
 color:white;
-
 }
-
 
 #matchEnd h1{
 
 margin:0 0 15px;
 
 font-size:32px;
-
 }
-
 
 #finalScore{
 
 font-size:28px;
 
 margin-bottom:25px;
-
 }
-
 
 #newMatch{
 
@@ -690,7 +645,6 @@ font-weight:bold;
 background:#1677ff;
 
 color:white;
-
 }
 
 </style>
@@ -822,7 +776,6 @@ fill="white"
 
 <!-- =====================================================
      TOP PENALTY ARC
-     ARC TOWARD CENTER OF FIELD
 ===================================================== -->
 
 <path
@@ -880,7 +833,6 @@ fill="white"
 
 <!-- =====================================================
      BOTTOM PENALTY ARC
-     ARC TOWARD CENTER OF FIELD
 ===================================================== -->
 
 <path
@@ -895,6 +847,354 @@ stroke-width="7"
 
 
 <!-- =====================================================
+     TOP GOAL
+     REALISTIC FRAME + NET
+===================================================== -->
+
+<!-- Goal shadow -->
+
+<polygon
+points="
+505,2
+695,2
+675,92
+525,92
+"
+fill="#00000022"
+/>
+
+
+<!-- Net -->
+
+<polygon
+points="
+505,2
+695,2
+675,92
+525,92
+"
+fill="#ffffff10"
+stroke="#ffffff55"
+stroke-width="3"
+/>
+
+
+<!-- Horizontal net lines -->
+
+<line
+x1="510"
+y1="24"
+x2="690"
+y2="24"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="513"
+y1="46"
+x2="687"
+y2="46"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="517"
+y1="68"
+x2="683"
+y2="68"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="521"
+y1="88"
+x2="679"
+y2="88"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+
+<!-- Vertical net lines -->
+
+<line
+x1="525"
+y1="2"
+x2="535"
+y2="92"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="550"
+y1="2"
+x2="555"
+y2="92"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="575"
+y1="2"
+x2="578"
+y2="92"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="600"
+y1="2"
+x2="600"
+y2="92"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="625"
+y1="2"
+x2="622"
+y2="92"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="650"
+y1="2"
+x2="645"
+y2="92"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="675"
+y1="2"
+x2="665"
+y2="92"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+
+<!-- Goal posts -->
+
+<line
+x1="505"
+y1="2"
+x2="525"
+y2="92"
+stroke="white"
+stroke-width="10"
+stroke-linecap="round"
+/>
+
+<line
+x1="695"
+y1="2"
+x2="675"
+y2="92"
+stroke="white"
+stroke-width="10"
+stroke-linecap="round"
+/>
+
+
+<!-- Crossbar -->
+
+<line
+x1="505"
+y1="2"
+x2="695"
+y2="2"
+stroke="white"
+stroke-width="10"
+stroke-linecap="round"
+/>
+
+
+<!-- =====================================================
+     BOTTOM GOAL
+     REALISTIC FRAME + NET
+===================================================== -->
+
+<!-- Goal shadow -->
+
+<polygon
+points="
+505,2198
+695,2198
+675,2108
+525,2108
+"
+fill="#00000022"
+/>
+
+
+<!-- Net -->
+
+<polygon
+points="
+505,2198
+695,2198
+675,2108
+525,2108
+"
+fill="#ffffff10"
+stroke="#ffffff55"
+stroke-width="3"
+/>
+
+
+<!-- Horizontal net lines -->
+
+<line
+x1="510"
+y1="2176"
+x2="690"
+y2="2176"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="513"
+y1="2154"
+x2="687"
+y2="2154"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="517"
+y1="2132"
+x2="683"
+y2="2132"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="521"
+y1="2112"
+x2="679"
+y2="2112"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+
+<!-- Vertical net lines -->
+
+<line
+x1="525"
+y1="2198"
+x2="535"
+y2="2108"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="550"
+y1="2198"
+x2="555"
+y2="2108"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="575"
+y1="2198"
+x2="578"
+y2="2108"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="600"
+y1="2198"
+x2="600"
+y2="2108"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="625"
+y1="2198"
+x2="622"
+y2="2108"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="650"
+y1="2198"
+x2="645"
+y2="2108"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+<line
+x1="675"
+y1="2198"
+x2="665"
+y2="2108"
+stroke="#ffffff55"
+stroke-width="2"
+/>
+
+
+<!-- Goal posts -->
+
+<line
+x1="505"
+y1="2198"
+x2="525"
+y2="2108"
+stroke="white"
+stroke-width="10"
+stroke-linecap="round"
+/>
+
+<line
+x1="695"
+y1="2198"
+x2="675"
+y2="2108"
+stroke="white"
+stroke-width="10"
+stroke-linecap="round"
+/>
+
+
+<!-- Crossbar -->
+
+<line
+x1="505"
+y1="2198"
+x2="695"
+y2="2198"
+stroke="white"
+stroke-width="10"
+stroke-linecap="round"
+/>
+
+
+<!-- =====================================================
      TOP GOAL LINE
 ===================================================== -->
 
@@ -904,7 +1204,7 @@ y1="2"
 x2="695"
 y2="2"
 stroke="white"
-stroke-width="8"
+stroke-width="5"
 />
 
 
@@ -918,7 +1218,7 @@ y1="2198"
 x2="695"
 y2="2198"
 stroke="white"
-stroke-width="8"
+stroke-width="5"
 />
 
 
@@ -983,6 +1283,8 @@ stroke-width="4"
 
 
 </svg>
+
+
 <!-- =====================================================
      LEGACY PITCH ELEMENTS
      KEPT FOR GAME-CORE COMPATIBILITY
@@ -1103,21 +1405,17 @@ stroke-width="4"
 🧍
 </div>
 
-
 <div id="opponent2" class="playerUnit red">
 🧍
 </div>
-
 
 <div id="opponent3" class="playerUnit red">
 🧍
 </div>
 
-
 <div id="opponent4" class="playerUnit red">
 🧍
 </div>
-
 
 <div id="opponent5" class="playerUnit red">
 🧍
@@ -1162,7 +1460,6 @@ stroke-width="4"
 </span>
 
 🔴
-
 
 <div id="matchTime">
 03:00
@@ -1227,11 +1524,9 @@ stroke-width="4"
 انتهت المباراة
 </h1>
 
-
 <div id="finalScore">
 🔵 0 - 0 🔴
 </div>
-
 
 <button id="newMatch">
 مباراة جديدة
