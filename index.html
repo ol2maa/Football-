@@ -363,28 +363,30 @@ background:#000c;
 
 color:white;
 
-padding:4px 9px;
+padding:3px 7px;
 
-border-radius:14px;
+border-radius:10px;
 
-font-size:15px;
+font-size:12px;
 
 font-weight:bold;
 
-min-width:92px;
+min-width:74px;
 
 text-align:center;
 
 box-shadow:
-0 2px 6px #0007;
+0 2px 5px #0007;
 
 }
 
 #matchTime{
 
-font-size:12px;
+font-size:10px;
 
-margin-top:2px;
+margin-top:1px;
+
+opacity:0.9;
 
 }
 
@@ -745,7 +747,7 @@ pointer-events:none;
 
 <svg
 class="pitchMarkings"
-viewBox="0 0 1200 2200"
+viewBox="-100 -120 1400 2440"
 width="1200"
 height="2200"
 xmlns="http://www.w3.org/2000/svg"
@@ -923,17 +925,17 @@ stroke-width="7"
 
 <!-- =====================================================
      TOP GOAL
-     CLEAN FOOTBALL GOAL
+     NET BEHIND THE GOAL LINE
 ===================================================== -->
 
-<!-- TOP NET -->
+<!-- TOP NET (خلف خط المرمى: y من -90 إلى 0) -->
 
 <path
 d="
 M 500 0
 L 700 0
-L 680 90
-L 520 90
+L 680 -90
+L 520 -90
 Z
 "
 fill="#ffffff08"
@@ -947,7 +949,7 @@ stroke-width="2"
 x1="520"
 y1="0"
 x2="525"
-y2="90"
+y2="-90"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -956,7 +958,7 @@ stroke-width="2"
 x1="560"
 y1="0"
 x2="565"
-y2="90"
+y2="-90"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -965,7 +967,7 @@ stroke-width="2"
 x1="600"
 y1="0"
 x2="600"
-y2="90"
+y2="-90"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -974,7 +976,7 @@ stroke-width="2"
 x1="640"
 y1="0"
 x2="635"
-y2="90"
+y2="-90"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -983,7 +985,7 @@ stroke-width="2"
 x1="680"
 y1="0"
 x2="675"
-y2="90"
+y2="-90"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -992,18 +994,18 @@ stroke-width="2"
 
 <line
 x1="505"
-y1="30"
+y1="-30"
 x2="695"
-y2="30"
+y2="-30"
 stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
 x1="510"
-y1="60"
+y1="-60"
 x2="690"
-y2="60"
+y2="-60"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -1014,7 +1016,7 @@ stroke-width="2"
 x1="500"
 y1="0"
 x2="500"
-y2="90"
+y2="-90"
 stroke="white"
 stroke-width="9"
 stroke-linecap="round"
@@ -1024,7 +1026,7 @@ stroke-linecap="round"
 x1="700"
 y1="0"
 x2="700"
-y2="90"
+y2="-90"
 stroke="white"
 stroke-width="9"
 stroke-linecap="round"
@@ -1045,17 +1047,17 @@ stroke-linecap="round"
 
 <!-- =====================================================
      BOTTOM GOAL
-     CLEAN FOOTBALL GOAL
+     NET BEHIND THE GOAL LINE
 ===================================================== -->
 
-<!-- BOTTOM NET -->
+<!-- BOTTOM NET (خلف خط المرمى: y من 2200 إلى 2290) -->
 
 <path
 d="
 M 500 2200
 L 700 2200
-L 680 2110
-L 520 2110
+L 680 2290
+L 520 2290
 Z
 "
 fill="#ffffff08"
@@ -1069,7 +1071,7 @@ stroke-width="2"
 x1="520"
 y1="2200"
 x2="525"
-y2="2110"
+y2="2290"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -1078,7 +1080,7 @@ stroke-width="2"
 x1="560"
 y1="2200"
 x2="565"
-y2="2110"
+y2="2290"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -1087,7 +1089,7 @@ stroke-width="2"
 x1="600"
 y1="2200"
 x2="600"
-y2="2110"
+y2="2290"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -1096,7 +1098,7 @@ stroke-width="2"
 x1="640"
 y1="2200"
 x2="635"
-y2="2110"
+y2="2290"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -1105,7 +1107,7 @@ stroke-width="2"
 x1="680"
 y1="2200"
 x2="675"
-y2="2110"
+y2="2290"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -1114,18 +1116,18 @@ stroke-width="2"
 
 <line
 x1="505"
-y1="2170"
+y1="2230"
 x2="695"
-y2="2170"
+y2="2230"
 stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
 x1="510"
-y1="2140"
+y1="2260"
 x2="690"
-y2="2140"
+y2="2260"
 stroke="#ffffff35"
 stroke-width="2"
 />
@@ -1136,7 +1138,7 @@ stroke-width="2"
 x1="500"
 y1="2200"
 x2="500"
-y2="2110"
+y2="2290"
 stroke="white"
 stroke-width="9"
 stroke-linecap="round"
@@ -1146,7 +1148,7 @@ stroke-linecap="round"
 x1="700"
 y1="2200"
 x2="700"
-y2="2110"
+y2="2290"
 stroke="white"
 stroke-width="9"
 stroke-linecap="round"
@@ -1438,7 +1440,7 @@ class="playerUnit red">
 0
 </span>
 
-&nbsp; - &nbsp;
+&nbsp;-&nbsp;
 
 <span id="redScore">
 0
