@@ -345,9 +345,6 @@ border-bottom:
 
 position:fixed;
 
-/*
-   أقصى اليسار في أعلى الشاشة
-*/
 left:
 calc(
 env(safe-area-inset-left) + 8px
@@ -358,9 +355,6 @@ calc(
 env(safe-area-inset-top) + 8px
 );
 
-/*
-   لا نستخدم translateX هنا
-*/
 transform:none;
 
 z-index:1000;
@@ -369,20 +363,28 @@ background:#000c;
 
 color:white;
 
-padding:7px 12px;
+padding:4px 9px;
 
-border-radius:18px;
+border-radius:14px;
 
-font-size:17px;
+font-size:15px;
 
 font-weight:bold;
 
-min-width:118px;
+min-width:92px;
 
 text-align:center;
 
 box-shadow:
-0 2px 8px #0008;
+0 2px 6px #0007;
+
+}
+
+#matchTime{
+
+font-size:12px;
+
+margin-top:2px;
 
 }
 
@@ -928,141 +930,116 @@ stroke-width="7"
 
 <!-- =====================================================
      TOP GOAL
-     SINGLE CLEAN GOAL
+     CLEAN FOOTBALL GOAL
 ===================================================== -->
 
-<!-- Goal net background -->
+<!-- TOP NET -->
 
 <path
-class="goalVisual"
 d="
 M 500 0
 L 700 0
-L 670 105
-L 530 105
+L 680 90
+L 520 90
 Z
 "
 fill="#ffffff08"
-stroke="#ffffff55"
-stroke-width="3"
+stroke="#ffffff40"
+stroke-width="2"
 />
 
-
-<!-- Top goal net vertical lines -->
+<!-- TOP NET VERTICAL -->
 
 <line
-class="goalVisual"
 x1="520"
 y1="0"
-x2="540"
-y2="105"
-stroke="#ffffff45"
+x2="525"
+y2="90"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
 x1="560"
 y1="0"
-x2="570"
-y2="105"
-stroke="#ffffff45"
+x2="565"
+y2="90"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
 x1="600"
 y1="0"
 x2="600"
-y2="105"
-stroke="#ffffff45"
+y2="90"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
 x1="640"
 y1="0"
-x2="630"
-y2="105"
-stroke="#ffffff45"
+x2="635"
+y2="90"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
 x1="680"
 y1="0"
-x2="660"
-y2="105"
-stroke="#ffffff45"
+x2="675"
+y2="90"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
-
-<!-- Top goal net horizontal lines -->
-
-<line
-class="goalVisual"
-x1="507"
-y1="25"
-x2="693"
-y2="25"
-stroke="#ffffff45"
-stroke-width="2"
-/>
+<!-- TOP NET HORIZONTAL -->
 
 <line
-class="goalVisual"
-x1="514"
-y1="50"
-x2="686"
-y2="50"
-stroke="#ffffff45"
+x1="505"
+y1="30"
+x2="695"
+y2="30"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
-x1="521"
-y1="78"
-x2="679"
-y2="78"
-stroke="#ffffff45"
+x1="510"
+y1="60"
+x2="690"
+y2="60"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
-
-<!-- Top goal side posts -->
+<!-- TOP GOAL POSTS -->
 
 <line
-class="goalVisual"
 x1="500"
 y1="0"
-x2="530"
-y2="105"
+x2="500"
+y2="90"
 stroke="white"
 stroke-width="9"
 stroke-linecap="round"
 />
 
 <line
-class="goalVisual"
 x1="700"
 y1="0"
-x2="670"
-y2="105"
+x2="700"
+y2="90"
 stroke="white"
 stroke-width="9"
 stroke-linecap="round"
 />
 
-
-<!-- Top goal crossbar -->
+<!-- TOP CROSSBAR -->
 
 <line
-class="goalVisual"
 x1="500"
 y1="0"
 x2="700"
@@ -1075,141 +1052,116 @@ stroke-linecap="round"
 
 <!-- =====================================================
      BOTTOM GOAL
-     SINGLE CLEAN GOAL
+     CLEAN FOOTBALL GOAL
 ===================================================== -->
 
-<!-- Goal net background -->
+<!-- BOTTOM NET -->
 
 <path
-class="goalVisual"
 d="
 M 500 2200
 L 700 2200
-L 670 2095
-L 530 2095
+L 680 2110
+L 520 2110
 Z
 "
 fill="#ffffff08"
-stroke="#ffffff55"
-stroke-width="3"
+stroke="#ffffff40"
+stroke-width="2"
 />
 
-
-<!-- Bottom goal net vertical lines -->
+<!-- BOTTOM NET VERTICAL -->
 
 <line
-class="goalVisual"
 x1="520"
 y1="2200"
-x2="540"
-y2="2095"
-stroke="#ffffff45"
+x2="525"
+y2="2110"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
 x1="560"
 y1="2200"
-x2="570"
-y2="2095"
-stroke="#ffffff45"
+x2="565"
+y2="2110"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
 x1="600"
 y1="2200"
 x2="600"
-y2="2095"
-stroke="#ffffff45"
+y2="2110"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
 x1="640"
 y1="2200"
-x2="630"
-y2="2095"
-stroke="#ffffff45"
+x2="635"
+y2="2110"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
 x1="680"
 y1="2200"
-x2="660"
-y2="2095"
-stroke="#ffffff45"
+x2="675"
+y2="2110"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
-
-<!-- Bottom goal net horizontal lines -->
-
-<line
-class="goalVisual"
-x1="507"
-y1="2175"
-x2="693"
-y2="2175"
-stroke="#ffffff45"
-stroke-width="2"
-/>
+<!-- BOTTOM NET HORIZONTAL -->
 
 <line
-class="goalVisual"
-x1="514"
-y1="2150"
-x2="686"
-y2="2150"
-stroke="#ffffff45"
+x1="505"
+y1="2170"
+x2="695"
+y2="2170"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
 <line
-class="goalVisual"
-x1="521"
-y1="2122"
-x2="679"
-y2="2122"
-stroke="#ffffff45"
+x1="510"
+y1="2140"
+x2="690"
+y2="2140"
+stroke="#ffffff35"
 stroke-width="2"
 />
 
-
-<!-- Bottom goal side posts -->
+<!-- BOTTOM GOAL POSTS -->
 
 <line
-class="goalVisual"
 x1="500"
 y1="2200"
-x2="530"
-y2="2095"
+x2="500"
+y2="2110"
 stroke="white"
 stroke-width="9"
 stroke-linecap="round"
 />
 
 <line
-class="goalVisual"
 x1="700"
 y1="2200"
-x2="670"
-y2="2095"
+x2="700"
+y2="2110"
 stroke="white"
 stroke-width="9"
 stroke-linecap="round"
 />
 
-
-<!-- Bottom goal crossbar -->
+<!-- BOTTOM CROSSBAR -->
 
 <line
-class="goalVisual"
 x1="500"
 y1="2200"
 x2="700"
