@@ -24,6 +24,7 @@ content="telephone=no">
 
 <title>كرة القدم ⚽️ v4.1.0</title>
 
+
 <style>
 
 /* =========================================================
@@ -31,11 +32,16 @@ content="telephone=no">
 ========================================================= */
 
 *{
+
 box-sizing:border-box;
+
 -webkit-user-select:none;
 user-select:none;
+
 -webkit-touch-callout:none;
+
 -webkit-tap-highlight-color:transparent;
+
 }
 
 html,
@@ -56,6 +62,7 @@ font-family:Arial,sans-serif;
 touch-action:none;
 
 -webkit-text-size-adjust:100%;
+
 }
 
 
@@ -74,6 +81,7 @@ overflow:hidden;
 background:#16843a;
 
 touch-action:none;
+
 }
 
 
@@ -102,17 +110,22 @@ to bottom,
 #15833a 160px
 );
 
-overflow:hidden;
+/*
+   مهم:
+   السماح بظهور المرمى بدون قص
+*/
+overflow:visible;
 
 transform:
 translate3d(0,0,0);
 
 will-change:transform;
+
 }
 
 
 /* =========================================================
-   PITCH MARKINGS
+   FIELD MARKINGS
 ========================================================= */
 
 .pitchMarkings{
@@ -130,6 +143,7 @@ z-index:5;
 pointer-events:none;
 
 overflow:visible;
+
 }
 
 
@@ -161,6 +175,7 @@ line-height:1;
 z-index:20;
 
 will-change:transform;
+
 }
 
 .playerUnit.blue{
@@ -171,6 +186,7 @@ border:3px solid #fff;
 
 box-shadow:
 0 2px 5px #0008;
+
 }
 
 .playerUnit.red{
@@ -181,6 +197,7 @@ border:3px solid #fff;
 
 box-shadow:
 0 2px 5px #0008;
+
 }
 
 
@@ -214,6 +231,7 @@ pointer-events:none;
 display:none;
 
 z-index:30;
+
 }
 
 .playerUnit.controlled{
@@ -225,6 +243,7 @@ box-shadow:
 0 0 12px #ffd400,
 
 0 2px 5px #0008;
+
 }
 
 
@@ -258,6 +277,7 @@ justify-content:center;
 font-size:14px;
 
 will-change:transform;
+
 }
 
 
@@ -290,6 +310,7 @@ box-shadow:
 0 0 6px #000;
 
 pointer-events:none;
+
 }
 
 #aimArrow::after{
@@ -312,6 +333,7 @@ border-right:
 
 border-bottom:
 16px solid #ffd400;
+
 }
 
 
@@ -323,23 +345,31 @@ border-bottom:
 
 position:fixed;
 
+/*
+   أقصى اليسار في أعلى الشاشة
+*/
+left:
+calc(
+env(safe-area-inset-left) + 8px
+);
+
 top:
 calc(
 env(safe-area-inset-top) + 8px
 );
 
-left:50%;
+/*
+   لا نستخدم translateX هنا
+*/
+transform:none;
 
-transform:
-translateX(-50%);
+z-index:1000;
 
-z-index:100;
-
-background:#000b;
+background:#000c;
 
 color:white;
 
-padding:5px 16px;
+padding:7px 12px;
 
 border-radius:18px;
 
@@ -347,21 +377,41 @@ font-size:17px;
 
 font-weight:bold;
 
-min-width:125px;
+min-width:118px;
 
 text-align:center;
+
+box-shadow:
+0 2px 8px #0008;
+
 }
+
+/*
+   ترتيب أفضل للنتيجة
+*/
+#scoreBoard{
+
+direction:ltr;
+
+}
+
+
+/* =========================================================
+   MATCH TIME
+========================================================= */
 
 #matchTime{
 
 font-size:14px;
 
-margin-top:2px;
+margin-top:3px;
+
 }
 
 #matchTime.warning{
 
 color:#ff3b30;
+
 }
 
 
@@ -383,6 +433,7 @@ align-items:center;
 justify-content:center;
 
 pointer-events:none;
+
 }
 
 #goalCelebrationText{
@@ -409,6 +460,7 @@ scale(0.7);
 
 animation:
 goalPop .35s ease-out forwards;
+
 }
 
 @keyframes goalPop{
@@ -419,6 +471,7 @@ transform:
 scale(.7);
 
 opacity:0;
+
 }
 
 70%{
@@ -427,6 +480,7 @@ transform:
 scale(1.15);
 
 opacity:1;
+
 }
 
 100%{
@@ -435,7 +489,9 @@ transform:
 scale(1);
 
 opacity:1;
+
 }
+
 }
 
 
@@ -468,6 +524,7 @@ background:#0008;
 z-index:100;
 
 display:none;
+
 }
 
 #powerBar{
@@ -477,6 +534,7 @@ width:0%;
 height:100%;
 
 background:#ffd400;
+
 }
 
 
@@ -508,6 +566,7 @@ border:3px solid #ffffff66;
 z-index:200;
 
 touch-action:none;
+
 }
 
 #joystickCenter{
@@ -530,6 +589,7 @@ background:#ffffff66;
 border:3px solid #fff;
 
 will-change:transform;
+
 }
 
 
@@ -569,6 +629,7 @@ touch-action:none;
 
 box-shadow:
 0 3px 8px #0008;
+
 }
 
 #kickDot{
@@ -588,6 +649,7 @@ justify-content:center;
 font-size:22px;
 
 line-height:1;
+
 }
 
 
@@ -614,6 +676,7 @@ justify-content:center;
 flex-direction:column;
 
 color:white;
+
 }
 
 #matchEnd h1{
@@ -621,6 +684,7 @@ color:white;
 margin:0 0 15px;
 
 font-size:32px;
+
 }
 
 #finalScore{
@@ -628,6 +692,7 @@ font-size:32px;
 font-size:28px;
 
 margin-bottom:25px;
+
 }
 
 #newMatch{
@@ -645,6 +710,21 @@ font-weight:bold;
 background:#1677ff;
 
 color:white;
+
+}
+
+
+/* =========================================================
+   GOAL VISUAL HELPERS
+========================================================= */
+
+/*
+   لا نسمح لعناصر المرمى أن تتلقى اللمس
+*/
+.goalVisual{
+
+pointer-events:none;
+
 }
 
 </style>
@@ -665,7 +745,7 @@ color:white;
 
 
 <!-- =====================================================
-     COMPLETE PITCH MARKINGS
+     PITCH MARKINGS
 ===================================================== -->
 
 <svg
@@ -848,172 +928,145 @@ stroke-width="7"
 
 <!-- =====================================================
      TOP GOAL
-     REALISTIC FRAME + NET
+     SINGLE CLEAN GOAL
 ===================================================== -->
 
-<!-- Goal shadow -->
+<!-- Goal net background -->
 
-<polygon
-points="
-505,2
-695,2
-675,92
-525,92
+<path
+class="goalVisual"
+d="
+M 500 0
+L 700 0
+L 670 105
+L 530 105
+Z
 "
-fill="#00000022"
-/>
-
-
-<!-- Net -->
-
-<polygon
-points="
-505,2
-695,2
-675,92
-525,92
-"
-fill="#ffffff10"
+fill="#ffffff08"
 stroke="#ffffff55"
 stroke-width="3"
 />
 
 
-<!-- Horizontal net lines -->
+<!-- Top goal net vertical lines -->
 
 <line
-x1="510"
-y1="24"
-x2="690"
-y2="24"
-stroke="#ffffff55"
+class="goalVisual"
+x1="520"
+y1="0"
+x2="540"
+y2="105"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 <line
-x1="513"
-y1="46"
-x2="687"
-y2="46"
-stroke="#ffffff55"
+class="goalVisual"
+x1="560"
+y1="0"
+x2="570"
+y2="105"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 <line
-x1="517"
-y1="68"
-x2="683"
-y2="68"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="521"
-y1="88"
-x2="679"
-y2="88"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-
-<!-- Vertical net lines -->
-
-<line
-x1="525"
-y1="2"
-x2="535"
-y2="92"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="550"
-y1="2"
-x2="555"
-y2="92"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="575"
-y1="2"
-x2="578"
-y2="92"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
+class="goalVisual"
 x1="600"
-y1="2"
+y1="0"
 x2="600"
-y2="92"
-stroke="#ffffff55"
+y2="105"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 <line
-x1="625"
-y1="2"
-x2="622"
-y2="92"
-stroke="#ffffff55"
+class="goalVisual"
+x1="640"
+y1="0"
+x2="630"
+y2="105"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 <line
-x1="650"
-y1="2"
-x2="645"
-y2="92"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="675"
-y1="2"
-x2="665"
-y2="92"
-stroke="#ffffff55"
+class="goalVisual"
+x1="680"
+y1="0"
+x2="660"
+y2="105"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 
-<!-- Goal posts -->
+<!-- Top goal net horizontal lines -->
 
 <line
-x1="505"
-y1="2"
-x2="525"
-y2="92"
+class="goalVisual"
+x1="507"
+y1="25"
+x2="693"
+y2="25"
+stroke="#ffffff45"
+stroke-width="2"
+/>
+
+<line
+class="goalVisual"
+x1="514"
+y1="50"
+x2="686"
+y2="50"
+stroke="#ffffff45"
+stroke-width="2"
+/>
+
+<line
+class="goalVisual"
+x1="521"
+y1="78"
+x2="679"
+y2="78"
+stroke="#ffffff45"
+stroke-width="2"
+/>
+
+
+<!-- Top goal side posts -->
+
+<line
+class="goalVisual"
+x1="500"
+y1="0"
+x2="530"
+y2="105"
 stroke="white"
-stroke-width="10"
+stroke-width="9"
 stroke-linecap="round"
 />
 
 <line
-x1="695"
-y1="2"
-x2="675"
-y2="92"
+class="goalVisual"
+x1="700"
+y1="0"
+x2="670"
+y2="105"
 stroke="white"
-stroke-width="10"
+stroke-width="9"
 stroke-linecap="round"
 />
 
 
-<!-- Crossbar -->
+<!-- Top goal crossbar -->
 
 <line
-x1="505"
-y1="2"
-x2="695"
-y2="2"
+class="goalVisual"
+x1="500"
+y1="0"
+x2="700"
+y2="0"
 stroke="white"
 stroke-width="10"
 stroke-linecap="round"
@@ -1022,559 +1075,181 @@ stroke-linecap="round"
 
 <!-- =====================================================
      BOTTOM GOAL
-     REALISTIC FRAME + NET
+     SINGLE CLEAN GOAL
 ===================================================== -->
 
-<!-- Goal shadow -->
+<!-- Goal net background -->
 
-<polygon
-points="
-505,2198
-695,2198
-675,2108
-525,2108
+<path
+class="goalVisual"
+d="
+M 500 2200
+L 700 2200
+L 670 2095
+L 530 2095
+Z
 "
-fill="#00000022"
-/>
-
-
-<!-- Net -->
-
-<polygon
-points="
-505,2198
-695,2198
-675,2108
-525,2108
-"
-fill="#ffffff10"
+fill="#ffffff08"
 stroke="#ffffff55"
 stroke-width="3"
 />
 
 
-<!-- Horizontal net lines -->
+<!-- Bottom goal net vertical lines -->
 
 <line
-x1="510"
-y1="2176"
-x2="690"
-y2="2176"
-stroke="#ffffff55"
+class="goalVisual"
+x1="520"
+y1="2200"
+x2="540"
+y2="2095"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 <line
-x1="513"
-y1="2154"
-x2="687"
-y2="2154"
-stroke="#ffffff55"
+class="goalVisual"
+x1="560"
+y1="2200"
+x2="570"
+y2="2095"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 <line
-x1="517"
-y1="2132"
-x2="683"
-y2="2132"
-stroke="#ffffff55"
+class="goalVisual"
+x1="600"
+y1="2200"
+x2="600"
+y2="2095"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 <line
+class="goalVisual"
+x1="640"
+y1="2200"
+x2="630"
+y2="2095"
+stroke="#ffffff45"
+stroke-width="2"
+/>
+
+<line
+class="goalVisual"
+x1="680"
+y1="2200"
+x2="660"
+y2="2095"
+stroke="#ffffff45"
+stroke-width="2"
+/>
+
+
+<!-- Bottom goal net horizontal lines -->
+
+<line
+class="goalVisual"
+x1="507"
+y1="2175"
+x2="693"
+y2="2175"
+stroke="#ffffff45"
+stroke-width="2"
+/>
+
+<line
+class="goalVisual"
+x1="514"
+y1="2150"
+x2="686"
+y2="2150"
+stroke="#ffffff45"
+stroke-width="2"
+/>
+
+<line
+class="goalVisual"
 x1="521"
-y1="2112"
+y1="2122"
 x2="679"
-y2="2112"
-stroke="#ffffff55"
+y2="2122"
+stroke="#ffffff45"
 stroke-width="2"
 />
 
 
-<!-- Vertical net lines -->
+<!-- Bottom goal side posts -->
 
 <line
-x1="525"
-y1="2198"
-x2="535"
-y2="2108"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="550"
-y1="2198"
-x2="555"
-y2="2108"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="575"
-y1="2198"
-x2="578"
-y2="2108"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="600"
-y1="2198"
-x2="600"
-y2="2108"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="625"
-y1="2198"
-x2="622"
-y2="2108"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="650"
-y1="2198"
-x2="645"
-y2="2108"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-<line
-x1="675"
-y1="2198"
-x2="665"
-y2="2108"
-stroke="#ffffff55"
-stroke-width="2"
-/>
-
-
-<!-- Goal posts -->
-
-<line
-x1="505"
-y1="2198"
-x2="525"
-y2="2108"
-stroke="white"
-stroke-width="10"
-stroke-linecap="round"
-/>
-
-<line
-x1="695"
-y1="2198"
-x2="675"
-y2="2108"
-stroke="white"
-stroke-width="10"
-stroke-linecap="round"
-/>
-
-
-<!-- Crossbar -->
-
-<line
-x1="505"
-y1="2198"
-x2="695"
-y2="2198"
-stroke="white"
-stroke-width="10"
-stroke-linecap="round"
-/>
-
-
-<!-- =====================================================
-     REALISTIC TOP GOAL
-===================================================== -->
-
-<!-- Goal shadow -->
-<path
-d="
-M 505 90
-L 695 90
-L 670 235
-L 530 235
-Z
-"
-fill="#000"
-fill-opacity="0.16"
-/>
-
-<!-- Net back -->
-<path
-d="
-M 505 90
-L 695 90
-L 670 235
-L 530 235
-Z
-"
-fill="none"
-stroke="white"
-stroke-opacity="0.22"
-stroke-width="3"
-/>
-
-<!-- Net depth lines -->
-<line
-x1="530"
-y1="235"
-x2="505"
-y2="90"
-stroke="white"
-stroke-opacity="0.20"
-stroke-width="3"
-/>
-
-<line
-x1="565"
-y1="235"
-x2="550"
-y2="90"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="600"
-y1="235"
-x2="600"
-y2="90"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="635"
-y1="235"
-x2="650"
-y2="90"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="670"
-y1="235"
-x2="695"
-y2="90"
-stroke="white"
-stroke-opacity="0.20"
-stroke-width="3"
-/>
-
-<!-- Net horizontal -->
-<line
-x1="509"
-y1="125"
-x2="689"
-y2="125"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="515"
-y1="165"
-x2="685"
-y2="165"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="522"
-y1="205"
-x2="678"
-y2="205"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-
-<!-- TOP GOAL POSTS -->
-
-<line
-x1="505"
-y1="45"
-x2="505"
-y2="90"
-stroke="white"
-stroke-width="11"
-stroke-linecap="round"
-/>
-
-<line
-x1="695"
-y1="45"
-x2="695"
-y2="90"
-stroke="white"
-stroke-width="11"
-stroke-linecap="round"
-/>
-
-
-<!-- TOP CROSSBAR -->
-
-<line
-x1="505"
-y1="45"
-x2="695"
-y2="45"
-stroke="white"
-stroke-width="11"
-stroke-linecap="round"
-/>
-
-
-<!-- Front goal frame sides -->
-
-<line
-x1="505"
-y1="45"
+class="goalVisual"
+x1="500"
+y1="2200"
 x2="530"
-y2="235"
+y2="2095"
 stroke="white"
-stroke-opacity="0.95"
-stroke-width="7"
+stroke-width="9"
 stroke-linecap="round"
 />
 
 <line
-x1="695"
-y1="45"
+class="goalVisual"
+x1="700"
+y1="2200"
 x2="670"
-y2="235"
+y2="2095"
 stroke="white"
-stroke-opacity="0.95"
-stroke-width="7"
+stroke-width="9"
+stroke-linecap="round"
+/>
+
+
+<!-- Bottom goal crossbar -->
+
+<line
+class="goalVisual"
+x1="500"
+y1="2200"
+x2="700"
+y2="2200"
+stroke="white"
+stroke-width="10"
 stroke-linecap="round"
 />
 
 
 <!-- =====================================================
-     REALISTIC BOTTOM GOAL
-===================================================== -->
-
-<!-- Goal shadow -->
-<path
-d="
-M 505 2110
-L 695 2110
-L 670 1965
-L 530 1965
-Z
-"
-fill="#000"
-fill-opacity="0.16"
-/>
-
-<!-- Net back -->
-<path
-d="
-M 505 2110
-L 695 2110
-L 670 1965
-L 530 1965
-Z
-"
-fill="none"
-stroke="white"
-stroke-opacity="0.22"
-stroke-width="3"
-/>
-
-<!-- Net depth lines -->
-
-<line
-x1="530"
-y1="1965"
-x2="505"
-y2="2110"
-stroke="white"
-stroke-opacity="0.20"
-stroke-width="3"
-/>
-
-<line
-x1="565"
-y1="1965"
-x2="550"
-y2="2110"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="600"
-y1="1965"
-x2="600"
-y2="2110"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="635"
-y1="1965"
-x2="650"
-y2="2110"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="670"
-y1="1965"
-x2="695"
-y2="2110"
-stroke="white"
-stroke-opacity="0.20"
-stroke-width="3"
-/>
-
-
-<!-- Net horizontal -->
-
-<line
-x1="511"
-y1="2075"
-x2="689"
-y2="2075"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="515"
-y1="2035"
-x2="685"
-y2="2035"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-<line
-x1="522"
-y1="1995"
-x2="678"
-y2="1995"
-stroke="white"
-stroke-opacity="0.18"
-stroke-width="2"
-/>
-
-
-<!-- BOTTOM GOAL POSTS -->
-
-<line
-x1="505"
-y1="2155"
-x2="505"
-y2="2110"
-stroke="white"
-stroke-width="11"
-stroke-linecap="round"
-/>
-
-<line
-x1="695"
-y1="2155"
-x2="695"
-y2="2110"
-stroke="white"
-stroke-width="11"
-stroke-linecap="round"
-/>
-
-
-<!-- BOTTOM CROSSBAR -->
-
-<line
-x1="505"
-y1="2155"
-x2="695"
-y2="2155"
-stroke="white"
-stroke-width="11"
-stroke-linecap="round"
-/>
-
-
-<!-- Front goal frame sides -->
-
-<line
-x1="505"
-y1="2155"
-x2="530"
-y2="1965"
-stroke="white"
-stroke-opacity="0.95"
-stroke-width="7"
-stroke-linecap="round"
-/>
-
-<line
-x1="695"
-y1="2155"
-x2="670"
-y2="1965"
-stroke="white"
-stroke-opacity="0.95"
-stroke-width="7"
-stroke-linecap="round"
-/>
-
-
-<!-- =====================================================
-     ACTUAL FIELD GOAL LINES
+     GOAL LINES
 ===================================================== -->
 
 <line
 data-field-goal-line="true"
-x1="505"
+x1="500"
 y1="2"
-x2="695"
+x2="700"
 y2="2"
 stroke="#e52d38"
-stroke-width="10"
+stroke-width="8"
 />
 
 <line
 data-field-goal-line="true"
-x1="505"
+x1="500"
 y1="2198"
-x2="695"
+x2="700"
 y2="2198"
 stroke="#e52d38"
-stroke-width="10"
+stroke-width="8"
 />
+
+
 <!-- =====================================================
-     TOP LEFT CORNER ARC
+     CORNER ARCS
 ===================================================== -->
+
+<!-- TOP LEFT -->
 
 <path
 d="
@@ -1587,9 +1262,7 @@ stroke-width="4"
 />
 
 
-<!-- =====================================================
-     TOP RIGHT CORNER ARC
-===================================================== -->
+<!-- TOP RIGHT -->
 
 <path
 d="
@@ -1602,9 +1275,7 @@ stroke-width="4"
 />
 
 
-<!-- =====================================================
-     BOTTOM LEFT CORNER ARC
-===================================================== -->
+<!-- BOTTOM LEFT -->
 
 <path
 d="
@@ -1617,9 +1288,7 @@ stroke-width="4"
 />
 
 
-<!-- =====================================================
-     BOTTOM RIGHT CORNER ARC
-===================================================== -->
+<!-- BOTTOM RIGHT -->
 
 <path
 d="
@@ -1637,55 +1306,60 @@ stroke-width="4"
 
 <!-- =====================================================
      LEGACY PITCH ELEMENTS
-     KEPT FOR GAME-CORE COMPATIBILITY
+     GAME-CORE COMPATIBILITY
 ===================================================== -->
 
 <div id="centerLine"
-     style="
-     position:absolute;
-     pointer-events:none;
-     opacity:0;
-     ">
+style="
+position:absolute;
+pointer-events:none;
+opacity:0;
+">
 </div>
+
 
 <div id="centerCircle"
-     style="
-     position:absolute;
-     pointer-events:none;
-     opacity:0;
-     ">
+style="
+position:absolute;
+pointer-events:none;
+opacity:0;
+">
 </div>
+
 
 <div id="centerDot"
-     style="
-     position:absolute;
-     pointer-events:none;
-     opacity:0;
-     ">
+style="
+position:absolute;
+pointer-events:none;
+opacity:0;
+">
 </div>
+
 
 <div id="goalLine"
-     style="
-     position:absolute;
-     pointer-events:none;
-     opacity:0;
-     ">
+style="
+position:absolute;
+pointer-events:none;
+opacity:0;
+">
 </div>
+
 
 <div id="topGoal"
-     style="
-     position:absolute;
-     pointer-events:none;
-     opacity:0;
-     ">
+style="
+position:absolute;
+pointer-events:none;
+opacity:0;
+">
 </div>
 
+
 <div id="bottomGoal"
-     style="
-     position:absolute;
-     pointer-events:none;
-     opacity:0;
-     ">
+style="
+position:absolute;
+pointer-events:none;
+opacity:0;
+">
 </div>
 
 
@@ -1693,7 +1367,8 @@ stroke-width="4"
      BLUE PLAYERS
 ===================================================== -->
 
-<div id="player" class="playerUnit blue">
+<div id="player"
+class="playerUnit blue">
 
 <div class="controlArrow">▼</div>
 
@@ -1702,7 +1377,8 @@ stroke-width="4"
 </div>
 
 
-<div id="teammate1" class="playerUnit blue">
+<div id="teammate1"
+class="playerUnit blue">
 
 <div class="controlArrow">▼</div>
 
@@ -1711,7 +1387,8 @@ stroke-width="4"
 </div>
 
 
-<div id="teammate2" class="playerUnit blue">
+<div id="teammate2"
+class="playerUnit blue">
 
 <div class="controlArrow">▼</div>
 
@@ -1720,7 +1397,8 @@ stroke-width="4"
 </div>
 
 
-<div id="teammate3" class="playerUnit blue">
+<div id="teammate3"
+class="playerUnit blue">
 
 <div class="controlArrow">▼</div>
 
@@ -1729,7 +1407,8 @@ stroke-width="4"
 </div>
 
 
-<div id="teammate4" class="playerUnit blue">
+<div id="teammate4"
+class="playerUnit blue">
 
 <div class="controlArrow">▼</div>
 
@@ -1738,7 +1417,8 @@ stroke-width="4"
 </div>
 
 
-<div id="teammate5" class="playerUnit blue">
+<div id="teammate5"
+class="playerUnit blue">
 
 <div class="controlArrow">🅾️</div>
 
@@ -1751,23 +1431,32 @@ stroke-width="4"
      RED PLAYERS
 ===================================================== -->
 
-<div id="opponent1" class="playerUnit red">
+<div id="opponent1"
+class="playerUnit red">
 🧍
 </div>
 
-<div id="opponent2" class="playerUnit red">
+
+<div id="opponent2"
+class="playerUnit red">
 🧍
 </div>
 
-<div id="opponent3" class="playerUnit red">
+
+<div id="opponent3"
+class="playerUnit red">
 🧍
 </div>
 
-<div id="opponent4" class="playerUnit red">
+
+<div id="opponent4"
+class="playerUnit red">
 🧍
 </div>
 
-<div id="opponent5" class="playerUnit red">
+
+<div id="opponent5"
+class="playerUnit red">
 🧍
 </div>
 
@@ -1785,7 +1474,8 @@ stroke-width="4"
      AIM
 ===================================================== -->
 
-<div id="aimArrow"></div>
+<div id="aimArrow">
+</div>
 
 
 </div>
@@ -1837,7 +1527,8 @@ stroke-width="4"
 
 <div id="powerBox">
 
-<div id="powerBar"></div>
+<div id="powerBar">
+</div>
 
 </div>
 
@@ -1848,7 +1539,8 @@ stroke-width="4"
 
 <div id="movePad">
 
-<div id="joystickCenter"></div>
+<div id="joystickCenter">
+</div>
 
 </div>
 
@@ -1859,7 +1551,8 @@ stroke-width="4"
 
 <div id="kickControl">
 
-<div id="kickDot"></div>
+<div id="kickDot">
+</div>
 
 </div>
 
@@ -1897,6 +1590,7 @@ stroke-width="4"
 <script src="game-core.js"></script>
 
 <script src="game-ai.js"></script>
+
 
 </body>
 
